@@ -1,0 +1,39 @@
+#ifndef MAINWINDOW_H
+#define MAINWINDOW_H
+#define MAX_ARR 200 // Макс. кол-во значений в таблице
+#define RAND_OFF 200 // Разница для рандома -RAND_OFF/2 - минимально возможное, RAND_OFF - максимально возможное
+
+#include <QMainWindow>
+
+QT_BEGIN_NAMESPACE
+namespace Ui { class MainWindow; }
+QT_END_NAMESPACE
+
+class MainWindow : public QMainWindow
+{
+    Q_OBJECT
+
+public:
+    MainWindow(QWidget *parent = nullptr);
+    ~MainWindow();
+
+private slots:
+    void on_spinBox_valueChanged(int arg1);
+
+    void on_tableWidget_cellChanged(int row, int column);
+
+    void on_pushButtonRandom_clicked();
+
+    void on_pushButtonSum_clicked();
+
+    void on_pushButtonMin_clicked();
+
+    void on_pushButtonMax_clicked();
+
+    void on_pushButtonAverage_clicked();
+
+private:
+    Ui::MainWindow *ui;
+    bool noAutoChange;
+};
+#endif // MAINWINDOW_H
