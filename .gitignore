@@ -1,3 +1,4 @@
 # Для Qt проектов
 *.user*
 build*
+*.zip
