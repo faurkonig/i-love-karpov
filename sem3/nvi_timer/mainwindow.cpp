@@ -17,6 +17,11 @@ MainWindow::MainWindow(QWidget *parent)
     downTimer->setInterval(10);
     ui->downTimerLabel->display("00:00:00:00");
     ui->downTimerLabel->hide();
+
+    additionalTimer = new QTimer(this);
+    connect(additionalTimer, &QTimer::timeout, this, &MainWindow::onAdditionalTimerTimeout);
+    additionalTimer->setInterval(10);
+    ui->additionalTimerLabel->display("00:00:00:00");
 }
 
 MainWindow::~MainWindow()
@@ -36,12 +41,13 @@ void MainWindow::on_startButton_clicked()
 
         if (isMainTimerStoped)
         {
-            mainCounter = 0;
+            mainCounter = ui->mainTimerSpinBox1->value() * 100;
             isMainTimerStoped = false;
+
+            ui->spinBoxWidget->setEnabled(false);
         }
     }
 }
-
 
 void MainWindow::on_pauseButton_clicked()
 {
@@ -51,7 +57,6 @@ void MainWindow::on_pauseButton_clicked()
         mainTimer->start();
 }
 
-
 void MainWindow::on_stopButton_clicked()
 {
     if (!isMainTimerStoped)
@@ -60,7 +65,6 @@ void MainWindow::on_stopButton_clicked()
         isMainTimerStoped = true;
     }
 }
-
 
 void MainWindow::on_armagedonButton_clicked()
 {
@@ -73,27 +77,50 @@ void MainWindow::on_armagedonButton_clicked()
 
 void MainWindow::onMainTimerTimeout()
 {
-    mainCounter++;
+    mainCounter--;
+    if (mainCounter <= 0)
+    {
+        if (!isTriggeredOnce)
+        {
+            mainCounter = ui->mainTimerSpinBox2->value() * 100;
+            isTriggeredOnce = true;
+        }
+        else
+        {
+            mainTimer->stop();
+            additionalTimer->start();
+            if (downTimer->isActive())
+                downTimer->stop();
+
+            ui->buttonsWidget->setEnabled(false);
+        }
+    }
     ui->mainTimerLabel->display(formatNumberAsTime(mainCounter));
 }
 
 void MainWindow::onDownTimerTimeout()
 {
     downCounter--;
-    if (downCounter > 0)
-    {
-        ui->downTimerLabel->display(formatNumberAsTime(downCounter));
-    }
-    else
+    if (downCounter <= 0)
     {
         downTimer->stop();
-        ui->armagedonButton->setEnabled(true);
-        ui->downTimerLabel->hide();
+        ui->centralwidget->setEnabled(false);
     }
+    ui->downTimerLabel->display(formatNumberAsTime(downCounter));
 }
+
+void MainWindow::onAdditionalTimerTimeout()
+{
+    additionalCounter++;
+    ui->additionalTimerLabel->display(formatNumberAsTime(additionalCounter));
+}
+
 
 QString MainWindow::formatNumberAsTime(int number)
 {
+    if (number < 0)
+        number = 0;
+
     int fractionsOfSeconds{number % 100};
     int seconds{number / 100};
     int minutes{seconds / 60};

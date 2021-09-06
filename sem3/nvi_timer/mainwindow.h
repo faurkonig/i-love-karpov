@@ -19,6 +19,7 @@ public:
 private slots:
     void onMainTimerTimeout();
     void onDownTimerTimeout();
+    void onAdditionalTimerTimeout();
 
     void on_startButton_clicked();
     void on_pauseButton_clicked();
@@ -31,9 +32,13 @@ private:
     QTimer *mainTimer;
     int mainCounter{0};
     bool isMainTimerStoped{true};
+    bool isTriggeredOnce{false};
 
     QTimer *downTimer;
     int downCounter{0};
+
+    QTimer *additionalTimer;
+    int additionalCounter{0};
 
     QString formatNumberAsTime(int number);
     QString formatDigit(int digit);
