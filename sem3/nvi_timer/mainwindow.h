@@ -26,19 +26,21 @@ private slots:
     void on_stopButton_clicked();
     void on_armagedonButton_clicked();
 
+    void on_additionaTimerButton_clicked();
+
 private:
     Ui::MainWindow *ui;
 
     QTimer *mainTimer;
     int mainCounter{0};
     bool isMainTimerStoped{true};
-    bool isTriggeredOnce{false};
 
     QTimer *downTimer;
     int downCounter{0};
 
     QTimer *additionalTimer;
     int additionalCounter{0};
+    bool isAdditionalTriggered{false};
 
     QString formatNumberAsTime(int number);
     QString formatDigit(int digit);

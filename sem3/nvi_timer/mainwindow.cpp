@@ -22,6 +22,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(additionalTimer, &QTimer::timeout, this, &MainWindow::onAdditionalTimerTimeout);
     additionalTimer->setInterval(10);
     ui->additionalTimerLabel->display("00:00:00:00");
+    ui->additionalTimerLabel->hide();
 }
 
 MainWindow::~MainWindow()
@@ -30,6 +31,7 @@ MainWindow::~MainWindow()
 
     delete mainTimer;
     delete downTimer;
+    delete additionalTimer;
 }
 
 
@@ -41,10 +43,7 @@ void MainWindow::on_startButton_clicked()
 
         if (isMainTimerStoped)
         {
-            mainCounter = ui->mainTimerSpinBox1->value() * 100;
             isMainTimerStoped = false;
-
-            ui->spinBoxWidget->setEnabled(false);
         }
     }
 }
@@ -63,6 +62,7 @@ void MainWindow::on_stopButton_clicked()
     {
         mainTimer->stop();
         isMainTimerStoped = true;
+        mainCounter = 0;
     }
 }
 
@@ -74,27 +74,19 @@ void MainWindow::on_armagedonButton_clicked()
     ui->downTimerLabel->show();
 }
 
+void MainWindow::on_additionaTimerButton_clicked()
+{
+    additionalCounter = ui->additionalTimerSpinBox1->value()*100;
+    additionalTimer->start();
+    ui->spinBoxWidget->setEnabled(false);
+    ui->additionaTimerButton->setEnabled(false);
+    ui->additionalTimerLabel->show();
+}
+
 
 void MainWindow::onMainTimerTimeout()
 {
-    mainCounter--;
-    if (mainCounter <= 0)
-    {
-        if (!isTriggeredOnce)
-        {
-            mainCounter = ui->mainTimerSpinBox2->value() * 100;
-            isTriggeredOnce = true;
-        }
-        else
-        {
-            mainTimer->stop();
-            additionalTimer->start();
-            if (downTimer->isActive())
-                downTimer->stop();
-
-            ui->buttonsWidget->setEnabled(false);
-        }
-    }
+    mainCounter++;
     ui->mainTimerLabel->display(formatNumberAsTime(mainCounter));
 }
 
@@ -104,6 +96,8 @@ void MainWindow::onDownTimerTimeout()
     if (downCounter <= 0)
     {
         downTimer->stop();
+        mainTimer->stop();
+        additionalTimer->stop();
         ui->centralwidget->setEnabled(false);
     }
     ui->downTimerLabel->display(formatNumberAsTime(downCounter));
@@ -111,7 +105,28 @@ void MainWindow::onDownTimerTimeout()
 
 void MainWindow::onAdditionalTimerTimeout()
 {
-    additionalCounter++;
+    additionalCounter--;
+    if (additionalCounter <= 0)
+    {
+        if (!isAdditionalTriggered)
+        {
+            isAdditionalTriggered = true;
+            additionalCounter = ui->additionalTimerSpinBox2->value()*100;
+            ui->startButton->click();
+            ui->startButton->setEnabled(false);
+            ui->stopButton->setEnabled(false);
+        }
+        else
+        {
+            isAdditionalTriggered = false;
+            additionalTimer->stop();
+            ui->startButton->setEnabled(true);
+            ui->stopButton->setEnabled(true);
+            ui->stopButton->click();
+            ui->additionaTimerButton->setEnabled(true);
+            ui->spinBoxWidget->setEnabled(true);
+        }
+    }
     ui->additionalTimerLabel->display(formatNumberAsTime(additionalCounter));
 }
 
