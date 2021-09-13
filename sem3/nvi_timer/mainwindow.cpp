@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+/// Конструктор
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
@@ -25,6 +26,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->additionalTimerLabel->hide();
 }
 
+/// Деструктор
 MainWindow::~MainWindow()
 {
     delete ui;
@@ -35,37 +37,30 @@ MainWindow::~MainWindow()
 }
 
 
+/// Действие по нажатию кнопки Старт
 void MainWindow::on_startButton_clicked()
 {
-    if (!mainTimer->isActive())
-    {
-        mainTimer->start();
-
-        if (isMainTimerStoped)
-        {
-            isMainTimerStoped = false;
-        }
-    }
+    mainCounter = 0;
+    mainTimer->start();
 }
 
+/// Действие по нажатию на паузу
 void MainWindow::on_pauseButton_clicked()
 {
     if (mainTimer->isActive())
         mainTimer->stop();
-    else if (!isMainTimerStoped)
+    else
         mainTimer->start();
 }
 
+/// Действие по нажатию кнопки Стоп
 void MainWindow::on_stopButton_clicked()
 {
-    if (!isMainTimerStoped)
-    {
-        mainTimer->stop();
-        isMainTimerStoped = true;
-        mainCounter = 0;
-    }
+    mainTimer->stop();
+    isMainTimerStoped = true;
 }
 
+/// Действие по нажатию на кнопку армагедона
 void MainWindow::on_armagedonButton_clicked()
 {
     downCounter = 60*100;
@@ -74,6 +69,7 @@ void MainWindow::on_armagedonButton_clicked()
     ui->downTimerLabel->show();
 }
 
+/// Действие по нажатию на кнопку 3 таймера
 void MainWindow::on_additionaTimerButton_clicked()
 {
     additionalCounter = ui->additionalTimerSpinBox1->value()*100;
@@ -84,12 +80,14 @@ void MainWindow::on_additionaTimerButton_clicked()
 }
 
 
+/// Действие по истечению главного (первого) таймера
 void MainWindow::onMainTimerTimeout()
 {
     mainCounter++;
     ui->mainTimerLabel->display(formatNumberAsTime(mainCounter));
 }
 
+/// Действие по истечению таймера армагедона
 void MainWindow::onDownTimerTimeout()
 {
     downCounter--;
@@ -103,6 +101,7 @@ void MainWindow::onDownTimerTimeout()
     ui->downTimerLabel->display(formatNumberAsTime(downCounter));
 }
 
+/// Действие по истечению третьего таймера
 void MainWindow::onAdditionalTimerTimeout()
 {
     additionalCounter--;
@@ -110,27 +109,24 @@ void MainWindow::onAdditionalTimerTimeout()
     {
         if (!isAdditionalTriggered)
         {
+            ui->startButton->click();
             isAdditionalTriggered = true;
             additionalCounter = ui->additionalTimerSpinBox2->value()*100;
-            ui->startButton->click();
-            ui->startButton->setEnabled(false);
-            ui->stopButton->setEnabled(false);
         }
         else
         {
             isAdditionalTriggered = false;
             additionalTimer->stop();
-            ui->startButton->setEnabled(true);
-            ui->stopButton->setEnabled(true);
-            ui->stopButton->click();
             ui->additionaTimerButton->setEnabled(true);
             ui->spinBoxWidget->setEnabled(true);
+            ui->stopButton->click();
         }
     }
     ui->additionalTimerLabel->display(formatNumberAsTime(additionalCounter));
 }
 
 
+/// Функция для форматирования числа как времени
 QString MainWindow::formatNumberAsTime(int number)
 {
     if (number < 0)
@@ -149,6 +145,7 @@ QString MainWindow::formatNumberAsTime(int number)
                                       formatDigit(fractionsOfSeconds));
 }
 
+/// Функция для форматирования одной цифры, чтобы она всегда записывалась с нулём
 QString MainWindow::formatDigit(int digit)
 {
     if (digit < 10)
