@@ -135,6 +135,28 @@
            </widget>
           </item>
           <item>
+           <widget class="QTableWidget" name="tableWidget">
+            <attribute name="horizontalHeaderDefaultSectionSize">
+             <number>137</number>
+            </attribute>
+            <column>
+             <property name="text">
+              <string>Ваш ответ</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>Правильный ответ</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>Количество баллов</string>
+             </property>
+            </column>
+           </widget>
+          </item>
+          <item>
            <widget class="QPushButton" name="closeButton">
             <property name="text">
              <string>Закрыть программу</string>

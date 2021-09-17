@@ -1,27 +1,32 @@
 #include "testobject.h"
 
-TestObject::TestObject(int testTime, int correctAnswersNeeded, QVector<TestExercise> exercises)
+/// Конструктор, требует количество времени на тест и список вопросов
+TestObject::TestObject(int testTime, QVector<TestExercise> exercises)
 {
     this->testTimeInSeconds = testTime;
-    this->correctAnswersNeeded = correctAnswersNeeded;
     this->exercises = exercises;
 }
 
+
+/// Возвращает количество времени на тест в секундах
 int TestObject::getTimeInSeconds()
 {
     return testTimeInSeconds;
 }
 
-bool TestObject::isPassed(int correctCount)
+/// Возвращает количество заданий
+int TestObject::getExercisesCount()
 {
-    return correctCount >= correctAnswersNeeded;
+    return exercises.count();
 }
 
+/// Возвращает указатель на список вопросов
 QVector<TestExercise> *TestObject::getExercises()
 {
     return &exercises;
 }
 
+/// Перегрузка оператора, которая возвращает задание по передаваемому индексу
 TestExercise *TestObject::operator[](int index)
 {
     return &exercises[index];

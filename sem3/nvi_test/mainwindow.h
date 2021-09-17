@@ -16,6 +16,7 @@ namespace Ui {
 class MainWindow;
 }
 
+/// Класс главного окна программы
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -31,11 +32,11 @@ private slots:
 
     void on_finishTestButton_clicked();
 
-    void onTestTimerTimeout();
+    void on_closeButton_clicked();
 
     void onAnswerChecked(int id);
 
-    void on_closeButton_clicked();
+    void onTestTimerTimeout();
 
 private:
     Ui::MainWindow *ui;
@@ -43,7 +44,6 @@ private:
     TestObject defaultTest {
         // Тест
         30,
-        3,
         {
             // Вопросы
             {
@@ -109,8 +109,8 @@ private:
     QTimer *testTimer{nullptr};
 
     int currentExercise{0};
-    int currentAnswer{-1};
-    int correctCount{0};
+    QVector<int> choosedAnswers;
+    /// Группа для QRadioButton, чтобы отслеживать, какой из ответов был выбран
     QButtonGroup *answersButtons;
 
     void clearAnswersButtons();
@@ -118,6 +118,8 @@ private:
 
     void updateTimeLabels(bool useCurrent = true);
     QString formatNumberAsTime(int seconds);
+
+    QString convertNumberToABC(int number);
 
     void finishTest();
 };

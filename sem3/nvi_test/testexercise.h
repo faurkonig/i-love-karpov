@@ -11,14 +11,10 @@
 class TestExercise
 {
 public:
-    /// Конструктор, требует текст вопроса и список ответов
     TestExercise(QString exerciseText, QVector<ExerciseAnswer> answers);
 
-    /// Возвращает текст вопроса
     QString getText();
-    /// Возвращает указатель на список вопросов
     QVector<ExerciseAnswer> *getAnswers();
-    /// Возвращает индекс первого правильного ответа, если правильного ответа нет, возвращает -1
     int getCorrectAnswerIndex();
 
 private:

@@ -8,12 +8,9 @@
 class ExerciseAnswer
 {
 public:
-    /// Конструктор, требует текст ответа и указание на то, верен этот ответа или нет
     ExerciseAnswer(QString text, bool correct);
 
-    /// Возвращате текст ответа
     QString getText();
-    /// Возвращает указание на правильность ответа
     bool isCorrect();
 
 private:
