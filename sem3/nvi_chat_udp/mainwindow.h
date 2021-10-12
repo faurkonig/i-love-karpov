@@ -32,6 +32,8 @@ private:
 
     QUdpSocket *udpSocket = nullptr;
 
+    bool isError;
+
     void logError(QString text);
     void log(QString text);
 };

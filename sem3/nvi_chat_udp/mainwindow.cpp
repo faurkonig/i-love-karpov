@@ -26,7 +26,15 @@ MainWindow::MainWindow(QWidget *parent)
 
     // Получение адреса текущего ПК
     auto adrs = QNetworkInterface::allAddresses();
-    ui->labelLocalAddress->setText("Адрес компьютера: <b>" + adrs[2].toString() + "</b>");
+    // В Windows (на компьютерах в Б217) выводится список с несколько другими адресами и там нужный адрес под индексом 1
+    // В Linux (на личном компьютере) в списке нужный адрес находится под индексом 2
+#ifdef Q_OS_MSDOS
+    QString adr = adrs[1].toString();
+#else
+    QString adr = adrs[2].toString();
+#endif
+
+    ui->labelLocalAddress->setText("Адрес компьютера: <b>" + adr + "</b>");
 
 
     QTextCodec::setCodecForLocale(QTextCodec::codecForName("UTF-8"));
@@ -54,7 +62,9 @@ void MainWindow::on_pushButtonSend_clicked()
         log(QString("<b>[<span style=\"color: #8314C2\">Вы</span>]</b> >> %1  "
                     "<i style=\"color: #707070; font-size: 8pt;\">(%2)</i>")
             .arg(str, ctStr));
+
         ui->lineEditMessage->clear();
+        ui->lineEditMessage->setFocus();
     }
 }
 
@@ -63,8 +73,8 @@ void MainWindow::on_pushButtonConnect_clicked()
 {
     // Проверка введённных с формы портов
     bool okPort1, okPort2;
-    quint16 port = ui->lineEditPort->text().toInt(&okPort1);
-    quint16 localPort = ui->lineEditLocalPort->text().toInt(&okPort2);
+    quint16 port = quint16(ui->lineEditPort->text().toInt(&okPort1));
+    quint16 localPort = quint16(ui->lineEditLocalPort->text().toInt(&okPort2));
     if (okPort1)
         ui->lineEditPort->setPalette(normPal);
     else
@@ -81,14 +91,31 @@ void MainWindow::on_pushButtonConnect_clicked()
 
         // Создание сокета и соединение слотов (если сокет уже существует, то его пересоздаём)
         if (udpSocket != nullptr)
-            udpSocket->deleteLater();
+        {
+            // Если сокет уже открыт, то закрываем его и разрываем соединение с собеседникам,
+            // после чего отправляем объект на удаление
+            if (udpSocket->isOpen())
+                udpSocket->close();
+//            if (udpSocket->isValid())
+//                udpSocket->disconnectFromHost();
+            if (udpSocket->waitForDisconnected())
+                udpSocket->deleteLater();
+        }
         udpSocket = new QUdpSocket(this);
         connect(udpSocket, &QUdpSocket::readyRead, this, &MainWindow::onUdpReadyRead);
         connect(udpSocket, &QUdpSocket::connected, this, &MainWindow::onUdpConnect);
+        // В версии Qt 5.15 добавили сигнал errorOccured, который является заменой ныне устаревшего сигнала error
+#if QT_VERSION_MAJOR >= 5 && QT_VERSION_MINOR >= 15
         connect(udpSocket, &QUdpSocket::errorOccurred, this, &MainWindow::onUdpError);
+#else
+        connect(udpSocket, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error), this, &MainWindow::onUdpError);
+#endif
 
+        ui->lineEditMessage->setEnabled(false);
+        ui->pushButtonSend->setEnabled(false);
         ui->chatTextEdit->clear();
         log("<p style=\"color: #707070\">Подключение...</p>\n");
+        isError = false;
 
         // Устанавливаем соединение
         udpSocket->bind(QHostAddress::Any, localPort);
@@ -122,22 +149,28 @@ void MainWindow::onUdpReadyRead()
 /// Слот соединения
 void MainWindow::onUdpConnect()
 {
-    ui->lineEditMessage->setEnabled(true);
-    ui->pushButtonSend->setEnabled(true);
+    if (!isError)
+    {
+        ui->lineEditMessage->setEnabled(true);
+        ui->pushButtonSend->setEnabled(true);
+        ui->lineEditMessage->setFocus();
 
-    log(QString("<p style=\"color: #707070\">"
-                "Слушается адрес <span style=\"color: #8314C2\"><b>%1:%2</b></span><br>"
-                "Адрес собеседника <span style=\"color: #C2145C\"><b>%3:%4</b></span>"
-                "<br>------------- НАЧАЛО ЧАТА -------------</p>")
-        .arg("0.0.0.0", ui->lineEditLocalPort->text(),
-             ui->lineEditAddress->text(), ui->lineEditPort->text()));
+        log(QString("<p style=\"color: #707070\">"
+                    "Слушается адрес <span style=\"color: #8314C2\"><b>%1:%2</b></span><br>"
+                    "Адрес собеседника <span style=\"color: #C2145C\"><b>%3:%4</b></span>"
+                    "<br>------------- НАЧАЛО ЧАТА -------------</p>")
+            .arg("0.0.0.0", ui->lineEditLocalPort->text(),
+                 ui->lineEditAddress->text(), ui->lineEditPort->text()));
 
-    ui->leftVerticalWidget->setEnabled(true);
+        ui->leftVerticalWidget->setEnabled(true);
+    }
 }
 
 /// Слот ошибки
 void MainWindow::onUdpError(QAbstractSocket::SocketError)
 {
+    isError = true;
+
     logError("Произошла ошибка...");
 
     ui->leftVerticalWidget->setEnabled(true);
