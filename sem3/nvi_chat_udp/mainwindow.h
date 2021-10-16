@@ -1,8 +1,10 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
+#define UTF8
 
 #include <QMainWindow>
 #include <QtNetwork/QUdpSocket>
+#include <QTimer>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -24,11 +26,15 @@ private slots:
     void onUdpError(QAbstractSocket::SocketError err);
     void onUdpReadyRead();
 
+    void onSpam();
+
 private:
     Ui::MainWindow *ui;
 
     QPalette normPal;
     QPalette errPal;
+
+    QTimer spamTimer;
 
     QUdpSocket *udpSocket = nullptr;
 

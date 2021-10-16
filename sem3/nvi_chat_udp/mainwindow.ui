@@ -143,7 +143,7 @@
           </font>
          </property>
          <property name="text">
-          <string>Подключиться</string>
+          <string>Создать</string>
          </property>
         </widget>
        </item>
@@ -166,6 +166,30 @@
          </property>
          <property name="alignment">
           <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="Line" name="line">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="checkBoxUtf8">
+         <property name="text">
+          <string>Использовать UTF-8</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="checkBoxSpam">
+         <property name="text">
+          <string>Спамим?</string>
          </property>
         </widget>
        </item>

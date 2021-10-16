@@ -28,16 +28,27 @@ MainWindow::MainWindow(QWidget *parent)
     auto adrs = QNetworkInterface::allAddresses();
     // В Windows (на компьютерах в Б217) выводится список с несколько другими адресами и там нужный адрес под индексом 1
     // В Linux (на личном компьютере) в списке нужный адрес находится под индексом 2
-#ifdef Q_OS_MSDOS
-    QString adr = adrs[1].toString();
+    // Также добавляю проверку на количество адресов, так как если устройство не подключено ни к какой сети,
+    // то там всего 1-2 элеметов (localhost собственно)
+#ifdef Q_OS_WIN
+    if (adrs.length() >= 2)
+    {
+        QString adr = adrs[1].toString();
 #else
-    QString adr = adrs[2].toString();
+    if (adrs.length() >= 3)
+    {
+        QString adr = adrs[2].toString();
 #endif
+        ui->labelLocalAddress->setText("Адрес компьютера: <b>" + adr + "</b>");
+    }
 
-    ui->labelLocalAddress->setText("Адрес компьютера: <b>" + adr + "</b>");
+    //#ifdef UTF8
+    //    QTextCodec::setCodecForLocale(QTextCodec::codecForName("UTF-8"));
+    //#endif
 
-
-    QTextCodec::setCodecForLocale(QTextCodec::codecForName("UTF-8"));
+    spamTimer.setInterval(2000);
+    spamTimer.start();
+    connect(&spamTimer, &QTimer::timeout, this, &MainWindow::onSpam);
 }
 
 /// Деструктор
@@ -54,7 +65,11 @@ void MainWindow::on_pushButtonSend_clicked()
     if (str.length() > 0)
     {
         // Отправка данных
-        auto data = str.toUtf8();
+        QByteArray data;
+        if (ui->checkBoxUtf8->isChecked())
+            data = str.toUtf8();
+        else
+            data = str.toLocal8Bit();
         udpSocket->write(data);
 
         // Вывод сообщения в "консоль"
@@ -96,9 +111,10 @@ void MainWindow::on_pushButtonConnect_clicked()
             // после чего отправляем объект на удаление
             if (udpSocket->isOpen())
                 udpSocket->close();
-//            if (udpSocket->isValid())
-//                udpSocket->disconnectFromHost();
-            if (udpSocket->waitForDisconnected())
+            //            if (udpSocket->isValid())
+            //                udpSocket->disconnectFromHost();
+            if (udpSocket->state() != QAbstractSocket::UnconnectedState &&
+                    udpSocket->waitForDisconnected())
                 udpSocket->deleteLater();
         }
         udpSocket = new QUdpSocket(this);
@@ -114,7 +130,7 @@ void MainWindow::on_pushButtonConnect_clicked()
         ui->lineEditMessage->setEnabled(false);
         ui->pushButtonSend->setEnabled(false);
         ui->chatTextEdit->clear();
-        log("<p style=\"color: #707070\">Подключение...</p>\n");
+        log("<p style=\"color: #707070\">Создание...</p>\n");
         isError = false;
 
         // Устанавливаем соединение
@@ -136,7 +152,11 @@ void MainWindow::onUdpReadyRead()
     {
         // Получаем адрес
         auto adr = datagram.senderAddress().toString().split(':').last();
-        auto str = QString::fromUtf8(datagram.data());
+        QString str;
+        if (ui->checkBoxUtf8->isChecked())
+            str = QString::fromUtf8(datagram.data());
+        else
+            str = QString::fromLocal8Bit(datagram.data());
 
         // Выводим сообщение в "консоль"
         QString ctStr = QTime::currentTime().toString("hh:mm:ss");
@@ -187,4 +207,28 @@ void MainWindow::logError(QString text)
 void MainWindow::log(QString text)
 {
     ui->chatTextEdit->append(text);
+}
+
+/// Слот автоматической отправки сообщения по истечению времени таймера
+void MainWindow::onSpam()
+{
+    if (ui->checkBoxSpam->isChecked() &&
+            ui->lineEditMessage->isEnabled() &&
+            udpSocket->isOpen())
+    {
+        QString str = "Hello World! Привет, мир!";
+        // Отправка данных
+        QByteArray data;
+        if (ui->checkBoxUtf8->isChecked())
+            data = str.toUtf8();
+        else
+            data = str.toLocal8Bit();
+        udpSocket->write(data);
+
+        // Вывод сообщения в "консоль"
+        QString ctStr = QTime::currentTime().toString("hh:mm:ss");
+        log(QString("<b>[<span style=\"color: #F8173E\">СПАМ</span>]</b> >> %1  "
+                    "<i style=\"color: #707070; font-size: 8pt;\">(%2)</i>")
+            .arg(str, ctStr));
+    }
 }
