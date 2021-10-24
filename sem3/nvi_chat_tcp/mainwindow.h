@@ -5,6 +5,7 @@
 #include <QMainWindow>
 #include <QtNetwork/QTcpServer>
 #include <QtNetwork/QTcpSocket>
+#include <QVector>
 #include <QTimer>
 
 QT_BEGIN_NAMESPACE
@@ -23,10 +24,12 @@ private slots:
     void on_pushButtonSend_clicked();
     void on_pushButtonBind_clicked();
     void on_pushButtonConnect_clicked();
+    void on_pushButtonConnectionList_clicked();
+    void on_pushButtonClear_clicked();
+    
+    void on_radioButtonServer_clicked();
+    void on_radioButtonClient_clicked();
 
-//    void onUdpConnect();
-//    void onUdpError(QAbstractSocket::SocketError err);
-//    void onUdpReadyRead();
     void onTcpBinded();
     void onTcpConnect();
     void onTcpSendDisconnect();
@@ -45,10 +48,18 @@ private:
     QTimer spamTimer;
 
     QTcpServer *server = nullptr;
-    QTcpSocket *sendSocket = nullptr;
-    QTcpSocket *getSocket = nullptr;
+//    QTcpSocket *sendSocket = nullptr;
+//    QTcpSocket *getSocket = nullptr;
+    QVector<QTcpSocket *> sockets;
 
     bool isError;
+
+    void clearSockets();
+    void clearServer();
+
+    void sendMessage(QString message, QString author, QString clr = "FFFFFF");
+
+    void updateConnectionsIndicator();
 
     void logError(QString text);
     void logWarn(QString text);

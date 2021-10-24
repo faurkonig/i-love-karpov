@@ -21,8 +21,11 @@ MainWindow::MainWindow(QWidget *parent)
 
     // По нажатию Enter в поле ввода сообщения, сообщение должно отправляться
     connect(ui->lineEditMessage, &QLineEdit::returnPressed, this, &MainWindow::on_pushButtonSend_clicked);
+
     ui->lineEditMessage->setEnabled(false);
     ui->pushButtonSend->setEnabled(false);
+    ui->checkBoxResend->setEnabled(false);
+    ui->pushButtonConnectionList->setEnabled(false);
 
     // Получение адреса текущего ПК
     auto adrs = QNetworkInterface::allAddresses();
@@ -46,6 +49,9 @@ MainWindow::MainWindow(QWidget *parent)
     spamTimer.setInterval(500);
     spamTimer.start();
     connect(&spamTimer, &QTimer::timeout, this, &MainWindow::onSpam);
+
+    ui->ServerWidget->hide();
+    ui->ClientWidget->hide();
 }
 
 /// Деструктор
@@ -55,29 +61,25 @@ MainWindow::~MainWindow()
 }
 
 
+/// Выбор режима сервера
+void MainWindow::on_radioButtonServer_clicked()
+{
+    ui->ServerWidget->show();
+    ui->ClientWidget->hide();
+}
+
+/// Выбор режима клиента
+void MainWindow::on_radioButtonClient_clicked()
+{
+    ui->ServerWidget->hide();
+    ui->ClientWidget->show();
+}
+
+
 /// Отправка введённого сообщения
 void MainWindow::on_pushButtonSend_clicked()
 {
-    auto str = ui->lineEditMessage->text();
-    if (str.length() > 0)
-    {
-        // Отправка данных
-        QByteArray data;
-        if (ui->checkBoxUtf8->isChecked())
-            data = str.toUtf8();
-        else
-            data = str.toLocal8Bit();
-        sendSocket->write(data);
-
-        if (sendSocket->waitForBytesWritten(data.length()))
-        {
-            // Вывод сообщения в "консоль"
-            logMessage(str, "Вы", "8314C2");
-
-            ui->lineEditMessage->clear();
-            ui->lineEditMessage->setFocus();
-        }
-    }
+    sendMessage(ui->lineEditMessage->text(), "Вы", "8314C2");
 }
 
 /// Слот открытия порта сервера
@@ -95,18 +97,18 @@ void MainWindow::on_pushButtonBind_clicked()
     {
         ui->pushButtonConnect->setPalette(normPal);
 
-        // Если сервер уже был создан, закрываем его, отправляем на удаление и создаём новый
-        if (server != nullptr)
-        {
-            if (server->isListening())
-                server->close();
-            server->deleteLater();
-        }
+        // Для начала на всякий слйчай отключаемся от сокета, сервера
+        clearSockets();
+        clearServer();
+
+        // Создаём TCP сервер и открываем порт
         server = new QTcpServer(this);
         connect(server, &QTcpServer::newConnection, this, &MainWindow::onTcpBinded);
         if (server->listen(QHostAddress::Any, localPort))
         {
             logInfo("Прослушиваем порт <b>" + QString::number(localPort) + "</b>");
+
+            ui->checkBoxResend->setEnabled(true);
         }
         else
         {
@@ -132,23 +134,32 @@ void MainWindow::on_pushButtonConnect_clicked()
 
     if (okPort1)
     {
-        // Если сокет для отправки уже был создан, то отключаемся, отправляем на удаление и создаём новый
-        if (sendSocket != nullptr)
-        {
-            if (sendSocket->isOpen())
-                sendSocket->disconnectFromHost();
-            sendSocket->deleteLater();
-        }
-        sendSocket = new QTcpSocket(this);
+        ui->pushButtonConnect->setPalette(normPal);
+
+        // Для начала на всякий слйчай отключаемся от сокета, сервера
+        clearSockets();
+        clearServer();
+
+        // Создаём принимающий TCP сокет
+        QTcpSocket *sendSocket = new QTcpSocket(this);
         connect(sendSocket, &QTcpSocket::connected, this, &MainWindow::onTcpConnect);
         connect(sendSocket, &QTcpSocket::disconnected, this, &MainWindow::onTcpSendDisconnect);
+        connect(sendSocket, &QTcpSocket::readyRead, this, &MainWindow::onTcpReadyRead);
         // В версии Qt 5.15 добавили сигнал errorOccured, который является заменой ныне устаревшего сигнала error
 #if QT_VERSION_MAJOR >= 5 && QT_VERSION_MINOR >= 15
         connect(sendSocket, &QTcpSocket::errorOccurred, this, &MainWindow::onTcpSendError);
 #else
-        connect(udpSocket, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error), this, &MainWindow::onUdpError);
+        connect(sendSocket, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error), this, &MainWindow::onTcpSendError);
 #endif
+        // Подключаемся к серверу
         sendSocket->connectToHost(ui->lineEditAddress->text(), port);
+
+        // Добавляем новый сокет
+        sockets.append(sendSocket);
+
+        updateConnectionsIndicator();
+
+        ui->checkBoxResend->setEnabled(false);
     }
     else
     {
@@ -160,21 +171,22 @@ void MainWindow::on_pushButtonConnect_clicked()
 /// Слот, соединённый с сигналом сервера, создаёт новое принимающее соединение
 void MainWindow::onTcpBinded()
 {
-    // Если сокет для приёма был уже создан, то отключаемся, отправляем на удаление и создаём новый
-    if (getSocket != nullptr)
-    {
-        if (getSocket->isOpen())
-            getSocket->disconnect();
-        getSocket->deleteLater();
-    }
-    getSocket = server->nextPendingConnection();
+    QTcpSocket *getSocket = server->nextPendingConnection();
     if (getSocket != nullptr)
     {
         connect(getSocket, &QTcpSocket::disconnected, this, &MainWindow::onTcpGetDisconnect);
         connect(getSocket, &QTcpSocket::readyRead, this, &MainWindow::onTcpReadyRead);
 
         logInfo(QString("К серверу подключился <b>%1</b>!")
-            .arg(getSocket->localAddress().toString().split(":").last()));
+                .arg(getSocket->localAddress().toString().split(":").last()));
+
+        // Добавляем новый сокет
+        sockets.append(getSocket);
+
+        ui->lineEditMessage->setEnabled(true);
+        ui->pushButtonSend->setEnabled(true);
+
+        updateConnectionsIndicator();
     }
 }
 
@@ -182,7 +194,7 @@ void MainWindow::onTcpBinded()
 void MainWindow::onTcpConnect()
 {
     logInfo(QString("Соединение с <b>%1</b> установлено!")
-        .arg(sendSocket->localAddress().toString().split(":").last()));
+        .arg(sockets[0]->localAddress().toString().split(":").last()));
 
     ui->lineEditMessage->setEnabled(true);
     ui->pushButtonSend->setEnabled(true);
@@ -193,17 +205,33 @@ void MainWindow::onTcpSendDisconnect()
 {
     logWarn("Вы отключились от собеседника");
 
-    sendSocket->deleteLater();
-    sendSocket = nullptr;
+    clearSockets();
+
+    updateConnectionsIndicator();
 }
 
 /// Слот, соединённый с сигналом дисконнекта принимающего сокета
 void MainWindow::onTcpGetDisconnect()
 {
-    logWarn("Собеседник отключился от вас");
+    auto getSocket = static_cast<QTcpSocket *>(sender());
+    if (getSocket != nullptr)
+    {
+        logWarn(QString("Собеседник <b>%1</b> отключился от вас")
+                .arg(getSocket->localAddress().toString().split(":").last()));
 
-    getSocket->deleteLater();
-    getSocket = nullptr;
+        // Удаляем сокет из вектора сокетов
+        sockets.removeOne(getSocket);
+        getSocket->deleteLater();
+
+        if (sockets.length() == 0)
+        {
+            // Если больше нет активных сокетов, отключаем возможность отправлять сообщения
+            ui->lineEditMessage->setEnabled(false);
+            ui->pushButtonSend->setEnabled(false);
+        }
+    }
+
+    updateConnectionsIndicator();
 }
 
 /// Слот, соединённый с сигналом об ошибки отправляющего сокета
@@ -213,7 +241,7 @@ void MainWindow::onTcpSendError(QAbstractSocket::SocketError err)
     // чтобы не вводить пользователя в заблуждение
     switch (err) {
     case QAbstractSocket::RemoteHostClosedError:
-        logWarn("Вы отключились от собеседника");
+        logWarn("Вы отключились от сервера");
         break;
     case QAbstractSocket::ConnectionRefusedError:
         logWarn("Не удаётся подключиться");
@@ -222,29 +250,142 @@ void MainWindow::onTcpSendError(QAbstractSocket::SocketError err)
         logError("Ошибка сокета отправки");
     }
 
-    // При ошибке закрываем отправляющий сокет
-    sendSocket->disconnect();
-    sendSocket->deleteLater();
-    sendSocket = nullptr;
+    auto socket = static_cast<QTcpSocket *>(sender());
+    if (socket != nullptr)
+    {
+        // При ошибке закрываем отправляющий сокет
+        socket->disconnect();
+        socket->deleteLater();
+        sockets.removeOne(socket);
+    }
 
     ui->lineEditMessage->setEnabled(false);
     ui->pushButtonSend->setEnabled(false);
+
+    updateConnectionsIndicator();
 }
 
 /// Слот, соединённый с сигналом приёма данных принимающего сокета
 void MainWindow::onTcpReadyRead()
 {
-    // Считываем данные
-    QString adr = getSocket->localAddress().toString().split(":")[3];
-    auto data = getSocket->readAll();
-    QString str;
-    if (ui->checkBoxUtf8->isChecked())
-        str = QString::fromUtf8(data);
-    else
-        str = QString::fromLocal8Bit(data);
+    auto socket = static_cast<QTcpSocket *>(sender());
+    if (socket != nullptr)
+    {
+        // Считываем данные
+        QString adr = socket->localAddress().toString().split(":").last();
+        auto data = socket->readAll();
+        QString str;
+        if (ui->checkBoxUtf8->isChecked())
+            str = QString::fromUtf8(data);
+        else
+            str = QString::fromLocal8Bit(data);
 
-    // Выводим сообщение в "консоль"
-    logMessage(str, adr, "C2145C");
+        // Выводим сообщение в "консоль"
+        logMessage(str, adr, "C2145C");
+
+        if (server != nullptr && ui->checkBoxResend->isChecked() && sockets.length() > 1)
+        {
+            // Если сейчас активен режим сервера, включена пересылка сообщений и к серверу подключено больше 1 пользователя,
+            // то каждое приходящее сообщение будет автоматически переслано на все сокеты,
+            // кроме того, с которого это сообщение пришло
+            int socketCount = sockets.length();
+            for (int i = 0; i < socketCount; i++)
+            {
+                if (sockets[i] != socket)
+                    sockets[i]->write(data);
+            }
+        }
+    }
+}
+
+
+/// Метод для очистки сокетов
+void MainWindow::clearSockets()
+{
+    int length = sockets.length();
+    for (int i = 0; i < length; i++)
+    {
+        auto socket = sockets[i];
+        // Если сокет активный, то отключаемся от него
+        if (socket->isOpen())
+        {
+            socket->close();
+            socket->disconnect();
+        }
+        // Отправляем на удаление
+        socket->deleteLater();
+    }
+    // Очищаем массив адресов на сокеты
+    sockets.clear();
+
+    updateConnectionsIndicator();
+}
+
+/// Метод для остановки о удаления сервера
+void MainWindow::clearServer()
+{
+    if (server != nullptr)
+    {
+        // Отключаем сервер, если он активный
+        if (server->isListening())
+            server->close();
+        // Отправляем на удаление
+        server->deleteLater();
+        server = nullptr;
+    }
+}
+
+
+/// Метод для более удобной отправки сообщений
+void MainWindow::sendMessage(QString message, QString author, QString clr)
+{
+    if (message.length() > 0)
+    {
+        // Отправка данных
+        QByteArray data;
+        if (ui->checkBoxUtf8->isChecked())
+            data = message.toUtf8();
+        else
+            data = message.toLocal8Bit();
+
+        int length = sockets.length();
+        for (int i = 0; i < length; i++)
+        {
+            auto socket = sockets[i];
+            socket->write(data);
+        }
+
+        ui->lineEditMessage->clear();
+        ui->lineEditMessage->setFocus();
+        // Вывод сообщения в "консоль"
+        logMessage(message, author, clr);
+    }
+}
+
+
+/// Обновление кнопки с количеством активных подключений
+void MainWindow::updateConnectionsIndicator()
+{
+    int socketsCount = sockets.length();
+    ui->pushButtonConnectionList->setText(QString("Подключено: %1").arg(socketsCount));
+    if (socketsCount > 0)
+        ui->pushButtonConnectionList->setEnabled(true);
+    else
+        ui->pushButtonConnectionList->setEnabled(false);
+}
+
+
+/// Слот отображения списка подключений
+void MainWindow::on_pushButtonConnectionList_clicked()
+{
+    int socketCount = sockets.length();
+    logInfo(QString("Подключено к <b>%1</b> %2:").arg(socketCount)
+            .arg(socketCount % 10 == 1 ? "сокету" : "сокетам"));
+    // Вывод списка всех подключений
+    for (int i = 0; i < socketCount; i++)
+    {
+        logInfo(QString::number(i + 1) + ") <b>" + sockets[i]->localAddress().toString().split(":").last() + "</b>");
+    }
 }
 
 
@@ -278,26 +419,27 @@ void MainWindow::logMessage(QString content, QString author, QString clr)
 /// Вывод текста в "консоль", сокращение для ui->chatTextEdit->append
 void MainWindow::log(QString text)
 {
-    ui->chatTextEdit->append(text);
+    if (ui != nullptr)
+        ui->chatTextEdit->append(text);
 }
 
-/// Слот автоматической отправки сообщения по истечению времени таймера
+
+/// Слот автоматической отправки сообщения
 void MainWindow::onSpam()
 {
     if (ui->checkBoxSpam->isChecked() &&
-            ui->lineEditMessage->isEnabled() &&
-            sendSocket->isOpen())
+            ui->lineEditMessage->isEnabled())
     {
         QString str = "Hello World! Привет, мир!";
-        // Отправка данных
-        QByteArray data;
-        if (ui->checkBoxUtf8->isChecked())
-            data = str.toUtf8();
-        else
-            data = str.toLocal8Bit();
-        sendSocket->write(data);
 
         // Вывод сообщение о спаме
-        logMessage(str, "СПАМ", "F8173E");
+        sendMessage(str, "СПАМ", "F8173E");
     }
 }
+
+/// Слот очистки чата
+void MainWindow::on_pushButtonClear_clicked()
+{
+    ui->chatTextEdit->clear();
+}
+
