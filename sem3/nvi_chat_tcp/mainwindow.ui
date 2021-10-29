@@ -230,22 +230,27 @@
             </property>
            </widget>
           </item>
+          <item>
+           <widget class="QPushButton" name="pushButtonAddresses">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>35</height>
+             </size>
+            </property>
+            <property name="font">
+             <font>
+              <pointsize>11</pointsize>
+              <weight>50</weight>
+              <bold>false</bold>
+             </font>
+            </property>
+            <property name="text">
+             <string>Вывести IP адреса компьютера</string>
+            </property>
+           </widget>
+          </item>
          </layout>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLabel" name="labelLocalAddress">
-         <property name="font">
-          <font>
-           <pointsize>12</pointsize>
-          </font>
-         </property>
-         <property name="text">
-          <string>Адрес компьютера: &lt;b&gt;127.0.0.1&lt;/b&gt;</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignCenter</set>
-         </property>
         </widget>
        </item>
        <item>

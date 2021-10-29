@@ -1,7 +1,6 @@
 #include <QtNetwork/QNetworkDatagram>
 #include <QtNetwork/QNetworkInterface>
 #include <QTime>
-#include <QTextCodec>
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
@@ -27,24 +26,6 @@ MainWindow::MainWindow(QWidget *parent)
     ui->checkBoxResend->setEnabled(false);
     ui->pushButtonConnectionList->setEnabled(false);
 
-    // Получение адреса текущего ПК
-    auto adrs = QNetworkInterface::allAddresses();
-    // В Windows (на компьютерах в Б217) выводится список с несколько другими адресами и там нужный адрес под индексом 1
-    // В Linux (на личном компьютере) в списке нужный адрес находится под индексом 2
-    // Также добавляю проверку на количество адресов, так как если устройство не подключено ни к какой сети,
-    // то там всего 1-2 элеметов (localhost собственно)
-#ifdef Q_OS_WIN
-    if (adrs.length() >= 2)
-    {
-        QString adr = adrs[1].toString();
-#else
-    if (adrs.length() >= 3)
-    {
-        QString adr = adrs[2].toString();
-#endif
-        ui->labelLocalAddress->setText("Адрес компьютера: <b>" + adr + "</b>");
-    }
-
     // Запуск таймера для спама в чат
     spamTimer.setInterval(500);
     spamTimer.start();
@@ -58,6 +39,24 @@ MainWindow::MainWindow(QWidget *parent)
 MainWindow::~MainWindow()
 {
     delete ui;
+}
+
+
+/// Вывод айпи адресов компьютера
+void MainWindow::on_pushButtonAddresses_clicked()
+{
+    // Получаем все адреса
+    auto adrs = QNetworkInterface::allAddresses();
+    // Регулярное выражение IPv4 адреса
+    QRegExp ipv4AddressRegex("^((25[0-5]|(2[0-4]|1\\d|[1-9]|)\\d)(\\.(?!$)|$)){4}$");
+    logInfo("IP адреса компьютера:");
+    for (int i = 0; i < adrs.count(); i++)
+    {
+        // Отсеиваем только адреса типа IPv4
+        auto str = adrs[i].toString().split(':').last();
+        if (ipv4AddressRegex.indexIn(str) != -1)
+            logInfo(str);
+    }
 }
 
 
@@ -442,4 +441,3 @@ void MainWindow::on_pushButtonClear_clicked()
 {
     ui->chatTextEdit->clear();
 }
-

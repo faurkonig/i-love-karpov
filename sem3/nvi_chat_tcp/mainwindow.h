@@ -1,6 +1,5 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
-#define UTF8
 
 #include <QMainWindow>
 #include <QtNetwork/QTcpServer>
@@ -38,6 +37,8 @@ private slots:
     void onTcpReadyRead();
 
     void onSpam();
+
+    void on_pushButtonAddresses_clicked();
 
 private:
     Ui::MainWindow *ui;
