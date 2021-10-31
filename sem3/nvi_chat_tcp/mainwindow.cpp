@@ -24,6 +24,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->lineEditMessage->setEnabled(false);
     ui->pushButtonSend->setEnabled(false);
     ui->checkBoxResend->setEnabled(false);
+    ui->checkBoxSpam->setEnabled(false);
     ui->pushButtonConnectionList->setEnabled(false);
 
     // Запуск таймера для спама в чат
@@ -38,6 +39,9 @@ MainWindow::MainWindow(QWidget *parent)
 /// Деструктор
 MainWindow::~MainWindow()
 {
+    clearServer();
+    clearSockets();
+
     delete ui;
 }
 
@@ -87,14 +91,11 @@ void MainWindow::on_pushButtonBind_clicked()
     // Проверка введённного с формы порта
     bool okPort2;
     quint16 localPort = quint16(ui->lineEditLocalPort->text().toInt(&okPort2));
-    if (okPort2)
-        ui->lineEditLocalPort->setPalette(normPal);
-    else
-        ui->lineEditLocalPort->setPalette(errPal);
 
     if (okPort2)
     {
-        ui->pushButtonConnect->setPalette(normPal);
+        ui->lineEditLocalPort->setPalette(normPal);
+        ui->pushButtonBind->setPalette(normPal);
 
         // Для начала на всякий слйчай отключаемся от сокета, сервера
         clearSockets();
@@ -117,6 +118,7 @@ void MainWindow::on_pushButtonBind_clicked()
     else
     {
         ui->pushButtonBind->setPalette(errPal);
+        ui->lineEditLocalPort->setPalette(errPal);
     }
 }
 
@@ -184,6 +186,8 @@ void MainWindow::onTcpBinded()
 
         ui->lineEditMessage->setEnabled(true);
         ui->pushButtonSend->setEnabled(true);
+        ui->checkBoxSpam->setEnabled(true);
+        ui->checkBoxSpam->setChecked(false);
 
         updateConnectionsIndicator();
     }
@@ -197,12 +201,18 @@ void MainWindow::onTcpConnect()
 
     ui->lineEditMessage->setEnabled(true);
     ui->pushButtonSend->setEnabled(true);
+    ui->checkBoxSpam->setEnabled(true);
 }
 
 /// Слот, соединённый с сигналом дисконнекта отправляющего сокета
 void MainWindow::onTcpSendDisconnect()
 {
     logWarn("Вы отключились от собеседника");
+
+    ui->lineEditMessage->setEnabled(false);
+    ui->pushButtonSend->setEnabled(false);
+    ui->checkBoxSpam->setEnabled(false);
+    ui->checkBoxSpam->setChecked(false);
 
     clearSockets();
 
@@ -227,6 +237,8 @@ void MainWindow::onTcpGetDisconnect()
             // Если больше нет активных сокетов, отключаем возможность отправлять сообщения
             ui->lineEditMessage->setEnabled(false);
             ui->pushButtonSend->setEnabled(false);
+            ui->checkBoxSpam->setEnabled(false);
+            ui->checkBoxSpam->setChecked(false);
         }
     }
 
@@ -260,6 +272,8 @@ void MainWindow::onTcpSendError(QAbstractSocket::SocketError err)
 
     ui->lineEditMessage->setEnabled(false);
     ui->pushButtonSend->setEnabled(false);
+    ui->checkBoxSpam->setEnabled(false);
+    ui->checkBoxSpam->setChecked(false);
 
     updateConnectionsIndicator();
 }
