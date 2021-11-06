@@ -1,6 +1,7 @@
 #include <QtNetwork/QNetworkDatagram>
 #include <QtNetwork/QNetworkInterface>
 #include <QTime>
+#include <QMessageBox>
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
@@ -83,6 +84,9 @@ void MainWindow::on_radioButtonClient_clicked()
 void MainWindow::on_pushButtonSend_clicked()
 {
     sendMessage(ui->lineEditMessage->text(), "Вы", "8314C2");
+
+    ui->lineEditMessage->clear();
+    ui->lineEditMessage->setFocus();
 }
 
 /// Слот открытия порта сервера
@@ -90,9 +94,9 @@ void MainWindow::on_pushButtonBind_clicked()
 {
     // Проверка введённного с формы порта
     bool okPort2;
-    quint16 localPort = quint16(ui->lineEditLocalPort->text().toInt(&okPort2));
+    int localPort = ui->lineEditLocalPort->text().toInt(&okPort2);
 
-    if (okPort2)
+    if (okPort2 && localPort > 0 && localPort < 0x10000)
     {
         ui->lineEditLocalPort->setPalette(normPal);
         ui->pushButtonBind->setPalette(normPal);
@@ -104,7 +108,7 @@ void MainWindow::on_pushButtonBind_clicked()
         // Создаём TCP сервер и открываем порт
         server = new QTcpServer(this);
         connect(server, &QTcpServer::newConnection, this, &MainWindow::onTcpBinded);
-        if (server->listen(QHostAddress::Any, localPort))
+        if (server->listen(QHostAddress::Any, quint16(localPort)))
         {
             logInfo("Прослушиваем порт <b>" + QString::number(localPort) + "</b>");
 
@@ -117,8 +121,10 @@ void MainWindow::on_pushButtonBind_clicked()
     }
     else
     {
+        // Если порт неправильный, сообщаем об ошибке
         ui->pushButtonBind->setPalette(errPal);
         ui->lineEditLocalPort->setPalette(errPal);
+        QMessageBox::information(this, "Предупреждение", "Введён неправильный порт");
     }
 }
 
@@ -127,14 +133,11 @@ void MainWindow::on_pushButtonConnect_clicked()
 {
     // Проверка введённного с формы порта
     bool okPort1;
-    quint16 port = quint16(ui->lineEditPort->text().toInt(&okPort1));
-    if (okPort1)
-        ui->lineEditPort->setPalette(normPal);
-    else
-        ui->lineEditPort->setPalette(errPal);
+    int port = ui->lineEditPort->text().toInt(&okPort1);
 
-    if (okPort1)
+    if (okPort1 && port > 0 && port < 0x10000)
     {
+        ui->lineEditPort->setPalette(normPal);
         ui->pushButtonConnect->setPalette(normPal);
 
         // Для начала на всякий слйчай отключаемся от сокета, сервера
@@ -153,7 +156,7 @@ void MainWindow::on_pushButtonConnect_clicked()
         connect(sendSocket, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error), this, &MainWindow::onTcpSendError);
 #endif
         // Подключаемся к серверу
-        sendSocket->connectToHost(ui->lineEditAddress->text(), port);
+        sendSocket->connectToHost(ui->lineEditAddress->text(), quint16(port));
 
         // Добавляем новый сокет
         sockets.append(sendSocket);
@@ -164,7 +167,10 @@ void MainWindow::on_pushButtonConnect_clicked()
     }
     else
     {
+        // Если порт неправильный, сообщаем об ошибке
         ui->pushButtonConnect->setPalette(errPal);
+        ui->lineEditPort->setPalette(errPal);
+        QMessageBox::information(this, "Предупреждение", "Введён неправильный порт");
     }
 }
 
@@ -368,8 +374,6 @@ void MainWindow::sendMessage(QString message, QString author, QString clr)
             socket->write(data);
         }
 
-        ui->lineEditMessage->clear();
-        ui->lineEditMessage->setFocus();
         // Вывод сообщения в "консоль"
         logMessage(message, author, clr);
     }
