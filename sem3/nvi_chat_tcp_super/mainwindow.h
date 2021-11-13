@@ -49,11 +49,11 @@ private:
     QTimer spamTimer;
 
     QTcpServer *server = nullptr;
-//    QTcpSocket *sendSocket = nullptr;
-//    QTcpSocket *getSocket = nullptr;
     QVector<QTcpSocket *> sockets;
 
     bool isError;
+
+    void processData(QByteArray data);
 
     void clearSockets();
     void clearServer();

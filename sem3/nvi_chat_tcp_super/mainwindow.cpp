@@ -310,43 +310,7 @@ void MainWindow::onTcpReadyRead()
             if (server == nullptr)
             {
                 // Если клиент получает данные
-                if (data.size() > 0)
-                {
-                    switch (data[0]) {
-                    case char(0): { // Если сообщение было отправлено именно сервером
-                        // Считывание текста
-                        QString text = QString::fromUtf8(data.mid(1));
-
-                        logMessage(text, "Сервер", "3BD737");
-                        break;
-                    }
-                    case char(1): { // Если сообщение было отправлено кем-то из клиентов
-                        // Считывание IP-адреса
-                        auto addr = bytesToAddress(data.mid(1, 4));
-                        // Считывание текста
-                        QString text = QString::fromUtf8(data.mid(5));
-
-                        logMessage(text, addressToString(addr), "C2145C");
-                        break;
-                    }
-                    case char(2): { // Кто-то из клиентов подключился
-                        // Считывание IP-адреса
-                        auto addr = bytesToAddress(data.mid(1, 4));
-
-                        logInfo(QString("<b>%1</b> подключился к беседе")
-                                .arg(addressToString(addr)));
-                        break;
-                    }
-                    case char(3): { // Кто-то из клиентов отключился
-                        // Считывание IP-адреса
-                        auto addr = bytesToAddress(data.mid(1, 4));
-
-                        logInfo(QString("<b>%1</b> отключился от беседы")
-                                .arg(addressToString(addr)));
-                        break;
-                    }
-                    }
-                }
+                processData(data);
             }
             else
             {
@@ -364,6 +328,58 @@ void MainWindow::onTcpReadyRead()
                         sockets[i]->write(data);
                 }
             }
+        }
+    }
+}
+
+/// Метод для обработки приходящих данных
+void MainWindow::processData(QByteArray data)
+{
+    if (data.size() > 0)
+    {
+        switch (data[0]) {
+        case char(0): { // Если сообщение было отправлено именно сервером
+            // Считывание текста
+            QString text = QString::fromUtf8(data.mid(1));
+
+            logMessage(text, "Сервер", "3BD737");
+            break;
+        }
+        case char(1): { // Если сообщение было отправлено кем-то из клиентов
+            // Считывание IP-адреса
+            auto addr = bytesToAddress(data.mid(1, 4));
+            // Считывание текста
+            QString text = QString::fromUtf8(data.mid(5));
+
+            logMessage(text, addressToString(addr), "C2145C");
+            break;
+        }
+        case char(2): { // Кто-то из клиентов подключился
+            // Считывание IP-адреса
+            auto addr = bytesToAddress(data.mid(1, 4));
+
+            logInfo(QString("<b>%1</b> подключился к беседе")
+                    .arg(addressToString(addr)));
+
+            // Защита от склеивания нескольких пакетов
+            if (data.size() > 5) {
+                processData(data.mid(5));
+            }
+            break;
+        }
+        case char(3): { // Кто-то из клиентов отключился
+            // Считывание IP-адреса
+            auto addr = bytesToAddress(data.mid(1, 4));
+
+            logInfo(QString("<b>%1</b> отключился от беседы")
+                    .arg(addressToString(addr)));
+
+            // Защита от склеивания нескольких пакетов
+            if (data.size() > 5) {
+                processData(data.mid(5));
+            }
+            break;
+        }
         }
     }
 }
