@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>664</width>
-    <height>530</height>
+    <width>730</width>
+    <height>566</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -78,7 +78,7 @@
            <number>0</number>
           </property>
           <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_2">
+           <layout class="QHBoxLayout" name="horizontalLayoutAddress">
             <item>
              <widget class="QLabel" name="labelAddressField">
               <property name="minimumSize">
@@ -105,7 +105,7 @@
            </layout>
           </item>
           <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_3">
+           <layout class="QHBoxLayout" name="horizontalLayoutPort">
             <item>
              <widget class="QLabel" name="labelPortField">
               <property name="minimumSize">
@@ -121,6 +121,33 @@
             </item>
             <item>
              <widget class="QLineEdit" name="lineEditPort">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>35</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayoutNickname">
+            <item>
+             <widget class="QLabel" name="labelNicknameField">
+              <property name="minimumSize">
+               <size>
+                <width>125</width>
+                <height>35</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>Ваш никнейм</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="lineEditNickname">
               <property name="minimumSize">
                <size>
                 <width>0</width>
@@ -151,13 +178,6 @@
             </property>
            </widget>
           </item>
-          <item>
-           <widget class="Line" name="line1">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-           </widget>
-          </item>
          </layout>
         </widget>
        </item>
@@ -177,7 +197,7 @@
            <number>0</number>
           </property>
           <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_4">
+           <layout class="QHBoxLayout" name="horizontalLayoutServerPort">
             <item>
              <widget class="QLabel" name="labelLocalPortField">
               <property name="minimumSize">
@@ -250,6 +270,19 @@
             </property>
            </widget>
           </item>
+          <item>
+           <widget class="QPushButton" name="pushButtonConnectionList">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>35</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>Подключено: 0</string>
+            </property>
+           </widget>
+          </item>
          </layout>
         </widget>
        </item>
@@ -271,19 +304,6 @@
         <widget class="Line" name="line4">
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="pushButtonConnectionList">
-         <property name="minimumSize">
-          <size>
-           <width>0</width>
-           <height>35</height>
-          </size>
-         </property>
-         <property name="text">
-          <string>Подключено: 0</string>
          </property>
         </widget>
        </item>
@@ -388,7 +408,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>664</width>
+     <width>730</width>
      <height>21</height>
     </rect>
    </property>

@@ -50,10 +50,15 @@ private:
 
     QTcpServer *server = nullptr;
     QVector<QTcpSocket *> sockets;
+    QVector<QString> userNicknames;
 
-    bool isError;
+    bool isError{false};
+    bool isClearing{false};
 
-    void processData(QByteArray data);
+    QString userConnectionNick;
+
+    void processServerData(QByteArray data, QTcpSocket *socket);
+    void processClientData(QByteArray data, QTcpSocket *socket);
 
     void clearSockets();
     void clearServer();
@@ -65,6 +70,9 @@ private:
     QString addressToString(QHostAddress address);
     QByteArray addressToBytes(QHostAddress address);
     QHostAddress bytesToAddress(QByteArray ba);
+    QString bytesToNick(QByteArray ba, int &byteLength);
+
+    QString getEnteredNickname();
 
     void logError(QString text);
     void logWarn(QString text);
