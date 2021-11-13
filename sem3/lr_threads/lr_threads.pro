@@ -1,6 +1,6 @@
 #-------------------------------------------------
 #
-# Project created by QtCreator 2021-02-17T16:26:52
+# Project created by QtCreator 2021-09-25T12:49:15
 #
 #-------------------------------------------------
 
@@ -25,10 +25,14 @@ CONFIG += c++11
 
 SOURCES += \
         main.cpp \
-        mainwindow.cpp
+        mainwindow.cpp \
+    my_thread.cpp \
+    ll_thread.cpp
 
 HEADERS += \
-        mainwindow.h
+        mainwindow.h \
+    my_thread.h \
+    ll_thread.h
 
 FORMS += \
         mainwindow.ui
