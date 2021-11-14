@@ -6,440 +6,546 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>730</width>
-    <height>566</height>
+    <width>902</width>
+    <height>599</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>TCP Chat</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QHBoxLayout" name="horizontalLayout_5">
+   <layout class="QHBoxLayout" name="horizontalLayout">
     <item>
-     <widget class="QWidget" name="leftVerticalWidget" native="true">
-      <property name="maximumSize">
-       <size>
-        <width>350</width>
-        <height>16777215</height>
-       </size>
+     <widget class="QTabWidget" name="tabWidget">
+      <property name="currentIndex">
+       <number>0</number>
       </property>
-      <layout class="QVBoxLayout" name="leftVerticalLayout">
-       <property name="spacing">
-        <number>4</number>
-       </property>
-       <property name="leftMargin">
-        <number>5</number>
-       </property>
-       <property name="topMargin">
-        <number>5</number>
-       </property>
-       <property name="rightMargin">
-        <number>5</number>
-       </property>
-       <property name="bottomMargin">
-        <number>5</number>
-       </property>
-       <item>
-        <widget class="QGroupBox" name="groupBoxMode">
-         <property name="title">
-          <string>Режим</string>
-         </property>
-         <layout class="QVBoxLayout" name="verticalLayout_4">
-          <item>
-           <widget class="QRadioButton" name="radioButtonServer">
-            <property name="text">
-             <string>Сервер</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QRadioButton" name="radioButtonClient">
-            <property name="text">
-             <string>Клиент</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item>
-        <widget class="QWidget" name="ClientWidget" native="true">
-         <layout class="QVBoxLayout" name="verticalLayout_2">
-          <property name="leftMargin">
-           <number>0</number>
-          </property>
-          <property name="topMargin">
-           <number>0</number>
-          </property>
-          <property name="rightMargin">
-           <number>0</number>
-          </property>
-          <property name="bottomMargin">
-           <number>0</number>
-          </property>
-          <item>
-           <layout class="QHBoxLayout" name="horizontalLayoutAddress">
-            <item>
-             <widget class="QLabel" name="labelAddressField">
-              <property name="minimumSize">
-               <size>
-                <width>125</width>
-                <height>35</height>
-               </size>
-              </property>
-              <property name="text">
-               <string>Адрес собеседника</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLineEdit" name="lineEditAddress">
-              <property name="minimumSize">
-               <size>
-                <width>0</width>
-                <height>35</height>
-               </size>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-          <item>
-           <layout class="QHBoxLayout" name="horizontalLayoutPort">
-            <item>
-             <widget class="QLabel" name="labelPortField">
-              <property name="minimumSize">
-               <size>
-                <width>125</width>
-                <height>35</height>
-               </size>
-              </property>
-              <property name="text">
-               <string>Порт собеседника</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLineEdit" name="lineEditPort">
-              <property name="minimumSize">
-               <size>
-                <width>0</width>
-                <height>35</height>
-               </size>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-          <item>
-           <layout class="QHBoxLayout" name="horizontalLayoutNickname">
-            <item>
-             <widget class="QLabel" name="labelNicknameField">
-              <property name="minimumSize">
-               <size>
-                <width>125</width>
-                <height>35</height>
-               </size>
-              </property>
-              <property name="text">
-               <string>Ваш никнейм</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLineEdit" name="lineEditNickname">
-              <property name="minimumSize">
-               <size>
-                <width>0</width>
-                <height>35</height>
-               </size>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-          <item>
-           <widget class="QPushButton" name="pushButtonConnect">
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>35</height>
-             </size>
-            </property>
-            <property name="font">
-             <font>
-              <pointsize>11</pointsize>
-              <weight>50</weight>
-              <bold>false</bold>
-             </font>
-            </property>
-            <property name="text">
-             <string>Подключиться</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item>
-        <widget class="QWidget" name="ServerWidget" native="true">
-         <layout class="QVBoxLayout" name="verticalLayout_3">
-          <property name="leftMargin">
-           <number>0</number>
-          </property>
-          <property name="topMargin">
-           <number>0</number>
-          </property>
-          <property name="rightMargin">
-           <number>0</number>
-          </property>
-          <property name="bottomMargin">
-           <number>0</number>
-          </property>
-          <item>
-           <layout class="QHBoxLayout" name="horizontalLayoutServerPort">
-            <item>
-             <widget class="QLabel" name="labelLocalPortField">
-              <property name="minimumSize">
-               <size>
-                <width>125</width>
-                <height>35</height>
-               </size>
-              </property>
-              <property name="text">
-               <string>Входящий порт</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLineEdit" name="lineEditLocalPort">
-              <property name="minimumSize">
-               <size>
-                <width>0</width>
-                <height>35</height>
-               </size>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-          <item>
-           <widget class="QPushButton" name="pushButtonBind">
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>35</height>
-             </size>
-            </property>
-            <property name="font">
-             <font>
-              <pointsize>11</pointsize>
-              <weight>50</weight>
-              <bold>false</bold>
-             </font>
-            </property>
-            <property name="text">
-             <string>Создать</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="Line" name="line2">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="pushButtonAddresses">
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>35</height>
-             </size>
-            </property>
-            <property name="font">
-             <font>
-              <pointsize>11</pointsize>
-              <weight>50</weight>
-              <bold>false</bold>
-             </font>
-            </property>
-            <property name="text">
-             <string>Вывести IP адреса компьютера</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="pushButtonConnectionList">
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>35</height>
-             </size>
-            </property>
-            <property name="text">
-             <string>Подключено: 0</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item>
-        <widget class="Line" name="line3">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QCheckBox" name="checkBoxSpam">
-         <property name="text">
-          <string>Спамим?</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <layout class="QHBoxLayout" name="horizontalLayoutSpamText">
-         <item>
-          <widget class="QLabel" name="labelSpamText">
-           <property name="minimumSize">
-            <size>
-             <width>125</width>
-             <height>35</height>
-            </size>
-           </property>
-           <property name="text">
-            <string>Текст спама</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLineEdit" name="lineEditSpamText">
-           <property name="minimumSize">
-            <size>
-             <width>0</width>
-             <height>35</height>
-            </size>
-           </property>
-           <property name="text">
-            <string>Hello World! Привет, мир!</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-       <item>
-        <widget class="Line" name="line4">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="pushButtonClear">
-         <property name="minimumSize">
-          <size>
-           <width>0</width>
-           <height>35</height>
-          </size>
-         </property>
-         <property name="text">
-          <string>Очистить чат</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <spacer name="verticalSpacer">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>40</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-      </layout>
-     </widget>
-    </item>
-    <item>
-     <layout class="QVBoxLayout" name="rightVerticalLayout">
-      <item>
-       <widget class="QScrollArea" name="chatArea">
-        <property name="widgetResizable">
-         <bool>true</bool>
-        </property>
-        <widget class="QWidget" name="scrollAreaWidgetContents">
-         <property name="geometry">
-          <rect>
-           <x>0</x>
-           <y>0</y>
-           <width>352</width>
-           <height>474</height>
-          </rect>
-         </property>
-         <layout class="QVBoxLayout" name="verticalChatLayout">
-          <property name="spacing">
-           <number>2</number>
-          </property>
-         </layout>
-        </widget>
-       </widget>
-      </item>
-      <item>
-       <layout class="QHBoxLayout" name="messageLayout">
-        <property name="leftMargin">
-         <number>4</number>
-        </property>
-        <property name="topMargin">
-         <number>4</number>
-        </property>
-        <property name="rightMargin">
-         <number>4</number>
-        </property>
-        <property name="bottomMargin">
-         <number>4</number>
-        </property>
+      <widget class="QWidget" name="propertiesTab">
+       <attribute name="title">
+        <string>Настройки</string>
+       </attribute>
+       <layout class="QHBoxLayout" name="propertiesTabLayout">
         <item>
-         <widget class="QLineEdit" name="lineEditMessage">
-          <property name="minimumSize">
+         <widget class="QWidget" name="leftPropertiesWidget" native="true">
+          <property name="maximumSize">
            <size>
-            <width>160</width>
-            <height>35</height>
+            <width>350</width>
+            <height>16777215</height>
            </size>
           </property>
-          <property name="placeholderText">
-           <string>Напишите сообщение...</string>
-          </property>
+          <layout class="QVBoxLayout" name="verticalLayout">
+           <item>
+            <widget class="QGroupBox" name="groupBoxMode">
+             <property name="title">
+              <string>Режим</string>
+             </property>
+             <layout class="QVBoxLayout" name="verticalLayout_4">
+              <item>
+               <widget class="QRadioButton" name="radioButtonServer">
+                <property name="text">
+                 <string>Сервер</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QRadioButton" name="radioButtonClient">
+                <property name="text">
+                 <string>Клиент</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item>
+            <widget class="Line" name="line">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="labelAddresses">
+             <property name="text">
+              <string>IP адреса компьютера:
+1) &lt;b&gt;127.0.0.1&lt;/b&gt;</string>
+             </property>
+             <property name="textFormat">
+              <enum>Qt::RichText</enum>
+             </property>
+             <property name="wordWrap">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="pushButtonAddresses">
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>35</height>
+              </size>
+             </property>
+             <property name="font">
+              <font>
+               <pointsize>11</pointsize>
+               <weight>50</weight>
+               <bold>false</bold>
+              </font>
+             </property>
+             <property name="text">
+              <string>Обновить</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="verticalSpacer_2">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>40</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+          </layout>
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="pushButtonSend">
-          <property name="minimumSize">
+         <widget class="QWidget" name="rightPropertiesWidget" native="true">
+          <property name="maximumSize">
            <size>
-            <width>0</width>
-            <height>35</height>
+            <width>350</width>
+            <height>16777215</height>
            </size>
           </property>
-          <property name="font">
-           <font>
-            <pointsize>11</pointsize>
-            <weight>75</weight>
-            <bold>true</bold>
-           </font>
-          </property>
-          <property name="text">
-           <string>Отправить</string>
-          </property>
+          <layout class="QVBoxLayout" name="leftVerticalLayout">
+           <property name="spacing">
+            <number>4</number>
+           </property>
+           <property name="leftMargin">
+            <number>5</number>
+           </property>
+           <property name="topMargin">
+            <number>5</number>
+           </property>
+           <property name="rightMargin">
+            <number>5</number>
+           </property>
+           <property name="bottomMargin">
+            <number>5</number>
+           </property>
+           <item>
+            <widget class="QWidget" name="ClientWidget" native="true">
+             <layout class="QVBoxLayout" name="verticalLayout_2">
+              <property name="leftMargin">
+               <number>0</number>
+              </property>
+              <property name="topMargin">
+               <number>0</number>
+              </property>
+              <property name="rightMargin">
+               <number>0</number>
+              </property>
+              <property name="bottomMargin">
+               <number>0</number>
+              </property>
+              <item>
+               <layout class="QHBoxLayout" name="horizontalLayoutAddress">
+                <item>
+                 <widget class="QLabel" name="labelAddressField">
+                  <property name="minimumSize">
+                   <size>
+                    <width>125</width>
+                    <height>35</height>
+                   </size>
+                  </property>
+                  <property name="text">
+                   <string>Адрес собеседника</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLineEdit" name="lineEditAddress">
+                  <property name="minimumSize">
+                   <size>
+                    <width>0</width>
+                    <height>35</height>
+                   </size>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <layout class="QHBoxLayout" name="horizontalLayoutPort">
+                <item>
+                 <widget class="QLabel" name="labelPortField">
+                  <property name="minimumSize">
+                   <size>
+                    <width>125</width>
+                    <height>35</height>
+                   </size>
+                  </property>
+                  <property name="text">
+                   <string>Порт собеседника</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLineEdit" name="lineEditPort">
+                  <property name="minimumSize">
+                   <size>
+                    <width>0</width>
+                    <height>35</height>
+                   </size>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <layout class="QHBoxLayout" name="horizontalLayoutNickname">
+                <item>
+                 <widget class="QLabel" name="labelNicknameField">
+                  <property name="minimumSize">
+                   <size>
+                    <width>125</width>
+                    <height>35</height>
+                   </size>
+                  </property>
+                  <property name="text">
+                   <string>Ваш никнейм</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLineEdit" name="lineEditNickname">
+                  <property name="minimumSize">
+                   <size>
+                    <width>0</width>
+                    <height>35</height>
+                   </size>
+                  </property>
+                  <property name="maxLength">
+                   <number>30</number>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <widget class="QPushButton" name="pushButtonConnect">
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>35</height>
+                 </size>
+                </property>
+                <property name="font">
+                 <font>
+                  <pointsize>11</pointsize>
+                  <weight>50</weight>
+                  <bold>false</bold>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>Подключиться</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item>
+            <widget class="QWidget" name="ServerWidget" native="true">
+             <layout class="QVBoxLayout" name="verticalLayout_3">
+              <property name="leftMargin">
+               <number>0</number>
+              </property>
+              <property name="topMargin">
+               <number>0</number>
+              </property>
+              <property name="rightMargin">
+               <number>0</number>
+              </property>
+              <property name="bottomMargin">
+               <number>0</number>
+              </property>
+              <item>
+               <layout class="QHBoxLayout" name="horizontalLayoutServerPort">
+                <item>
+                 <widget class="QLabel" name="labelLocalPortField">
+                  <property name="minimumSize">
+                   <size>
+                    <width>125</width>
+                    <height>35</height>
+                   </size>
+                  </property>
+                  <property name="text">
+                   <string>Входящий порт</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLineEdit" name="lineEditLocalPort">
+                  <property name="minimumSize">
+                   <size>
+                    <width>0</width>
+                    <height>35</height>
+                   </size>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <widget class="QPushButton" name="pushButtonBind">
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>35</height>
+                 </size>
+                </property>
+                <property name="font">
+                 <font>
+                  <pointsize>11</pointsize>
+                  <weight>50</weight>
+                  <bold>false</bold>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>Создать</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item>
+            <spacer name="verticalSpacer">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>40</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+          </layout>
          </widget>
         </item>
        </layout>
-      </item>
-     </layout>
+      </widget>
+      <widget class="QWidget" name="chatTab">
+       <attribute name="title">
+        <string>Чат</string>
+       </attribute>
+       <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <item>
+         <widget class="QWidget" name="widget" native="true">
+          <property name="maximumSize">
+           <size>
+            <width>350</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <layout class="QVBoxLayout" name="verticalLayout_5">
+           <item>
+            <widget class="QCheckBox" name="checkBoxSpam">
+             <property name="text">
+              <string>Спамим?</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayoutSpamText">
+             <item>
+              <widget class="QLabel" name="labelSpamText">
+               <property name="minimumSize">
+                <size>
+                 <width>125</width>
+                 <height>35</height>
+                </size>
+               </property>
+               <property name="text">
+                <string>Текст спама</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="lineEditSpamText">
+               <property name="minimumSize">
+                <size>
+                 <width>0</width>
+                 <height>35</height>
+                </size>
+               </property>
+               <property name="text">
+                <string>Hello World! Привет, мир!</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <widget class="Line" name="line4">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="pushButtonClear">
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>35</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>Очистить чат</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="verticalSpacer_3">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>40</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <layout class="QVBoxLayout" name="rightChatLayout">
+          <item>
+           <widget class="QScrollArea" name="chatArea">
+            <property name="widgetResizable">
+             <bool>true</bool>
+            </property>
+            <widget class="QWidget" name="scrollAreaWidgetContents">
+             <property name="geometry">
+              <rect>
+               <x>0</x>
+               <y>0</y>
+               <width>502</width>
+               <height>459</height>
+              </rect>
+             </property>
+             <layout class="QVBoxLayout" name="verticalChatLayout">
+              <property name="spacing">
+               <number>2</number>
+              </property>
+             </layout>
+            </widget>
+           </widget>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="messageLayout">
+            <property name="leftMargin">
+             <number>4</number>
+            </property>
+            <property name="topMargin">
+             <number>4</number>
+            </property>
+            <property name="rightMargin">
+             <number>4</number>
+            </property>
+            <property name="bottomMargin">
+             <number>4</number>
+            </property>
+            <item>
+             <widget class="QLineEdit" name="lineEditMessage">
+              <property name="minimumSize">
+               <size>
+                <width>160</width>
+                <height>35</height>
+               </size>
+              </property>
+              <property name="placeholderText">
+               <string>Напишите сообщение...</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="pushButtonOtherMessage">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>35</height>
+               </size>
+              </property>
+              <property name="font">
+               <font>
+                <pointsize>11</pointsize>
+                <weight>75</weight>
+                <bold>true</bold>
+               </font>
+              </property>
+              <property name="text">
+               <string/>
+              </property>
+              <property name="icon">
+               <iconset theme="mail-attachment"/>
+              </property>
+              <property name="iconSize">
+               <size>
+                <width>24</width>
+                <height>24</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="pushButtonSend">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>35</height>
+               </size>
+              </property>
+              <property name="font">
+               <font>
+                <pointsize>11</pointsize>
+                <weight>75</weight>
+                <bold>true</bold>
+               </font>
+              </property>
+              <property name="text">
+               <string>Отправить</string>
+              </property>
+              <property name="icon">
+               <iconset theme="mail-send"/>
+              </property>
+              <property name="iconSize">
+               <size>
+                <width>21</width>
+                <height>21</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </widget>
+     </widget>
     </item>
    </layout>
   </widget>
@@ -448,12 +554,31 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>730</width>
+     <width>902</width>
      <height>21</height>
     </rect>
    </property>
   </widget>
  </widget>
+ <tabstops>
+  <tabstop>radioButtonServer</tabstop>
+  <tabstop>radioButtonClient</tabstop>
+  <tabstop>pushButtonAddresses</tabstop>
+  <tabstop>lineEditAddress</tabstop>
+  <tabstop>lineEditPort</tabstop>
+  <tabstop>lineEditNickname</tabstop>
+  <tabstop>pushButtonConnect</tabstop>
+  <tabstop>lineEditLocalPort</tabstop>
+  <tabstop>pushButtonBind</tabstop>
+  <tabstop>tabWidget</tabstop>
+  <tabstop>checkBoxSpam</tabstop>
+  <tabstop>lineEditSpamText</tabstop>
+  <tabstop>pushButtonClear</tabstop>
+  <tabstop>chatArea</tabstop>
+  <tabstop>lineEditMessage</tabstop>
+  <tabstop>pushButtonOtherMessage</tabstop>
+  <tabstop>pushButtonSend</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

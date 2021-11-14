@@ -25,7 +25,6 @@ private slots:
     void on_pushButtonSend_clicked();
     void on_pushButtonBind_clicked();
     void on_pushButtonConnect_clicked();
-    void on_pushButtonConnectionList_clicked();
     void on_pushButtonClear_clicked();
     
     void on_radioButtonServer_clicked();
@@ -68,8 +67,6 @@ private:
     void clearServer();
 
     void sendMessage(QString message, QString author, QString clr = "000000");
-
-    void updateConnectionsIndicator();
 
     QString addressToString(QHostAddress address);
     QByteArray addressToBytes(QHostAddress address);
