@@ -19,7 +19,7 @@
      <widget class="QWidget" name="leftVerticalWidget" native="true">
       <property name="maximumSize">
        <size>
-        <width>300</width>
+        <width>350</width>
         <height>16777215</height>
        </size>
       </property>
@@ -301,6 +301,36 @@
         </widget>
        </item>
        <item>
+        <layout class="QHBoxLayout" name="horizontalLayoutSpamText">
+         <item>
+          <widget class="QLabel" name="labelSpamText">
+           <property name="minimumSize">
+            <size>
+             <width>125</width>
+             <height>35</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>Текст спама</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="lineEditSpamText">
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>35</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>Hello World! Привет, мир!</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
         <widget class="Line" name="line4">
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
@@ -339,15 +369,25 @@
     <item>
      <layout class="QVBoxLayout" name="rightVerticalLayout">
       <item>
-       <widget class="QTextEdit" name="chatTextEdit">
-        <property name="font">
-         <font>
-          <pointsize>10</pointsize>
-         </font>
-        </property>
-        <property name="readOnly">
+       <widget class="QScrollArea" name="chatArea">
+        <property name="widgetResizable">
          <bool>true</bool>
         </property>
+        <widget class="QWidget" name="scrollAreaWidgetContents">
+         <property name="geometry">
+          <rect>
+           <x>0</x>
+           <y>0</y>
+           <width>352</width>
+           <height>474</height>
+          </rect>
+         </property>
+         <layout class="QVBoxLayout" name="verticalChatLayout">
+          <property name="spacing">
+           <number>2</number>
+          </property>
+         </layout>
+        </widget>
        </widget>
       </item>
       <item>

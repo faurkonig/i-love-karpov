@@ -1,6 +1,7 @@
 #include <QtNetwork/QNetworkDatagram>
 #include <QtNetwork/QNetworkInterface>
 #include <QTime>
+#include <QScrollBar>
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
@@ -11,6 +12,10 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+
+    // Настройка области чата
+    ui->verticalChatLayout->setAlignment(Qt::AlignTop | Qt::AlignHCenter);
+    connect(ui->chatArea->verticalScrollBar(), &QScrollBar::rangeChanged, this, &MainWindow::scrollAreaRangeChanged);
 
     // Палитра для полей и кнопки
     normPal = ui->lineEditPort->palette();
@@ -387,7 +392,7 @@ void MainWindow::processServerData(QByteArray data, QTcpSocket *socket)
             int nickLength = 0;
             auto nick = bytesToNick(data.mid(1), nickLength);
 
-            logInfo(QString("<b>%1</b> отключился от беседы").arg(nick));
+            logWarn(QString("<b>%1</b> отключился от беседы").arg(nick));
 
             // Защита от склеивания нескольких пакетов
             if (data.size() > nickLength) {
@@ -588,49 +593,86 @@ QString MainWindow::getEnteredNickname()
 }
 
 
-/// Вывод "страшного" красного сообщения в "консоль"
-void MainWindow::logError(QString text)
+void MainWindow::scrollAreaRangeChanged()
 {
-    log("<span style=\"color: #F8173E\">" + text + "</span>");
+    auto scroll = static_cast<QScrollBar *>(sender());
+    if (scroll)
+        scroll->setSliderPosition(ui->chatArea->verticalScrollBar()->maximum());
 }
 
-/// Вывод предупрежения в "консоль"
-void MainWindow::logWarn(QString text)
-{
-    log("<span style=\"color: #FFC618\">" + text + "</span>");
-}
 
-/// Вывод "дополнительной" информации в "консоль"
-void MainWindow::logInfo(QString text)
+void MainWindow::logMessage(QString content, QString author, QString color)
 {
-    log("<span style=\"color: #4682B4\">" + text + "</span>");
-}
+    auto mainContainer = new QWidget;
+    auto mainMessageLayout = new QVBoxLayout;
+    mainContainer->setLayout(mainMessageLayout);
 
-/// Вывод сообщения в "консоль"
-void MainWindow::logMessage(QString content, QString author, QString clr)
-{
+    auto topInfoContainer = new QWidget;
+    auto topInfoLayout = new QHBoxLayout;
+    topInfoLayout->setContentsMargins(0, 0, 0, 0);
+    topInfoContainer->setLayout(topInfoLayout);
+    mainMessageLayout->addWidget(topInfoContainer);
+
+    auto authorLabel = new QLabel(QString("[<b style=\"color:#%1\">%2</b>]")
+                                  .arg(color, author));
+    authorLabel->setTextInteractionFlags(Qt::TextSelectableByMouse);
     QString ctStr = QTime::currentTime().toString("hh:mm:ss");
-    log(QString("<b>[<span style=\"color: #%1\">%2</span>]</b> >> %3  "
-                "<i style=\"color: #707070; font-size: 8pt;\">(%4)</i>")
-        .arg(clr, author, content, ctStr));
+    auto timeLabel = new QLabel(QString("<i style=\"color:#707070;font-size:8pt;\">%2</i>")
+                                .arg(ctStr));
+    timeLabel->setTextInteractionFlags(Qt::TextSelectableByMouse);
+    topInfoLayout->addWidget(authorLabel);
+    topInfoLayout->addItem(new QSpacerItem(0, 5, QSizePolicy::Expanding, QSizePolicy::Fixed));
+    topInfoLayout->addWidget(timeLabel);
+
+    auto textLabel = new QLabel(content);
+    textLabel->setTextInteractionFlags(Qt::TextSelectableByMouse);
+    mainMessageLayout->addWidget(textLabel);
+
+    addWidgetToChat(mainContainer);
 }
 
-/// Вывод текста в "консоль", сокращение для ui->chatTextEdit->append
-void MainWindow::log(QString text)
+void MainWindow::logError(QString content)
 {
-    if (ui != nullptr)
-        ui->chatTextEdit->append(text);
+    addWidgetToChat(genLabelWidget(content, 251, 95, 86, 30));
+}
+
+void MainWindow::logWarn(QString content)
+{
+    addWidgetToChat(genLabelWidget(content, 251, 223, 86, 30));
+}
+
+void MainWindow::logInfo(QString content)
+{
+    addWidgetToChat(genLabelWidget(content, 112, 163, 255, 30));
+}
+
+QWidget *MainWindow::genLabelWidget(QString content, int r, int g, int b, int a)
+{
+    QLabel *label = new QLabel(content);
+    label->setMinimumHeight(30);
+    label->setWordWrap(true);
+    label->setTextInteractionFlags(Qt::TextSelectableByMouse);
+    label->setAlignment(Qt::AlignCenter);
+    label->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
+    label->setStyleSheet(QString("background-color: rgba(%1, %2, %3, %4); border-radius: 15px;")
+                         .arg(r).arg(g).arg(b).arg(a));
+    return label;
+}
+
+void MainWindow::addWidgetToChat(QWidget *widget)
+{
+    chatWidgets.append(widget);
+    ui->verticalChatLayout->addWidget(widget);
 }
 
 
 /// Слот автоматической отправки сообщения
 void MainWindow::onSpam()
 {
+    QString str = ui->lineEditSpamText->text();
     if (ui->checkBoxSpam->isChecked() &&
-            ui->lineEditMessage->isEnabled())
+            ui->lineEditMessage->isEnabled() && !str.isEmpty())
     {
-        QString str = "Hello World! Привет, мир!";
-
         // Вывод сообщение о спаме
         sendMessage(str, "СПАМ", "F8173E");
     }
@@ -639,5 +681,10 @@ void MainWindow::onSpam()
 /// Слот очистки чата
 void MainWindow::on_pushButtonClear_clicked()
 {
-    ui->chatTextEdit->clear();
+    for (int i = 0; i < chatWidgets.length(); i++)
+    {
+        ui->verticalChatLayout->removeWidget(chatWidgets[i]);
+        chatWidgets[i]->deleteLater();
+    }
+    chatWidgets.clear();
 }

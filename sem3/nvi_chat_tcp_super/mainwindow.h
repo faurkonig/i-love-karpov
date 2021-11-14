@@ -20,6 +20,8 @@ public:
     ~MainWindow();
 
 private slots:
+    void scrollAreaRangeChanged();
+
     void on_pushButtonSend_clicked();
     void on_pushButtonBind_clicked();
     void on_pushButtonConnect_clicked();
@@ -57,13 +59,15 @@ private:
 
     QString userConnectionNick;
 
+    QVector<QWidget *> chatWidgets;
+
     void processServerData(QByteArray data, QTcpSocket *socket);
     void processClientData(QByteArray data, QTcpSocket *socket);
 
     void clearSockets();
     void clearServer();
 
-    void sendMessage(QString message, QString author, QString clr = "FFFFFF");
+    void sendMessage(QString message, QString author, QString clr = "000000");
 
     void updateConnectionsIndicator();
 
@@ -74,10 +78,11 @@ private:
 
     QString getEnteredNickname();
 
-    void logError(QString text);
-    void logWarn(QString text);
-    void logInfo(QString text);
-    void logMessage(QString content, QString author, QString clr = "FFFFFF");
-    void log(QString text);
+    void logMessage(QString content, QString author, QString color = "000000");
+    void logError(QString content);
+    void logWarn(QString content);
+    void logInfo(QString content);
+    QWidget *genLabelWidget(QString content, int r, int g, int b, int a);
+    void addWidgetToChat(QWidget *widget);
 };
 #endif // MAINWINDOW_H
