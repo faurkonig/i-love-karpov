@@ -694,27 +694,36 @@ void MainWindow::sendImage(QString filePath)
 {
     // Считываем картинку из файла
     QFile imageFile(filePath);
-    imageFile.open(QIODevice::ReadOnly);
-    auto data = imageFile.readAll();
-
-    QPixmap pixmap;
-    if (pixmap.loadFromData(data))
+    int fileSize = imageFile.size();
+    if (fileSize > 0 && fileSize <= 1024*1024*1024)
     {
-        data.prepend(char(0));
-        // Добавляем имя файла в массив байтов
-        data.prepend(QFileInfo(imageFile).fileName().toUtf8());
-        // Добавляем "команду". Если сервер - 4, если клиент - 2
-        if (isServerMode())
-            data.prepend(char(4));
-        else
-            data.prepend(char(2));
-        sendData(data);
+        imageFile.open(QIODevice::ReadOnly);
+        auto data = imageFile.readAll();
 
-        logImageMessage(pixmap, filePath, "Вы", "8314C2");
+        QPixmap pixmap;
+        if (pixmap.loadFromData(data))
+        {
+            data.prepend(char(0));
+            // Добавляем имя файла в массив байтов
+            data.prepend(QFileInfo(imageFile).fileName().toUtf8());
+            // Добавляем "команду". Если сервер - 4, если клиент - 2
+            if (isServerMode())
+                data.prepend(char(4));
+            else
+                data.prepend(char(2));
+            sendData(data);
+
+            logImageMessage(pixmap, filePath, "Вы", "8314C2");
+        }
+        else
+        {
+            logError("Не удалось загрузить изображение");
+        }
     }
     else
     {
-        logError("Не удалось загрузить изображение</b>");
+        logWarn("Файл слишком большой или слишком маленький\n"
+                "Он не должен быть пустым или размером больше 1ГБ");
     }
 }
 
