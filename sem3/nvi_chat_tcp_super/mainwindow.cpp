@@ -2,6 +2,11 @@
 #include <QtNetwork/QNetworkInterface>
 #include <QTime>
 #include <QScrollBar>
+#include <QFileDialog>
+#include <QDesktopServices>
+#include <QProcess>
+#include <QBuffer>
+#include <QStandardPaths>
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
@@ -28,7 +33,8 @@ MainWindow::MainWindow(QWidget *parent)
 
     ui->lineEditMessage->setEnabled(false);
     ui->pushButtonSend->setEnabled(false);
-    ui->checkBoxSpam->setEnabled(false);
+    ui->checkBoxSpam->setChecked(false);
+    ui->attachmentsPage->setEnabled(false);
 
     // Запуск таймера для спама в чат
     spamTimer.setInterval(500);
@@ -98,10 +104,25 @@ void MainWindow::on_radioButtonClient_clicked()
 /// Отправка введённого сообщения
 void MainWindow::on_pushButtonSend_clicked()
 {
-    sendMessage(ui->lineEditMessage->text(), "Вы", "8314C2");
+    sendMessage(ui->lineEditMessage->text());
 
     ui->lineEditMessage->clear();
     ui->lineEditMessage->setFocus();
+}
+
+/// Отправка выбранного изображения
+void MainWindow::on_pushButtonSendImage_clicked()
+{
+    QString filename = QFileDialog::getOpenFileName(this, "Открыть файл",
+                                                    "", tr("Images (*.png *.jpg *.gif)"));
+    if (!filename.isEmpty())
+    {
+        sendImage(filename);
+    }
+    else
+    {
+        logWarn("Файл не выбран");
+    }
 }
 
 /// Слот открытия порта сервера
@@ -110,115 +131,139 @@ void MainWindow::on_pushButtonBind_clicked()
     // Проверка введённного с формы порта
     if (server == nullptr)
     {
-        bool okPort2;
-        int localPort = ui->lineEditLocalPort->text().toInt(&okPort2);
+        startServer();
+    }
+    else
+    {
+        stopServer();
+    }
+}
 
-        if (okPort2 && localPort > 0 && localPort < 0x10000)
+void MainWindow::startServer()
+{
+    bool okPort2;
+    int localPort = ui->lineEditLocalPort->text().toInt(&okPort2);
+
+    if (okPort2 && localPort > 0 && localPort < 0x10000)
+    {
+        ui->lineEditLocalPort->setPalette(normPal);
+        ui->pushButtonBind->setPalette(normPal);
+
+        // Для начала на всякий слйчай отключаемся от сокета, сервера
+        clearSockets();
+        clearServer();
+
+        // Создаём TCP сервер и открываем порт
+        server = new QTcpServer(this);
+        connect(server, &QTcpServer::newConnection, this, &MainWindow::onTcpBinded);
+        if (server->listen(QHostAddress::Any, quint16(localPort)))
         {
-            ui->lineEditLocalPort->setPalette(normPal);
-            ui->pushButtonBind->setPalette(normPal);
+            logInfo("Прослушиваем порт <b>" + QString::number(localPort) + "</b>");
 
-            // Для начала на всякий слйчай отключаемся от сокета, сервера
-            clearSockets();
-            clearServer();
+            ui->pushButtonBind->setText("Закрыть");
+            ui->lineEditLocalPort->setEnabled(false);
 
-            // Создаём TCP сервер и открываем порт
-            server = new QTcpServer(this);
-            connect(server, &QTcpServer::newConnection, this, &MainWindow::onTcpBinded);
-            if (server->listen(QHostAddress::Any, quint16(localPort)))
-            {
-                logInfo("Прослушиваем порт <b>" + QString::number(localPort) + "</b>");
-
-                ui->pushButtonBind->setText("Закрыть");
-
-                ui->tabWidget->setCurrentIndex(1);
-            }
-            else
-            {
-                logError("Ошибка при открытии сервера");
-            }
+            ui->tabWidget->setCurrentIndex(1);
         }
         else
         {
-            // Если порт неправильный, сообщаем об ошибке
-            ui->pushButtonBind->setPalette(errPal);
-            ui->lineEditLocalPort->setPalette(errPal);
-            logError("Введён неправильный порт");
+            logError("Ошибка при открытии сервера");
         }
     }
     else
     {
-        logInfo("Сервер остановлен");
-        clearSockets();
-        clearServer();
+        // Если порт неправильный, сообщаем об ошибке
+        ui->pushButtonBind->setPalette(errPal);
+        ui->lineEditLocalPort->setPalette(errPal);
+        logError("Введён неправильный порт");
     }
+}
+
+void MainWindow::stopServer()
+{
+    logInfo("Сервер остановлен");
+    clearSockets();
+    clearServer();
 }
 
 /// Слот установки соединения
 void MainWindow::on_pushButtonConnect_clicked()
 {
-    if (sockets.length() == 0)
+    if (sockets.length() == 0 || isServerMode())
     {
-        // Проверка введённного с формы порта
-        bool okPort1;
-        int port = ui->lineEditPort->text().toInt(&okPort1);
+        startClient();
+    }
+    else
+    {
+        stopClient();
+    }
+}
 
-        if (okPort1 && port > 0 && port < 0x10000)
+void MainWindow::startClient()
+{
+    // Проверка введённного с формы порта
+    bool okPort1;
+    int port = ui->lineEditPort->text().toInt(&okPort1);
+
+    if (okPort1 && port > 0 && port < 0x10000)
+    {
+        QString nick = getEnteredNickname();
+        if (nick.size() > 0)
         {
-            QString nick = getEnteredNickname();
-            if (nick.size() > 0)
-            {
-                userConnectionNick = nick;
+            userConnectionNick = nick;
 
-                ui->lineEditPort->setPalette(normPal);
-                ui->pushButtonConnect->setPalette(normPal);
+            ui->lineEditPort->setPalette(normPal);
+            ui->pushButtonConnect->setPalette(normPal);
 
-                // Для начала на всякий слйчай отключаемся от сокета, сервера
-                clearSockets();
-                clearServer();
+            // Для начала на всякий слйчай отключаемся от сокета, сервера
+            clearSockets();
+            clearServer();
 
-                // Создаём принимающий TCP сокет
-                QTcpSocket *sendSocket = new QTcpSocket(this);
-                connect(sendSocket, &QTcpSocket::connected, this, &MainWindow::onTcpConnect);
-                connect(sendSocket, &QTcpSocket::disconnected, this, &MainWindow::onTcpSendDisconnect);
-                connect(sendSocket, &QTcpSocket::readyRead, this, &MainWindow::onTcpReadyRead);
-                // В версии Qt 5.15 добавили сигнал errorOccured, который является заменой ныне устаревшего сигнала error
+            // Создаём принимающий TCP сокет
+            QTcpSocket *sendSocket = new QTcpSocket(this);
+            connect(sendSocket, &QTcpSocket::connected, this, &MainWindow::onTcpConnect);
+            connect(sendSocket, &QTcpSocket::disconnected, this, &MainWindow::onTcpSendDisconnect);
+            connect(sendSocket, &QTcpSocket::readyRead, this, &MainWindow::onTcpReadyRead);
+            // В версии Qt 5.15 добавили сигнал errorOccured, который является заменой ныне устаревшего сигнала error
 #if QT_VERSION_MAJOR >= 5 && QT_VERSION_MINOR >= 15
-                connect(sendSocket, &QTcpSocket::errorOccurred, this, &MainWindow::onTcpSendError);
+            connect(sendSocket, &QTcpSocket::errorOccurred, this, &MainWindow::onTcpSendError);
 #else
-                connect(sendSocket, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error), this, &MainWindow::onTcpSendError);
+            connect(sendSocket, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error), this, &MainWindow::onTcpSendError);
 #endif
-                // Подключаемся к серверу
-                sendSocket->connectToHost(ui->lineEditAddress->text(), quint16(port));
+            // Подключаемся к серверу
+            sendSocket->connectToHost(ui->lineEditAddress->text(), quint16(port));
 
-                // Добавляем новый сокет
-                sockets.append(sendSocket);
+            // Добавляем новый сокет
+            sockets.append(sendSocket);
 
-                ui->pushButtonConnect->setText("Отключиться");
+            ui->pushButtonConnect->setText("Отключиться");
+            ui->lineEditPort->setEnabled(false);
+            ui->lineEditAddress->setEnabled(false);
+            ui->lineEditNickname->setEnabled(false);
 
-                ui->tabWidget->setCurrentIndex(1);
-            }
-            else
-            {
-                // Если порт неправильный, сообщаем об ошибке
-                ui->pushButtonConnect->setPalette(errPal);
-                ui->lineEditNickname->setPalette(errPal);
-                logError("Введён неправильный никнейм");
-            }
+            ui->tabWidget->setCurrentIndex(1);
         }
         else
         {
             // Если порт неправильный, сообщаем об ошибке
             ui->pushButtonConnect->setPalette(errPal);
-            ui->lineEditPort->setPalette(errPal);
-            logError("Введён неправильный порт");
+            ui->lineEditNickname->setPalette(errPal);
+            logError("Введён неправильный никнейм");
         }
     }
     else
     {
-        clearSockets();
-        clearServer();
+        // Если порт неправильный, сообщаем об ошибке
+        ui->pushButtonConnect->setPalette(errPal);
+        ui->lineEditPort->setPalette(errPal);
+        logError("Введён неправильный порт");
     }
+}
+
+void MainWindow::stopClient()
+{
+    clearSockets();
+    clearServer();
 }
 
 
@@ -239,8 +284,8 @@ void MainWindow::onTcpBinded()
 
         ui->lineEditMessage->setEnabled(true);
         ui->pushButtonSend->setEnabled(true);
-        ui->checkBoxSpam->setEnabled(true);
-        ui->checkBoxSpam->setChecked(false);
+        ui->spamPage->setEnabled(true);
+        ui->attachmentsPage->setEnabled(true);
     }
 }
 
@@ -250,15 +295,15 @@ void MainWindow::onTcpConnect()
     // Отправка ника серверу
     QByteArray ba = userConnectionNick.toUtf8();
     ba.prepend(char(1));
-    sockets[0]->write(ba);
-    sockets[0]->waitForBytesWritten();
+    sendData(ba);
 
     logInfo(QString("Соединение с <b>%1</b> установлено!")
             .arg(addressToString(sockets[0]->localAddress())));
 
     ui->lineEditMessage->setEnabled(true);
     ui->pushButtonSend->setEnabled(true);
-    ui->checkBoxSpam->setEnabled(true);
+    ui->spamPage->setEnabled(true);
+    ui->attachmentsPage->setEnabled(true);
 }
 
 /// Слот, соединённый с сигналом дисконнекта отправляющего сокета
@@ -268,50 +313,50 @@ void MainWindow::onTcpSendDisconnect()
 
     ui->lineEditMessage->setEnabled(false);
     ui->pushButtonSend->setEnabled(false);
-    ui->checkBoxSpam->setEnabled(false);
+    ui->spamPage->setEnabled(false);
     ui->checkBoxSpam->setChecked(false);
+    ui->attachmentsPage->setEnabled(false);
 
-    clearSockets();
+    if (!isClearing)
+    {
+        clearSockets();
+    }
 }
 
 /// Слот, соединённый с сигналом дисконнекта принимающего сокета
 void MainWindow::onTcpGetDisconnect()
 {
-    if (!isClearing)
+    auto getSocket = static_cast<QTcpSocket *>(sender());
+    if (getSocket != nullptr)
     {
-        auto getSocket = static_cast<QTcpSocket *>(sender());
-        if (getSocket != nullptr)
+        int socketId = sockets.indexOf(getSocket);
+        logWarn(QString("Собеседник <b>%1</b>(<b>%2</b>) отключился от вас")
+                .arg(addressToString(getSocket->localAddress()),
+                     userNicknames[socketId]));
+
+        int userId = sockets.indexOf(getSocket);
+        auto nick = userNicknames[userId];
+
+        auto disconnectData = nick.toUtf8();
+        disconnectData.prepend(char(3));
+        sendData(disconnectData, getSocket);
+
+        // Удаляем сокет из вектора сокетов
+        if (!isClearing)
         {
-            int socketId = sockets.indexOf(getSocket);
-            logWarn(QString("Собеседник <b>%1</b>(<b>%2</b>) отключился от вас")
-                    .arg(addressToString(getSocket->localAddress()),
-                         userNicknames[socketId]));
-
-            int userId = sockets.indexOf(getSocket);
-            auto nick = userNicknames[userId];
-
-            auto disconnectData = nick.toUtf8();
-            disconnectData.prepend(char(3));
-            int socketCount = sockets.length();
-            for (int i = 0; i < socketCount; i++)
-            {
-                if (sockets[i] != getSocket)
-                    sockets[i]->write(disconnectData);
-            }
-
-            // Удаляем сокет из вектора сокетов
             sockets.removeOne(getSocket);
             getSocket->deleteLater();
             userNicknames.removeAt(userId);
+        }
 
-            if (sockets.length() == 0)
-            {
-                // Если больше нет активных сокетов, отключаем возможность отправлять сообщения
-                ui->lineEditMessage->setEnabled(false);
-                ui->pushButtonSend->setEnabled(false);
-                ui->checkBoxSpam->setEnabled(false);
-                ui->checkBoxSpam->setChecked(false);
-            }
+        if (sockets.length() == 0)
+        {
+            // Если больше нет активных сокетов, отключаем возможность отправлять сообщения
+            ui->lineEditMessage->setEnabled(false);
+            ui->pushButtonSend->setEnabled(false);
+            ui->spamPage->setEnabled(false);
+            ui->checkBoxSpam->setChecked(false);
+            ui->attachmentsPage->setEnabled(false);
         }
     }
 }
@@ -339,86 +384,155 @@ void MainWindow::onTcpSendError(QAbstractSocket::SocketError err)
 
     ui->lineEditMessage->setEnabled(false);
     ui->pushButtonSend->setEnabled(false);
-    ui->checkBoxSpam->setEnabled(false);
+    ui->spamPage->setEnabled(false);
     ui->checkBoxSpam->setChecked(false);
+    ui->attachmentsPage->setEnabled(false);
 }
 
 /// Слот, соединённый с сигналом приёма данных принимающего сокета
 void MainWindow::onTcpReadyRead()
 {
-    auto socket = static_cast<QTcpSocket *>(sender());
-    if (socket != nullptr)
+    auto senderSocket = static_cast<QTcpSocket *>(sender());
+    if (senderSocket != nullptr)
     {
-        auto data = socket->readAll();
-        if (data.size() > 0)
+        processPendingData(senderSocket);
+    }
+}
+
+/// Метод для обработки данных из сокета
+void MainWindow::processPendingData(QTcpSocket *senderSocket)
+{
+    // Считывание ожидаемого количества байтов
+    int expectedSize = senderSocket->bytesAvailable();
+    if (expectedSize > 0)
+    {
+        // Если ещё не известен размер блока, то считываем его
+        if (currentBlockSize == -1 && expectedSize >= 4)
         {
-            // Чтение данных из сокета
-            if (server == nullptr)
+            currentBlockSize = bytesToInt(senderSocket->read(4));
+            expectedSize -= 4;
+        }
+
+        if (expectedSize >= currentBlockSize)
+        {
+            // Загружаем столько данных, сколько надо
+            QByteArray data = senderSocket->read(currentBlockSize);
+
+            // Обрабатываем загруженные данные
+            if (isServerMode())
             {
-                // Если клиент получает данные
-                processServerData(data, socket);
+                // Если сервер получает данные
+                processClientData(data, senderSocket);
             }
             else
             {
-                // Если сервер получает данные
-                processClientData(data, socket);
+                // Если клиент получает данные
+                processServerData(data, senderSocket);
             }
+
+            currentBlockSize = -1;
+            processPendingData(senderSocket);
         }
     }
 }
 
 /// Метод для обработки данных, приходящих от сервера
-void MainWindow::processServerData(QByteArray data, QTcpSocket *socket)
+void MainWindow::processServerData(QByteArray data, QTcpSocket *)
 {
-    if (data.size() > 0)
+    if (!data.isEmpty())
     {
-        switch (data[0]) {
+        char command = data[0];
+        data = data.mid(1);
+        switch (command) {
         case char(0): { // Если сообщение было отправлено именно сервером
             // Считывание текста
-            QString text = QString::fromUtf8(data.mid(1));
-
-            logMessage(text, "Сервер", "3BD737");
+            QString text = QString::fromUtf8(data);
+            logTextMessage(text, "Сервер", "3BD737");
             break;
         }
         case char(1): { // Если сообщение было отправлено кем-то из клиентов
             // Считывание никнейма
-            int nickLength = 0;
-            auto nick = bytesToNick(data.mid(1), nickLength);
+            int nickSepInd = data.indexOf(char(0));
+            auto nick = QString::fromUtf8(data.left(nickSepInd));
 
             // Считывание текста
-            QString text = QString::fromUtf8(data.mid(nickLength + 2));
+            data = data.mid(nickSepInd + 1);
+            QString text = QString::fromUtf8(data);
 
-            logMessage(text, nick, "C2145C");
+            logTextMessage(text, nick, "C2145C");
             break;
         }
-        case char(2): { // Кто-то из клиентов подключился
+        case char(2): { // Если кто-то из клиентов подключился
             // Считывание IP-адреса
-            auto addr = bytesToAddress(data.mid(1, 4));
+            auto addr = bytesToAddress(data.left(4));
 
             // Считывание никнейма
-            data = data.mid(5);
-            int nickLength = 0;
-            auto nick = bytesToNick(data, nickLength);
+            data = data.mid(4);
+            QString nick = QString::fromUtf8(data);
 
             logInfo(QString("<b>%1</b> подключился к беседе как <b>%2</b>")
                     .arg(addressToString(addr), nick));
+            break;
+        }
+        case char(3): { // Если кто-то из клиентов отключился
+            // Считывание никнейма
+            auto nick = QString::fromUtf8(data);
 
-            // Защита от склеивания нескольких пакетов
-            if (data.size() > nickLength) {
-                processServerData(data.mid(nickLength), socket);
+            logWarn(QString("<b>%1</b> отключился от беседы").arg(nick));
+            break;
+        }
+        case char(4): { // Если сервер сам прислал картинку
+            // Считывание имени картинки
+            int filenameSepIndex = data.indexOf(char(0));
+            QString imageName = data.left(filenameSepIndex);
+            data = data.mid(filenameSepIndex + 1);
+
+            // Получение пути к файлу
+            QString path = getFilenameForDownload(imageName);
+            QFile imageFile(path);
+
+            // Сохранение и вывод картинку
+            QPixmap pixmap;
+            if (pixmap.loadFromData(data) && imageFile.open(QIODevice::WriteOnly))
+            {
+                imageFile.write(data);
+
+                logImageMessage(pixmap, path, "Сервер", "3BD737");
+            }
+            else
+            {
+                logTextMessage("<b style=\"color:#FB5F56;font-size:12px\">Не удалось загрузить изображение</b>",
+                               "Сервер", "3BD737");
             }
             break;
         }
-        case char(3): { // Кто-то из клиентов отключился
+        case char(5): { // Если клиент отправил картинку
             // Считывание никнейма
-            int nickLength = 0;
-            auto nick = bytesToNick(data.mid(1), nickLength);
+            int nickSepInd = data.indexOf(char(0));
+            QString nick = QString::fromUtf8(data.left(nickSepInd));
+            data = data.mid(nickSepInd + 1);
 
-            logWarn(QString("<b>%1</b> отключился от беседы").arg(nick));
+            // Считывание имени картинки
+            int filenameSepIndex = data.indexOf(char(0));
+            QString imageName = data.left(filenameSepIndex);
+            data = data.mid(filenameSepIndex + 1);
 
-            // Защита от склеивания нескольких пакетов
-            if (data.size() > nickLength) {
-                processServerData(data.mid(nickLength), socket);
+            // Получение пути к файлу
+            QString path = getFilenameForDownload(imageName);
+            QFile imageFile(path);
+
+            // Сохранение и вывод картинку
+            QPixmap pixmap;
+            if (pixmap.loadFromData(data) && imageFile.open(QIODevice::WriteOnly))
+            {
+                imageFile.write(data);
+
+                logImageMessage(pixmap, path, nick, "C2145C");
+            }
+            else
+            {
+                logTextMessage("<b style=\"color:#FB5F56;font-size:12px\">Не удалось загрузить изображение</b>",
+                               nick, "C2145C");
             }
             break;
         }
@@ -429,52 +543,76 @@ void MainWindow::processServerData(QByteArray data, QTcpSocket *socket)
 /// Метод для обработки данных, приходящих от клиентов
 void MainWindow::processClientData(QByteArray data, QTcpSocket *socket)
 {
-    int socketId = sockets.indexOf(socket);
+    if (!data.isEmpty())
+    {
+        int socketId = sockets.indexOf(socket);
 
-    switch (data[0]) {
-    case char(0): {
-        // Считывание текста
-        auto textBa = data.mid(1);
-        auto text = QString::fromUtf8(textBa);
+        char command = data[0];
+        data = data.mid(1);
+        switch (command) {
+        case char(0): {
+            // Считывание текста
+            auto text = QString::fromUtf8(data);
 
-        logMessage(text, userNicknames[socketId], "C2145C");
+            logTextMessage(text, userNicknames[socketId], "C2145C");
 
-        // Создание массива байтов, отражающий данные с ником, текстом
-        auto senderData = textBa;
-        senderData.prepend(char(0));
-        senderData.prepend(userNicknames[socketId].toUtf8());
-        senderData.prepend(char(1));
-        // Отправка данных всем сокетам
-        int socketCount = sockets.length();
-        for (int i = 0; i < socketCount; i++)
-        {
-            if (sockets[i] != socket)
-                sockets[i]->write(senderData);
+            // Создание массива байтов, отражающий данные с ником, текстом
+            data.prepend(char(0));
+            data.prepend(userNicknames[socketId].toUtf8());
+            data.prepend(char(1));
+            // Отправка данных всем сокетам
+            sendData(data, socket);
+            break;
         }
-        break;
-    }
-    case char(1): {
-        // Считывание ника
-        auto nickBa = data.mid(1);
-        auto nick = QString::fromUtf8(nickBa);
+        case char(1): {
+            // Считывание ника
+            auto nick = QString::fromUtf8(data);
 
-        userNicknames.insert(socketId, nick);
+            userNicknames.insert(socketId, nick);
 
-        logInfo(QString("<b>%1</b> называет себя <b>%2</b>")
-                .arg(addressToString(socket->localAddress()), nick));
+            logInfo(QString("<b>%1</b> называет себя <b>%2</b>")
+                    .arg(addressToString(socket->localAddress()), nick));
 
-        // Создания массива байтов, отражающий данные с ником
-        auto connectData = addressToBytes(socket->localAddress());
-        connectData.prepend(char(2));
-        connectData.append(nickBa);
-        int socketCount = sockets.length();
-        for (int i = 0; i < socketCount; i++)
-        {
-            if (sockets[i] != socket)
-                sockets[i]->write(connectData);
+            // Создания массива байтов, отражающий данные с ником
+            data.prepend(addressToBytes(socket->localAddress()));
+            data.prepend(char(2));
+            sendData(data, socket);
+            break;
         }
-        break;
-    }
+        case char(2): {
+            // Чтение присланной картинки
+            QString nick = userNicknames[socketId];
+
+            // Считывание имени файла
+            int filenameSepIndex = data.indexOf(char(0));
+            QString imageName = data.left(filenameSepIndex);
+            data = data.mid(filenameSepIndex + 1);
+
+            // Получение пути к файлу
+            QString path = getFilenameForDownload(imageName);
+            QFile imageFile(path);
+
+            QPixmap pixmap;
+            if (pixmap.loadFromData(data) && imageFile.open(QIODevice::WriteOnly))
+            {
+                imageFile.write(data);
+
+                data.prepend(char(0));
+                data.prepend(imageName.toUtf8());
+                data.prepend(char(0));
+                data.prepend(nick.toUtf8());
+                data.prepend(char(5));
+                sendData(data, socket);
+
+                logImageMessage(pixmap, path, nick, "C2145C");
+            }
+            else
+            {
+                logTextMessage("<b style=\"color:#FB5F56;font-size:12px\">Не удалось загрузить изображение</b>",
+                               nick, "C2145C");
+            }
+        }
+        }
     }
 }
 
@@ -504,6 +642,9 @@ void MainWindow::clearSockets()
     isClearing = false;
 
     ui->pushButtonConnect->setText("Подключиться");
+    ui->lineEditPort->setEnabled(true);
+    ui->lineEditAddress->setEnabled(true);
+    ui->lineEditNickname->setEnabled(true);
 }
 
 /// Метод для остановки о удаления сервера
@@ -519,26 +660,61 @@ void MainWindow::clearServer()
         server = nullptr;
     }
     ui->pushButtonBind->setText("Создать");
+    ui->lineEditLocalPort->setEnabled(true);
+}
+
+void MainWindow::sendData(QByteArray data, QTcpSocket *exception)
+{
+    // Добавляем размер
+    data.prepend(intToBytes(data.size()));
+    for (auto socket : qAsConst(sockets))
+    {
+        if (socket != exception)
+            socket->write(data);
+    }
 }
 
 
 /// Метод для более удобной отправки сообщений
-void MainWindow::sendMessage(QString message, QString author, QString clr)
+void MainWindow::sendMessage(QString message)
 {
     if (message.length() > 0)
     {
         // Отправка данных
         QByteArray data = message.toUtf8();
         data.prepend(char(0));
+        sendData(data);
 
-        int length = sockets.length();
-        for (int i = 0; i < length; i++)
-        {
-            auto socket = sockets[i];
-            socket->write(data);
-        }
         // Вывод сообщения в "консоль"
-        logMessage(message, author, clr);
+        logTextMessage(message, "Вы", "8314C2");
+    }
+}
+
+void MainWindow::sendImage(QString filePath)
+{
+    // Считываем картинку из файла
+    QFile imageFile(filePath);
+    imageFile.open(QIODevice::ReadOnly);
+    auto data = imageFile.readAll();
+
+    QPixmap pixmap;
+    if (pixmap.loadFromData(data))
+    {
+        data.prepend(char(0));
+        // Добавляем имя файла в массив байтов
+        data.prepend(QFileInfo(imageFile).fileName().toUtf8());
+        // Добавляем "команду". Если сервер - 4, если клиент - 2
+        if (isServerMode())
+            data.prepend(char(4));
+        else
+            data.prepend(char(2));
+        sendData(data);
+
+        logImageMessage(pixmap, filePath, "Вы", "8314C2");
+    }
+    else
+    {
+        logError("Не удалось загрузить изображение</b>");
     }
 }
 
@@ -552,32 +728,32 @@ QString MainWindow::addressToString(QHostAddress address)
 /// Метод для превращения адреса в массив байтов
 QByteArray MainWindow::addressToBytes(QHostAddress address)
 {
-    char *addrAsBytes = new char[4];
-    quint32 addrIPv4 = address.toIPv4Address();
-    memcpy(addrAsBytes, &addrIPv4, 4);
-    QByteArray ba(addrAsBytes, 4);
-    delete [] addrAsBytes;
-    return ba;
+    return intToBytes(address.toIPv4Address());
 }
 
-/// Метод для превращщения массива байтов в адрес
+/// Метод для превращения массива байтов в адрес
 QHostAddress MainWindow::bytesToAddress(QByteArray ba)
 {
-    quint32 addrInt;
-    memcpy(&addrInt, ba.constData(), 4);
+    quint32 addrInt = bytesToInt(ba);
     return QHostAddress(addrInt);
 }
 
-/// Метод для парсинга байтов пакета для определения ника в нём
-QString MainWindow::bytesToNick(QByteArray ba, int &byteLength)
+/// Метод для превращения числа в массив байтов
+QByteArray MainWindow::intToBytes(quint32 value)
 {
-    int length = 0;
-    while (length < ba.size() && ba[length] != char(0) &&
-           ba[length] != char(1) && ba[length] != char(2))
-        length++;
+    char *intAsBytes = new char[4];
+    memcpy(intAsBytes, &value, 4);
+    QByteArray ba(intAsBytes, 4);
+    delete [] intAsBytes;
+    return ba;
+}
 
-    byteLength = length;
-    return QString::fromUtf8(ba.left(length));
+/// Метод для превращения массива байтов в число
+quint32 MainWindow::bytesToInt(QByteArray ba)
+{
+    quint32 result;
+    memcpy(&result, ba.constData(), 4);
+    return result;
 }
 
 
@@ -585,6 +761,11 @@ QString MainWindow::bytesToNick(QByteArray ba, int &byteLength)
 QString MainWindow::getEnteredNickname()
 {
     return ui->lineEditNickname->text().trimmed();
+}
+
+bool MainWindow::isServerMode()
+{
+    return server != nullptr;
 }
 
 
@@ -596,7 +777,7 @@ void MainWindow::scrollAreaRangeChanged()
 }
 
 
-void MainWindow::logMessage(QString content, QString author, QString color)
+QWidget *MainWindow::logTextMessage(QString content, QString author, QString color)
 {
     auto mainContainer = new QWidget;
     auto mainMessageLayout = new QVBoxLayout;
@@ -624,25 +805,84 @@ void MainWindow::logMessage(QString content, QString author, QString color)
     mainMessageLayout->addWidget(textLabel);
 
     addWidgetToChat(mainContainer);
+
+    return mainContainer;
 }
 
-void MainWindow::logError(QString content)
+QWidget *MainWindow::logImageMessage(QPixmap pixmap, QString filename, QString author, QString color)
 {
-    addWidgetToChat(genLabelWidget(content, 251, 95, 86, 30));
+    auto mainContainer = new QWidget;
+    auto mainMessageLayout = new QVBoxLayout;
+    mainContainer->setLayout(mainMessageLayout);
+
+    auto topInfoContainer = new QWidget;
+    auto topInfoLayout = new QHBoxLayout;
+    topInfoLayout->setContentsMargins(0, 0, 0, 0);
+    topInfoContainer->setLayout(topInfoLayout);
+    mainMessageLayout->addWidget(topInfoContainer);
+
+    auto authorLabel = new QLabel(QString("[<b style=\"color:#%1\">%2</b>]")
+                                  .arg(color, author));
+    authorLabel->setTextInteractionFlags(Qt::TextSelectableByMouse);
+    QString ctStr = QTime::currentTime().toString("hh:mm:ss");
+    auto timeLabel = new QLabel(QString("<i style=\"color:#707070;font-size:8pt;\">%1</i>")
+                                .arg(ctStr));
+    timeLabel->setTextInteractionFlags(Qt::TextSelectableByMouse);
+    topInfoLayout->addWidget(authorLabel);
+    topInfoLayout->addItem(new QSpacerItem(0, 5, QSizePolicy::Expanding, QSizePolicy::Fixed));
+    topInfoLayout->addWidget(timeLabel);
+
+    auto imageLabel = new QLabel;
+    pixmap = pixmap.scaledToWidth(290);
+    imageLabel->setPixmap(pixmap);
+    mainMessageLayout->addWidget(imageLabel);
+
+    if (!filename.isEmpty())
+    {
+        auto showFileButton = new QPushButton("Открыть фото");
+        showFileButton->setProperty("filename", filename);
+        connect(showFileButton, &QPushButton::clicked, this, &MainWindow::imageOpeningButtonClicked);
+        mainMessageLayout->addWidget(showFileButton);
+
+        auto pathLabel = new QLabel(QString("<i style=\"color:#707070;font-size:8pt;\">"
+                                            "Путь к файлу: <u>%1</u></i>").arg(filename));
+        pathLabel->setTextInteractionFlags(Qt::TextSelectableByMouse);
+        pathLabel->setWordWrap(true);
+        mainMessageLayout->addWidget(pathLabel);
+    }
+
+    addWidgetToChat(mainContainer);
+
+    return mainContainer;
+}
+
+QWidget *MainWindow::logError(QString content)
+{
+    auto widget = genLabelWidget(content, 251, 95, 86, 30);
+    addWidgetToChat(widget);
 
     ui->tabWidget->setCurrentIndex(1);
+
+    return widget;
 }
 
-void MainWindow::logWarn(QString content)
+QWidget *MainWindow::logWarn(QString content)
 {
-    addWidgetToChat(genLabelWidget(content, 251, 223, 86, 30));
+    auto widget = genLabelWidget(content, 251, 223, 86, 30);
+    addWidgetToChat(widget);
 
     ui->tabWidget->setCurrentIndex(1);
+
+    return widget;
 }
 
-void MainWindow::logInfo(QString content)
+QWidget *MainWindow::logInfo(QString content)
 {
-    addWidgetToChat(genLabelWidget(content, 112, 163, 255, 30));
+    auto widget = genLabelWidget(content, 112, 163, 255, 30);
+
+    addWidgetToChat(widget);
+
+    return widget;
 }
 
 QWidget *MainWindow::genLabelWidget(QString content, int r, int g, int b, int a)
@@ -653,7 +893,7 @@ QWidget *MainWindow::genLabelWidget(QString content, int r, int g, int b, int a)
     label->setTextInteractionFlags(Qt::TextSelectableByMouse);
     label->setAlignment(Qt::AlignCenter);
     label->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
-    label->setStyleSheet(QString("background-color: rgba(%1, %2, %3, %4); border-radius: 15px;")
+    label->setStyleSheet(QString("background-color:rgba(%1,%2,%3,%4);border-radius:15px;")
                          .arg(r).arg(g).arg(b).arg(a));
     return label;
 }
@@ -665,6 +905,70 @@ void MainWindow::addWidgetToChat(QWidget *widget)
 }
 
 
+QString MainWindow::getFilenameForDownload(QString name)
+{
+    auto downloads = QStandardPaths::writableLocation(QStandardPaths::DownloadLocation);
+    if (!downloads.isEmpty())
+    {
+        QDir dir(downloads);
+        dir.mkdir("SuperChat");
+        downloads += "/SuperChat/" + name;
+        return downloads;
+    }
+    else
+    {
+        return "";
+    }
+}
+
+void MainWindow::imageOpeningButtonClicked()
+{
+    auto buttonSender = static_cast<QPushButton *>(sender());
+    if (buttonSender != nullptr)
+    {
+        auto filename = buttonSender->property("filename").value<QString>();
+        if (filename != "")
+        {
+            openFile(filename);
+        }
+    }
+}
+
+void MainWindow::showInFolder(QString filename)
+{
+#if defined(Q_OS_WIN)
+    QStringList args;
+    if (!info.isDir())
+        args << "/select,";
+    args << QDir::toNativeSeparators(filename);
+    if (QProcess::startDetached("explorer", args))
+        return;
+#elif defined(Q_OS_MAC)
+    QStringList args;
+    args << "-e";
+    args << "tell application \"Finder\"";
+    args << "-e";
+    args << "activate";
+    args << "-e";
+    args << "select POSIX file \"" + filename + "\"";
+    args << "-e";
+    args << "end tell";
+    args << "-e";
+    args << "return";
+    if (!QProcess::execute("/usr/bin/osascript", args))
+        return;
+#else
+    QFileInfo info(filename);
+    QDesktopServices::openUrl(QUrl::fromLocalFile(info.isDir()? filename : info.path()));
+#endif
+}
+
+void MainWindow::openFile(QString filename)
+{
+    QDesktopServices::openUrl(filename);
+}
+
+
 /// Слот автоматической отправки сообщения
 void MainWindow::onSpam()
 {
@@ -673,7 +977,7 @@ void MainWindow::onSpam()
             ui->lineEditMessage->isEnabled() && !str.isEmpty())
     {
         // Вывод сообщение о спаме
-        sendMessage(str, "СПАМ", "F8173E");
+        sendMessage(str);
     }
 }
 
@@ -687,3 +991,10 @@ void MainWindow::on_pushButtonClear_clicked()
     }
     chatWidgets.clear();
 }
+
+/// Слот изменения интервала таймера
+void MainWindow::on_timerIntervalSpinBox_valueChanged(double arg1)
+{
+    spamTimer.setInterval(arg1 * 1000);
+}
+

@@ -23,6 +23,7 @@ private slots:
     void scrollAreaRangeChanged();
 
     void on_pushButtonSend_clicked();
+    void on_pushButtonSendImage_clicked();
     void on_pushButtonBind_clicked();
     void on_pushButtonConnect_clicked();
     void on_pushButtonClear_clicked();
@@ -41,6 +42,10 @@ private slots:
 
     void on_pushButtonAddresses_clicked();
 
+    void imageOpeningButtonClicked();
+
+    void on_timerIntervalSpinBox_valueChanged(double arg1);
+
 private:
     Ui::MainWindow *ui;
 
@@ -49,7 +54,7 @@ private:
 
     QTimer spamTimer;
 
-    QTcpServer *server = nullptr;
+    QTcpServer *server{nullptr};
     QVector<QTcpSocket *> sockets;
     QVector<QString> userNicknames;
 
@@ -57,29 +62,45 @@ private:
     bool isClearing{false};
 
     QString userConnectionNick;
+    int currentBlockSize{-1};
 
     QVector<QWidget *> chatWidgets;
 
+    void startServer();
+    void stopServer();
+    void startClient();
+    void stopClient();
+
+    void processPendingData(QTcpSocket *senderSocket);
     void processServerData(QByteArray data, QTcpSocket *socket);
     void processClientData(QByteArray data, QTcpSocket *socket);
 
     void clearSockets();
     void clearServer();
 
-    void sendMessage(QString message, QString author, QString clr = "000000");
+    void sendData(QByteArray data, QTcpSocket *exception = nullptr);
+    void sendMessage(QString message);
+    void sendImage(QString filenPath);
 
     QString addressToString(QHostAddress address);
     QByteArray addressToBytes(QHostAddress address);
     QHostAddress bytesToAddress(QByteArray ba);
-    QString bytesToNick(QByteArray ba, int &byteLength);
+    QByteArray intToBytes(quint32 value);
+    quint32 bytesToInt(QByteArray ba);
 
     QString getEnteredNickname();
+    bool isServerMode();
 
-    void logMessage(QString content, QString author, QString color = "000000");
-    void logError(QString content);
-    void logWarn(QString content);
-    void logInfo(QString content);
+    QWidget *logTextMessage(QString content, QString author, QString color = "000000");
+    QWidget *logImageMessage(QPixmap pixmap, QString filePath, QString author, QString color = "000000");
+    QWidget *logError(QString content);
+    QWidget *logWarn(QString content);
+    QWidget *logInfo(QString content);
     QWidget *genLabelWidget(QString content, int r, int g, int b, int a);
     void addWidgetToChat(QWidget *widget);
+
+    QString getFilenameForDownload(QString name);
+    void showInFolder(QString filePath);
+    void openFile(QString filePath);
 };
 #endif // MAINWINDOW_H
