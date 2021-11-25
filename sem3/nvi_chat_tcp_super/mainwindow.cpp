@@ -125,6 +125,22 @@ void MainWindow::on_pushButtonSendImage_clicked()
     }
 }
 
+/// Отправка выбранного файла
+void MainWindow::on_pushButtonSendFile_clicked()
+{
+    QString filename = QFileDialog::getOpenFileName(this, "Открыть файл",
+                                                    "");
+    if (!filename.isEmpty())
+    {
+        sendFile(filename);
+    }
+    else
+    {
+        logWarn("Файл не выбран");
+    }
+}
+
+
 /// Слот открытия порта сервера
 void MainWindow::on_pushButtonBind_clicked()
 {
@@ -139,6 +155,7 @@ void MainWindow::on_pushButtonBind_clicked()
     }
 }
 
+/// Метод для запуска сервера
 void MainWindow::startServer()
 {
     bool okPort2;
@@ -179,6 +196,7 @@ void MainWindow::startServer()
     }
 }
 
+/// Метод для остановки сервера
 void MainWindow::stopServer()
 {
     logInfo("Сервер остановлен");
@@ -199,6 +217,7 @@ void MainWindow::on_pushButtonConnect_clicked()
     }
 }
 
+/// Метод для запуска клиента
 void MainWindow::startClient()
 {
     // Проверка введённного с формы порта
@@ -260,6 +279,7 @@ void MainWindow::startClient()
     }
 }
 
+/// Метод для остановки клиента
 void MainWindow::stopClient()
 {
     clearSockets();
@@ -495,14 +515,14 @@ void MainWindow::processServerData(QByteArray data, QTcpSocket *)
             QPixmap pixmap;
             if (pixmap.loadFromData(data) && imageFile.open(QIODevice::WriteOnly))
             {
+                // Сохранение файла
                 imageFile.write(data);
 
                 logImageMessage(pixmap, path, "Сервер", "3BD737");
             }
             else
             {
-                logTextMessage("<b style=\"color:#FB5F56;font-size:12px\">Не удалось загрузить изображение</b>",
-                               "Сервер", "3BD737");
+                logError("Не удалось загрузить изображение");
             }
             break;
         }
@@ -525,14 +545,63 @@ void MainWindow::processServerData(QByteArray data, QTcpSocket *)
             QPixmap pixmap;
             if (pixmap.loadFromData(data) && imageFile.open(QIODevice::WriteOnly))
             {
+                // Сохранение файла
                 imageFile.write(data);
 
                 logImageMessage(pixmap, path, nick, "C2145C");
             }
             else
             {
-                logTextMessage("<b style=\"color:#FB5F56;font-size:12px\">Не удалось загрузить изображение</b>",
-                               nick, "C2145C");
+                logError("Не удалось загрузить изображение");
+            }
+            break;
+        }
+        case char(6): {
+            // Считывание имени файла
+            int filenameSepIndex = data.indexOf(char(0));
+            QString imageName = data.left(filenameSepIndex);
+            data = data.mid(filenameSepIndex + 1);
+
+            // Получение пути к файлу
+            QString path = getFilenameForDownload(imageName);
+            QFile file(path);
+            if (file.open(QIODevice::WriteOnly))
+            {
+                // Сохранение файла
+                file.write(data);
+
+                logFileMessage(path, "Сервер", "3BD737");
+            }
+            else
+            {
+                logError("Не удалось сохранить файл");
+            }
+            break;
+        }
+        case char(7): {
+            // Считывание никнейма
+            int nickSepInd = data.indexOf(char(0));
+            QString nick = QString::fromUtf8(data.left(nickSepInd));
+            data = data.mid(nickSepInd + 1);
+
+            // Считывание имени файла
+            int filenameSepIndex = data.indexOf(char(0));
+            QString imageName = data.left(filenameSepIndex);
+            data = data.mid(filenameSepIndex + 1);
+
+            // Получение пути к файлу
+            QString path = getFilenameForDownload(imageName);
+            QFile file(path);
+            if (file.open(QIODevice::WriteOnly))
+            {
+                // Сохранение файла
+                file.write(data);
+
+                logFileMessage(path, nick, "C2145C");
+            }
+            else
+            {
+                logError("Не удалось сохранить файл");
             }
             break;
         }
@@ -556,11 +625,10 @@ void MainWindow::processClientData(QByteArray data, QTcpSocket *socket)
 
             logTextMessage(text, userNicknames[socketId], "C2145C");
 
-            // Создание массива байтов, отражающий данные с ником, текстом
+            // Пересылка сообщения всем другим пользователям
             data.prepend(char(0));
             data.prepend(userNicknames[socketId].toUtf8());
             data.prepend(char(1));
-            // Отправка данных всем сокетам
             sendData(data, socket);
             break;
         }
@@ -596,7 +664,9 @@ void MainWindow::processClientData(QByteArray data, QTcpSocket *socket)
             if (pixmap.loadFromData(data) && imageFile.open(QIODevice::WriteOnly))
             {
                 imageFile.write(data);
+                imageFile.close();
 
+                // Пересылка сообщения всем другим пользователям
                 data.prepend(char(0));
                 data.prepend(imageName.toUtf8());
                 data.prepend(char(0));
@@ -608,9 +678,45 @@ void MainWindow::processClientData(QByteArray data, QTcpSocket *socket)
             }
             else
             {
-                logTextMessage("<b style=\"color:#FB5F56;font-size:12px\">Не удалось загрузить изображение</b>",
-                               nick, "C2145C");
+                logError("Не удалось загрузить изображение");
             }
+            break;
+        }
+        case char(3): {
+            // Чтение присланного файла
+            QString nick = userNicknames[socketId];
+
+            // Считывание имени файла
+            int filenameSepIndex = data.indexOf(char(0));
+            QString imageName = data.left(filenameSepIndex);
+            data = data.mid(filenameSepIndex + 1);
+
+            // Получение пути к файлу
+            QString path = getFilenameForDownload(imageName);
+            QFile file(path);
+
+            // Запись файла
+            if (file.open(QIODevice::WriteOnly))
+            {
+                file.write(data);
+                file.close();
+
+                // Пересылка сообщения всем другим пользователям
+                data.prepend(char(0));
+                data.prepend(imageName.toUtf8());
+                data.prepend(char(0));
+                data.prepend(nick.toUtf8());
+                data.prepend(char(7));
+                sendData(data, socket);
+
+                logFileMessage(path, nick, "C2145C");
+            }
+            else
+            {
+                logError("Не удалось сохранить файл");
+            }
+
+            break;
         }
         }
     }
@@ -663,6 +769,7 @@ void MainWindow::clearServer()
     ui->lineEditLocalPort->setEnabled(true);
 }
 
+/// Универсальный метод для отправки данных всем нужным сокетам
 void MainWindow::sendData(QByteArray data, QTcpSocket *exception)
 {
     // Добавляем размер
@@ -690,15 +797,17 @@ void MainWindow::sendMessage(QString message)
     }
 }
 
+/// Метод для более удобной отправки изображений
 void MainWindow::sendImage(QString filePath)
 {
     // Считываем картинку из файла
     QFile imageFile(filePath);
     int fileSize = imageFile.size();
-    if (fileSize > 0 && fileSize <= 1024*1024*1024)
+    if (fileSize > 0 && fileSize <= 256*1024*1024)
     {
         imageFile.open(QIODevice::ReadOnly);
         auto data = imageFile.readAll();
+        imageFile.close();
 
         QPixmap pixmap;
         if (pixmap.loadFromData(data))
@@ -718,6 +827,43 @@ void MainWindow::sendImage(QString filePath)
         else
         {
             logError("Не удалось загрузить изображение");
+        }
+    }
+    else
+    {
+        logWarn("Файл слишком большой или слишком маленький\n"
+                "Он не должен быть пустым или размером больше 256МБ");
+    }
+}
+
+/// Метод для более удобной отправки файлов
+void MainWindow::sendFile(QString filePath)
+{
+    // Считываем из файла
+    QFile file(filePath);
+    int fileSize = file.size();
+    if (fileSize > 0 && fileSize <= 1024*1024*1024)
+    {
+        if (file.open(QIODevice::ReadOnly))
+        {
+            auto data = file.readAll();
+            file.close();
+
+            data.prepend(char(0));
+            // Добавляем имя файла в массив байтов
+            data.prepend(QFileInfo(file).fileName().toUtf8());
+            // Добавляем "команду". Если сервер - 6, если клиент - 3
+            if (isServerMode())
+                data.prepend(char(6));
+            else
+                data.prepend(char(3));
+            sendData(data);
+
+            logFileMessage(filePath, "Вы", "8314C2");
+        }
+        else
+        {
+            logError("Не удалось открыть файл");
         }
     }
     else
@@ -772,20 +918,23 @@ QString MainWindow::getEnteredNickname()
     return ui->lineEditNickname->text().trimmed();
 }
 
+/// Проверка на то, какой режим активен, true - если сервер, false - если нет
 bool MainWindow::isServerMode()
 {
     return server != nullptr;
 }
 
 
+/// Слот для перемещения скролла в низ
 void MainWindow::scrollAreaRangeChanged()
 {
     auto scroll = static_cast<QScrollBar *>(sender());
-    if (scroll)
+    if (scroll != nullptr)
         scroll->setSliderPosition(ui->chatArea->verticalScrollBar()->maximum());
 }
 
 
+/// Метод для вывода текстового сообщения в чат
 QWidget *MainWindow::logTextMessage(QString content, QString author, QString color)
 {
     auto mainContainer = new QWidget;
@@ -818,7 +967,8 @@ QWidget *MainWindow::logTextMessage(QString content, QString author, QString col
     return mainContainer;
 }
 
-QWidget *MainWindow::logImageMessage(QPixmap pixmap, QString filename, QString author, QString color)
+/// Метод для вывода сообщения с картинкой в чат
+QWidget *MainWindow::logImageMessage(QPixmap pixmap, QString filePath, QString author, QString color)
 {
     auto mainContainer = new QWidget;
     auto mainMessageLayout = new QVBoxLayout;
@@ -846,15 +996,15 @@ QWidget *MainWindow::logImageMessage(QPixmap pixmap, QString filename, QString a
     imageLabel->setPixmap(pixmap);
     mainMessageLayout->addWidget(imageLabel);
 
-    if (!filename.isEmpty())
+    if (!filePath.isEmpty())
     {
         auto showFileButton = new QPushButton("Открыть фото");
-        showFileButton->setProperty("filename", filename);
-        connect(showFileButton, &QPushButton::clicked, this, &MainWindow::imageOpeningButtonClicked);
+        showFileButton->setProperty("filename", filePath);
+        connect(showFileButton, &QPushButton::clicked, this, &MainWindow::openFileButtonClicked);
         mainMessageLayout->addWidget(showFileButton);
 
         auto pathLabel = new QLabel(QString("<i style=\"color:#707070;font-size:8pt;\">"
-                                            "Путь к файлу: <u>%1</u></i>").arg(filename));
+                                            "Путь к файлу: <u>%1</u></i>").arg(filePath));
         pathLabel->setTextInteractionFlags(Qt::TextSelectableByMouse);
         pathLabel->setWordWrap(true);
         mainMessageLayout->addWidget(pathLabel);
@@ -865,6 +1015,47 @@ QWidget *MainWindow::logImageMessage(QPixmap pixmap, QString filename, QString a
     return mainContainer;
 }
 
+/// Метод для вывода сообщения с файлов в чат
+QWidget *MainWindow::logFileMessage(QString filePath, QString author, QString color)
+{
+    auto mainContainer = new QWidget;
+    auto mainMessageLayout = new QVBoxLayout;
+    mainContainer->setLayout(mainMessageLayout);
+
+    auto topInfoContainer = new QWidget;
+    auto topInfoLayout = new QHBoxLayout;
+    topInfoLayout->setContentsMargins(0, 0, 0, 0);
+    topInfoContainer->setLayout(topInfoLayout);
+    mainMessageLayout->addWidget(topInfoContainer);
+
+    auto authorLabel = new QLabel(QString("[<b style=\"color:#%1\">%2</b>]")
+                                  .arg(color, author));
+    authorLabel->setTextInteractionFlags(Qt::TextSelectableByMouse);
+    QString ctStr = QTime::currentTime().toString("hh:mm:ss");
+    auto timeLabel = new QLabel(QString("<i style=\"color:#707070;font-size:8pt;\">%2</i>")
+                                .arg(ctStr));
+    timeLabel->setTextInteractionFlags(Qt::TextSelectableByMouse);
+    topInfoLayout->addWidget(authorLabel);
+    topInfoLayout->addItem(new QSpacerItem(0, 5, QSizePolicy::Expanding, QSizePolicy::Fixed));
+    topInfoLayout->addWidget(timeLabel);
+
+    auto pathLabel = new QLabel(QString("<i style=\"color:#707070;font-size:10pt;\">"
+                                        "Был отправлен файл: <u>%1</u></i>").arg(filePath));
+    pathLabel->setTextInteractionFlags(Qt::TextSelectableByMouse);
+    pathLabel->setWordWrap(true);
+    mainMessageLayout->addWidget(pathLabel);
+
+    auto showFileButton = new QPushButton("Показать файл");
+    showFileButton->setProperty("filename", filePath);
+    connect(showFileButton, &QPushButton::clicked, this, &MainWindow::showFileButtonClicked);
+    mainMessageLayout->addWidget(showFileButton);
+
+    addWidgetToChat(mainContainer);
+
+    return mainContainer;
+}
+
+/// Метод для вывода ошибки в чат
 QWidget *MainWindow::logError(QString content)
 {
     auto widget = genLabelWidget(content, 251, 95, 86, 30);
@@ -875,6 +1066,7 @@ QWidget *MainWindow::logError(QString content)
     return widget;
 }
 
+/// Метод для вывода предупреждения в чат
 QWidget *MainWindow::logWarn(QString content)
 {
     auto widget = genLabelWidget(content, 251, 223, 86, 30);
@@ -885,6 +1077,7 @@ QWidget *MainWindow::logWarn(QString content)
     return widget;
 }
 
+/// Метод для вывода информации в чат
 QWidget *MainWindow::logInfo(QString content)
 {
     auto widget = genLabelWidget(content, 112, 163, 255, 30);
@@ -894,6 +1087,7 @@ QWidget *MainWindow::logInfo(QString content)
     return widget;
 }
 
+/// Метод для генерации виджетов информационных "круглых" сообщений
 QWidget *MainWindow::genLabelWidget(QString content, int r, int g, int b, int a)
 {
     QLabel *label = new QLabel(content);
@@ -907,6 +1101,7 @@ QWidget *MainWindow::genLabelWidget(QString content, int r, int g, int b, int a)
     return label;
 }
 
+/// Метод для добавления виджета в чат
 void MainWindow::addWidgetToChat(QWidget *widget)
 {
     chatWidgets.append(widget);
@@ -914,6 +1109,7 @@ void MainWindow::addWidgetToChat(QWidget *widget)
 }
 
 
+/// Метод для получения имени файла в папке для загрузки на компьютере
 QString MainWindow::getFilenameForDownload(QString name)
 {
     auto downloads = QStandardPaths::writableLocation(QStandardPaths::DownloadLocation);
@@ -930,7 +1126,9 @@ QString MainWindow::getFilenameForDownload(QString name)
     }
 }
 
-void MainWindow::imageOpeningButtonClicked()
+
+/// Слот для открытия файла (вызывается нажатием кнопки в чате)
+void MainWindow::openFileButtonClicked()
 {
     auto buttonSender = static_cast<QPushButton *>(sender());
     if (buttonSender != nullptr)
@@ -943,9 +1141,26 @@ void MainWindow::imageOpeningButtonClicked()
     }
 }
 
+/// Слот для отображения файла в проводнике (вызывается нажатием кнопки в чате)
+void MainWindow::showFileButtonClicked()
+{
+    auto buttonSender = static_cast<QPushButton *>(sender());
+    if (buttonSender != nullptr)
+    {
+        auto filename = buttonSender->property("filename").value<QString>();
+        if (filename != "")
+        {
+            showInFolder(filename);
+        }
+    }
+}
+
+
+/// Метод для показывания файла в проводнике
 void MainWindow::showInFolder(QString filename)
 {
 #if defined(Q_OS_WIN)
+    // Если программа собирается под Windowss
     QStringList args;
     if (!info.isDir())
         args << "/select,";
@@ -953,6 +1168,7 @@ void MainWindow::showInFolder(QString filename)
     if (QProcess::startDetached("explorer", args))
         return;
 #elif defined(Q_OS_MAC)
+    // Если программа собирается под MacOS
     QStringList args;
     args << "-e";
     args << "tell application \"Finder\"";
@@ -967,11 +1183,13 @@ void MainWindow::showInFolder(QString filename)
     if (!QProcess::execute("/usr/bin/osascript", args))
         return;
 #else
+    // Если программа выполняется под другой ОС (например Linux)
     QFileInfo info(filename);
     QDesktopServices::openUrl(QUrl::fromLocalFile(info.isDir()? filename : info.path()));
 #endif
 }
 
+/// Метод для открытия файла
 void MainWindow::openFile(QString filename)
 {
     QDesktopServices::openUrl(filename);
@@ -1006,4 +1224,3 @@ void MainWindow::on_timerIntervalSpinBox_valueChanged(double arg1)
 {
     spamTimer.setInterval(arg1 * 1000);
 }
-

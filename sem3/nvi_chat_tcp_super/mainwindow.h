@@ -24,6 +24,7 @@ private slots:
 
     void on_pushButtonSend_clicked();
     void on_pushButtonSendImage_clicked();
+    void on_pushButtonSendFile_clicked();
     void on_pushButtonBind_clicked();
     void on_pushButtonConnect_clicked();
     void on_pushButtonClear_clicked();
@@ -38,13 +39,14 @@ private slots:
     void onTcpSendError(QAbstractSocket::SocketError err);
     void onTcpReadyRead();
 
+    void on_timerIntervalSpinBox_valueChanged(double arg1);
     void onSpam();
 
     void on_pushButtonAddresses_clicked();
 
-    void imageOpeningButtonClicked();
+    void openFileButtonClicked();
+    void showFileButtonClicked();
 
-    void on_timerIntervalSpinBox_valueChanged(double arg1);
 
 private:
     Ui::MainWindow *ui;
@@ -80,7 +82,8 @@ private:
 
     void sendData(QByteArray data, QTcpSocket *exception = nullptr);
     void sendMessage(QString message);
-    void sendImage(QString filenPath);
+    void sendImage(QString filePath);
+    void sendFile(QString filePath);
 
     QString addressToString(QHostAddress address);
     QByteArray addressToBytes(QHostAddress address);
@@ -93,6 +96,7 @@ private:
 
     QWidget *logTextMessage(QString content, QString author, QString color = "000000");
     QWidget *logImageMessage(QPixmap pixmap, QString filePath, QString author, QString color = "000000");
+    QWidget *logFileMessage(QString filePath, QString author, QString color = "000000");
     QWidget *logError(QString content);
     QWidget *logWarn(QString content);
     QWidget *logInfo(QString content);
