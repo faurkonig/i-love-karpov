@@ -151,6 +151,10 @@ void MainWindow::onSocketDisconneted()
         // Удаляем единственный сокет подключения
         if (!socketClearing)
             clearSockets();
+
+        ui->lineEditMessage->setEnabled(false);
+        ui->pushButtonSend->setEnabled(false);
+        ui->checkBoxSpam->setEnabled(false);
     }
     else
     {
@@ -170,14 +174,14 @@ void MainWindow::onSocketDisconneted()
 
         // Удаляем сокет, от которого отключились
         sockets.removeOne(senderSocket);
-    }
 
-    if (sockets.length() == 0)
-    {
-        // Если уже все клиенты отключились
-        ui->lineEditMessage->setEnabled(false);
-        ui->pushButtonSend->setEnabled(false);
-        ui->checkBoxSpam->setEnabled(false);
+        if (sockets.length() == 0)
+        {
+            // Если уже все клиенты отключились
+            ui->lineEditMessage->setEnabled(false);
+            ui->pushButtonSend->setEnabled(false);
+            ui->checkBoxSpam->setEnabled(false);
+        }
     }
 }
 

@@ -2,6 +2,7 @@
 #include "ui_mainwindow.h"
 #include <QtNetwork/QNetworkDatagram>
 #include <QtNetwork/QNetworkInterface>
+#include <QValidator>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -44,40 +45,58 @@ void MainWindow::on_pushButton_Create_clicked()
     port = ui->lineEdit_Port->text().toInt();
     our_port = ui->lineEdit_Our_Port->text().toInt();
 
-    if (our_port != 0)
+    if (our_port > 0 && our_port < 0x10000 && port > 0 && port < 0x10000)
     {
-        if (udpsocket != nullptr)
+        QString textAddress = ui->lineEdit_Adress->text();
+        // Регулярное выражение, проверяющее строку на соответствие формату IPv4
+        QRegExp ipv4RegEx("^((25[0-5]|(2[0-4]|1\\d|[1-9]|)\\d)(\\.(?!$)|$)){4}$");
+        if (ipv4RegEx.indexIn(textAddress) != -1) // Если нашлось совпадение
         {
-            udpsocket->close();
-            udpsocket->deleteLater();
-            udpsocket = nullptr;
+            if (udpsocket != nullptr)
+            {
+                udpsocket->close();
+                udpsocket->deleteLater();
+                udpsocket = nullptr;
+            }
+
+            udpsocket = new QUdpSocket(this);
+            if (udpsocket->bind(QHostAddress::Any, quint16(our_port)))
+            {
+                connect(udpsocket, &QUdpSocket::readyRead, this, &MainWindow::read_data);
+                if (address != nullptr)
+                    delete address;
+                address = new QHostAddress();
+                address->setAddress(textAddress);
+
+                QMessageBox::warning(this, "Сообщение", "Сокет создан и принимает сообщения на порт "+ui->lineEdit_Our_Port->text());
+
+                ui->lineEdit_Mes->setEnabled(true);
+                ui->pushButton_SendMes->setEnabled(true);
+            }
+            else
+            {
+                QMessageBox::warning(this, "Ошибка", "Не удалось открыть порт");
+            }
         }
-
-        udpsocket = new QUdpSocket(this);
-        udpsocket->bind(QHostAddress::Any,quint16(our_port));
-        connect(udpsocket, &QUdpSocket::readyRead, this, &MainWindow::read_data);
-        if (address != nullptr) address = nullptr;
-        address = new QHostAddress();
-        address->setAddress(ui->lineEdit_Adress->text());
-
-        QMessageBox::warning(this, "Сообщение", "Сокет создан и принимает сообщения на порт "+ui->lineEdit_Our_Port->text());
-
-        ui->lineEdit_Mes->setEnabled(true);
-        ui->pushButton_SendMes->setEnabled(true);
+        else
+        {
+            QMessageBox::warning(this, "Ошибка", "Введён неверный адрес");
+        }
     }
     else
     {
-        QMessageBox::warning(this, "Сообщение", "Введён неверный порт");
+        QMessageBox::warning(this, "Ошибка", "Введён неверный порт");
     }
 }
 
 void MainWindow::on_pushButton_SendMes_clicked()
 {
-    QByteArray ba = ui->lineEdit_Mes->text().toLocal8Bit(); // Переводим строку в массив байт
+    QString str = ui->lineEdit_Mes->text();
+    QByteArray ba = str.toLocal8Bit(); // Переводим строку в массив байт
     if (ba.size() > 0)
     {
         udpsocket->writeDatagram(ba, *address, quint16(port)); // Отправляем данные
-        ui->textEdit_Output->append(ui->lineEdit_Mes->text());
+        ui->textEdit_Output->append(str);
 
         // Очищаем поле ввода и ставим фокус на него
         ui->lineEdit_Mes->clear();
@@ -89,7 +108,7 @@ void MainWindow::spam_timeout()
 {
     if (ui->checkBoxSpam->isChecked() && ui->lineEdit_Mes->isEnabled())
     {
-        QString str = QString("Привет!");
+        QString str = "Привет!";
         QByteArray ba = str.toLocal8Bit(); // Переводим строку в массив байт
         udpsocket->writeDatagram(ba, *address, quint16(port)); // Отправляем данные
         ui->textEdit_Output->append(str);
@@ -97,16 +116,16 @@ void MainWindow::spam_timeout()
 }
 
 void MainWindow::on_pushButton_Address_clicked()
-{
-
-        auto adrs = QNetworkInterface::allAddresses(); // Получаем все адреса
-        QRegExp ipv4AddressRegex("^((25[0-5]|(2[0-4]|1\\d|[1-9]|)\\d)(\\.(?!$)|$)){4}$"); // Регулярное выражение IPv4 адреса
-        ui->textEdit_Address->append("IP адреса компьютера:");
-        for (int i = 0; i < adrs.count(); i++)
+{    
+    QList<QHostAddress> adrs = QNetworkInterface::allAddresses(); // Получаем все адреса
+    ui->textEdit_Address->clear();
+    ui->textEdit_Address->append("IP адреса компьютера:");
+    for (int i = 0; i < adrs.count(); i++)
+    {
+        if (adrs[i].protocol() == QAbstractSocket::IPv4Protocol)
         {
-            // Отсеиваем только адреса типа IPv4
-            auto str = adrs[i].toString().split(':').last();
-            if (ipv4AddressRegex.indexIn(str) != -1)
-                ui->textEdit_Address->append(str);
+            QString str = adrs[i].toString().split(':').last();
+            ui->textEdit_Address->append(str);
         }
+    }
 }
