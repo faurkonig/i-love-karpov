@@ -378,7 +378,7 @@
            <item>
             <widget class="QToolBox" name="toolBox">
              <property name="currentIndex">
-              <number>1</number>
+              <number>0</number>
              </property>
              <widget class="QWidget" name="spamPage">
               <property name="geometry">
@@ -508,7 +508,7 @@
                 <x>0</x>
                 <y>0</y>
                 <width>332</width>
-                <height>135</height>
+                <height>140</height>
                </rect>
               </property>
               <attribute name="label">

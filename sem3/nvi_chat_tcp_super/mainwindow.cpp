@@ -73,7 +73,7 @@ void MainWindow::on_pushButtonAddresses_clicked()
             if (adrs[i].protocol() == QAbstractSocket::IPv4Protocol)
             {
                 str += QString("<br>%1) <b>%2</b>").arg(id)
-                        .arg(addressToString(adrs[id]));
+                        .arg(addressToString(adrs[i]));
                 id++;
             }
         }
@@ -960,6 +960,8 @@ QWidget *MainWindow::logTextMessage(QString content, QString author, QString col
 
     auto textLabel = new QLabel(content);
     textLabel->setTextInteractionFlags(Qt::TextSelectableByMouse);
+    textLabel->setWordWrap(true);
+    textLabel->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Maximum);
     mainMessageLayout->addWidget(textLabel);
 
     addWidgetToChat(mainContainer);
@@ -1162,7 +1164,7 @@ void MainWindow::showInFolder(QString filename)
 #if defined(Q_OS_WIN)
     // Если программа собирается под Windowss
     QStringList args;
-    if (!info.isDir())
+    if (!QFileInfo(filename).isDir())
         args << "/select,";
     args << QDir::toNativeSeparators(filename);
     if (QProcess::startDetached("explorer", args))
