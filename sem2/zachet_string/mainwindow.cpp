@@ -2,7 +2,7 @@
 #include "ui_mainwindow.h"
 #include "charcounter.h"
 
-// Конструктор
+/// Конструктор
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
@@ -10,13 +10,13 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
 }
 
-// Деструктор
+/// Деструктор
 MainWindow::~MainWindow()
 {
     delete ui;
 }
 
-// Получение и вывод результата
+/// Получение и вывод результата
 void MainWindow::on_pushButtonResult_clicked()
 {
     // Добавление ввода в класс + проверка ввода

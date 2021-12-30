@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>TCP Chat</string>
+   <string>Super Chat</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QHBoxLayout" name="horizontalLayout">
@@ -507,8 +507,8 @@
                <rect>
                 <x>0</x>
                 <y>0</y>
-                <width>332</width>
-                <height>140</height>
+                <width>150</width>
+                <height>100</height>
                </rect>
               </property>
               <attribute name="label">

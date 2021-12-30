@@ -1,12 +1,12 @@
 #include "charcounter.h"
 
-// Конструктор
+/// Конструктор
 CharCounter::CharCounter()
 {
 
 }
 
-// Установка значения строки. Возвращает false, если строка пустая
+/// Установка значения строки. Возвращает false, если строка пустая
 bool CharCounter::setString(QString value)
 {
     if (value.isEmpty())
@@ -17,7 +17,7 @@ bool CharCounter::setString(QString value)
     return true;
 }
 
-// Установка значения символа. Возвращает false, если символ длины больше или меньше 1
+/// Установка значения символа. Возвращает false, если символ длины больше или меньше 1
 bool CharCounter::setCharacter(QString value)
 {
     if (value.isEmpty() || value.length() > 1)
@@ -28,7 +28,7 @@ bool CharCounter::setCharacter(QString value)
     return true;
 }
 
-// Вывод результата - количества появления символа в строке
+/// Вывод результата - количества появления символа в строке
 int CharCounter::getResult()
 {
     return str.count(character);

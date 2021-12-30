@@ -60,7 +60,6 @@ private:
     QVector<QTcpSocket *> sockets;
     QVector<QString> userNicknames;
 
-    bool isError{false};
     bool isClearing{false};
 
     QString userConnectionNick;
@@ -81,17 +80,11 @@ private:
     void clearServer();
 
     void sendData(QByteArray data, QTcpSocket *exception = nullptr);
+    void sendDataTo(QByteArray data, QTcpSocket *target);
     void sendMessage(QString message);
     void sendImage(QString filePath);
     void sendFile(QString filePath);
 
-    QString addressToString(QHostAddress address);
-    QByteArray addressToBytes(QHostAddress address);
-    QHostAddress bytesToAddress(QByteArray ba);
-    QByteArray intToBytes(quint32 value);
-    quint32 bytesToInt(QByteArray ba);
-
-    QString getEnteredNickname();
     bool isServerMode();
 
     QWidget *logTextMessage(QString content, QString author, QString color = "000000");
@@ -102,6 +95,7 @@ private:
     QWidget *logInfo(QString content);
     QWidget *genLabelWidget(QString content, int r, int g, int b, int a);
     void addWidgetToChat(QWidget *widget);
+    void removeWidgetFromChat(QWidget *widget);
 
     QString getFilenameForDownload(QString name);
     void showInFolder(QString filePath);

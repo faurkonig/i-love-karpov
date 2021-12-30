@@ -10,6 +10,7 @@
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "byteconverter.h"
 
 /// Конструктор
 MainWindow::MainWindow(QWidget *parent)
@@ -73,7 +74,7 @@ void MainWindow::on_pushButtonAddresses_clicked()
             if (adrs[i].protocol() == QAbstractSocket::IPv4Protocol)
             {
                 str += QString("<br>%1) <b>%2</b>").arg(id)
-                        .arg(addressToString(adrs[i]));
+                        .arg(ByteConverter::addressToString(adrs[i]));
                 id++;
             }
         }
@@ -226,7 +227,7 @@ void MainWindow::startClient()
 
     if (okPort1 && port > 0 && port < 0x10000)
     {
-        QString nick = getEnteredNickname();
+        QString nick = ui->lineEditNickname->text().trimmed();
         if (nick.size() > 0)
         {
             userConnectionNick = nick;
@@ -297,7 +298,7 @@ void MainWindow::onTcpBinded()
         connect(getSocket, &QTcpSocket::readyRead, this, &MainWindow::onTcpReadyRead);
 
         logInfo(QString("К серверу подключился <b>%1</b>!")
-                .arg(addressToString(getSocket->localAddress())));
+                .arg(ByteConverter::addressToString(getSocket->localAddress())));
 
         // Добавляем новый сокет
         sockets.append(getSocket);
@@ -318,7 +319,7 @@ void MainWindow::onTcpConnect()
     sendData(ba);
 
     logInfo(QString("Соединение с <b>%1</b> установлено!")
-            .arg(addressToString(sockets[0]->localAddress())));
+            .arg(ByteConverter::addressToString(sockets[0]->localAddress())));
 
     ui->lineEditMessage->setEnabled(true);
     ui->pushButtonSend->setEnabled(true);
@@ -351,7 +352,7 @@ void MainWindow::onTcpGetDisconnect()
     {
         int socketId = sockets.indexOf(getSocket);
         logWarn(QString("Собеседник <b>%1</b>(<b>%2</b>) отключился от вас")
-                .arg(addressToString(getSocket->localAddress()),
+                .arg(ByteConverter::addressToString(getSocket->localAddress()),
                      userNicknames[socketId]));
 
         int userId = sockets.indexOf(getSocket);
@@ -429,7 +430,7 @@ void MainWindow::processPendingData(QTcpSocket *senderSocket)
         // Если ещё не известен размер блока, то считываем его
         if (currentBlockSize == -1 && expectedSize >= 4)
         {
-            currentBlockSize = bytesToInt(senderSocket->read(4));
+            currentBlockSize = ByteConverter::bytesToInt(senderSocket->read(4));
             expectedSize -= 4;
         }
 
@@ -464,13 +465,16 @@ void MainWindow::processServerData(QByteArray data, QTcpSocket *)
         char command = data[0];
         data = data.mid(1);
         switch (command) {
-        case char(0): { // Если сообщение было отправлено именно сервером
+        // Сообщение от сервера
+        case char(0): {
             // Считывание текста
             QString text = QString::fromUtf8(data);
             logTextMessage(text, "Сервер", "3BD737");
             break;
         }
-        case char(1): { // Если сообщение было отправлено кем-то из клиентов
+
+            // Сообщение от клиента
+        case char(1): {
             // Считывание никнейма
             int nickSepInd = data.indexOf(char(0));
             auto nick = QString::fromUtf8(data.left(nickSepInd));
@@ -482,26 +486,32 @@ void MainWindow::processServerData(QByteArray data, QTcpSocket *)
             logTextMessage(text, nick, "C2145C");
             break;
         }
-        case char(2): { // Если кто-то из клиентов подключился
+
+            // Уведомление об подключении клиента
+        case char(2): {
             // Считывание IP-адреса
-            auto addr = bytesToAddress(data.left(4));
+            auto addr = ByteConverter::bytesToAddress(data.left(4));
 
             // Считывание никнейма
             data = data.mid(4);
             QString nick = QString::fromUtf8(data);
 
             logInfo(QString("<b>%1</b> подключился к беседе как <b>%2</b>")
-                    .arg(addressToString(addr), nick));
+                    .arg(ByteConverter::addressToString(addr), nick));
             break;
         }
-        case char(3): { // Если кто-то из клиентов отключился
+
+            // Уведомление об отключении клиента
+        case char(3): {
             // Считывание никнейма
             auto nick = QString::fromUtf8(data);
 
             logWarn(QString("<b>%1</b> отключился от беседы").arg(nick));
             break;
         }
-        case char(4): { // Если сервер сам прислал картинку
+
+            // Картинка от сервера
+        case char(4): {
             // Считывание имени картинки
             int filenameSepIndex = data.indexOf(char(0));
             QString imageName = data.left(filenameSepIndex);
@@ -526,7 +536,9 @@ void MainWindow::processServerData(QByteArray data, QTcpSocket *)
             }
             break;
         }
-        case char(5): { // Если клиент отправил картинку
+
+            // Картинка от клиента
+        case char(5): {
             // Считывание никнейма
             int nickSepInd = data.indexOf(char(0));
             QString nick = QString::fromUtf8(data.left(nickSepInd));
@@ -556,14 +568,16 @@ void MainWindow::processServerData(QByteArray data, QTcpSocket *)
             }
             break;
         }
+
+            // Файл от сервера
         case char(6): {
             // Считывание имени файла
             int filenameSepIndex = data.indexOf(char(0));
-            QString imageName = data.left(filenameSepIndex);
+            QString fileName = data.left(filenameSepIndex);
             data = data.mid(filenameSepIndex + 1);
 
             // Получение пути к файлу
-            QString path = getFilenameForDownload(imageName);
+            QString path = getFilenameForDownload(fileName);
             QFile file(path);
             if (file.open(QIODevice::WriteOnly))
             {
@@ -578,6 +592,8 @@ void MainWindow::processServerData(QByteArray data, QTcpSocket *)
             }
             break;
         }
+
+            // Файл от клиента
         case char(7): {
             // Считывание никнейма
             int nickSepInd = data.indexOf(char(0));
@@ -586,11 +602,11 @@ void MainWindow::processServerData(QByteArray data, QTcpSocket *)
 
             // Считывание имени файла
             int filenameSepIndex = data.indexOf(char(0));
-            QString imageName = data.left(filenameSepIndex);
+            QString fileName = data.left(filenameSepIndex);
             data = data.mid(filenameSepIndex + 1);
 
             // Получение пути к файлу
-            QString path = getFilenameForDownload(imageName);
+            QString path = getFilenameForDownload(fileName);
             QFile file(path);
             if (file.open(QIODevice::WriteOnly))
             {
@@ -619,6 +635,7 @@ void MainWindow::processClientData(QByteArray data, QTcpSocket *socket)
         char command = data[0];
         data = data.mid(1);
         switch (command) {
+        // Сообщение
         case char(0): {
             // Считывание текста
             auto text = QString::fromUtf8(data);
@@ -632,6 +649,8 @@ void MainWindow::processClientData(QByteArray data, QTcpSocket *socket)
             sendData(data, socket);
             break;
         }
+
+            // Блок с ником пользователя
         case char(1): {
             // Считывание ника
             auto nick = QString::fromUtf8(data);
@@ -639,21 +658,23 @@ void MainWindow::processClientData(QByteArray data, QTcpSocket *socket)
             userNicknames.insert(socketId, nick);
 
             logInfo(QString("<b>%1</b> называет себя <b>%2</b>")
-                    .arg(addressToString(socket->localAddress()), nick));
+                    .arg(ByteConverter::addressToString(socket->localAddress()), nick));
 
             // Создания массива байтов, отражающий данные с ником
-            data.prepend(addressToBytes(socket->localAddress()));
+            data.prepend(ByteConverter::addressToBytes(socket->localAddress()));
             data.prepend(char(2));
             sendData(data, socket);
             break;
         }
+
+            // Картинка
         case char(2): {
-            // Чтение присланной картинки
+            // Считывание ника
             QString nick = userNicknames[socketId];
 
             // Считывание имени файла
             int filenameSepIndex = data.indexOf(char(0));
-            QString imageName = data.left(filenameSepIndex);
+            QString imageName = QString::fromUtf8(data.left(filenameSepIndex));
             data = data.mid(filenameSepIndex + 1);
 
             // Получение пути к файлу
@@ -682,17 +703,19 @@ void MainWindow::processClientData(QByteArray data, QTcpSocket *socket)
             }
             break;
         }
+
+            // Файл (сами внутренности файла)
         case char(3): {
-            // Чтение присланного файла
+            // Считывание ника
             QString nick = userNicknames[socketId];
 
             // Считывание имени файла
             int filenameSepIndex = data.indexOf(char(0));
-            QString imageName = data.left(filenameSepIndex);
+            QString fileName = QString::fromUtf8(data.left(filenameSepIndex));
             data = data.mid(filenameSepIndex + 1);
 
             // Получение пути к файлу
-            QString path = getFilenameForDownload(imageName);
+            QString path = getFilenameForDownload(fileName);
             QFile file(path);
 
             // Запись файла
@@ -703,7 +726,7 @@ void MainWindow::processClientData(QByteArray data, QTcpSocket *socket)
 
                 // Пересылка сообщения всем другим пользователям
                 data.prepend(char(0));
-                data.prepend(imageName.toUtf8());
+                data.prepend(fileName.toUtf8());
                 data.prepend(char(0));
                 data.prepend(nick.toUtf8());
                 data.prepend(char(7));
@@ -773,12 +796,20 @@ void MainWindow::clearServer()
 void MainWindow::sendData(QByteArray data, QTcpSocket *exception)
 {
     // Добавляем размер
-    data.prepend(intToBytes(data.size()));
+    data.prepend(ByteConverter::intToBytes(data.size()));
     for (auto socket : qAsConst(sockets))
     {
         if (socket != exception)
             socket->write(data);
     }
+}
+
+/// Универсальный метод для отправки данных конкртеному сокету
+void MainWindow::sendDataTo(QByteArray data, QTcpSocket *target)
+{
+    // Добавляем размер
+    data.prepend(ByteConverter::intToBytes(data.size()));
+    target->write(data);
 }
 
 
@@ -873,50 +904,6 @@ void MainWindow::sendFile(QString filePath)
     }
 }
 
-
-/// Метод для превращения адреса в красивую строку
-QString MainWindow::addressToString(QHostAddress address)
-{
-    return address.toString().split(':').last();
-}
-
-/// Метод для превращения адреса в массив байтов
-QByteArray MainWindow::addressToBytes(QHostAddress address)
-{
-    return intToBytes(address.toIPv4Address());
-}
-
-/// Метод для превращения массива байтов в адрес
-QHostAddress MainWindow::bytesToAddress(QByteArray ba)
-{
-    quint32 addrInt = bytesToInt(ba);
-    return QHostAddress(addrInt);
-}
-
-/// Метод для превращения числа в массив байтов
-QByteArray MainWindow::intToBytes(quint32 value)
-{
-    char *intAsBytes = new char[4];
-    memcpy(intAsBytes, &value, 4);
-    QByteArray ba(intAsBytes, 4);
-    delete [] intAsBytes;
-    return ba;
-}
-
-/// Метод для превращения массива байтов в число
-quint32 MainWindow::bytesToInt(QByteArray ba)
-{
-    quint32 result;
-    memcpy(&result, ba.constData(), 4);
-    return result;
-}
-
-
-/// Метод для получения адекватного ника
-QString MainWindow::getEnteredNickname()
-{
-    return ui->lineEditNickname->text().trimmed();
-}
 
 /// Проверка на то, какой режим активен, true - если сервер, false - если нет
 bool MainWindow::isServerMode()
@@ -1108,6 +1095,13 @@ void MainWindow::addWidgetToChat(QWidget *widget)
 {
     chatWidgets.append(widget);
     ui->verticalChatLayout->addWidget(widget);
+}
+
+/// Метод для удаления виджета из чата
+void MainWindow::removeWidgetFromChat(QWidget *widget)
+{
+    chatWidgets.removeOne(widget);
+    ui->verticalChatLayout->removeWidget(widget);
 }
 
 
