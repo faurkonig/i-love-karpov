@@ -11,11 +11,11 @@ CONFIG += c++11
 SOURCES += \
     main.cpp \
     mainwindow.cpp \
-    passwords.cpp
+    stringcompare.cpp
 
 HEADERS += \
     mainwindow.h \
-    passwords.h
+    stringcompare.h
 
 FORMS += \
     mainwindow.ui

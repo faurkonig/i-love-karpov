@@ -1,13 +1,13 @@
-#ifndef PASSWORD_H
-#define PASSWORD_H
+#ifndef PASSWORDS_H
+#define PASSWORDS_H
 
 #include <QString>
 #include <QVector>
 
-class Password
+class Passwords
 {
 public:
-    Password();
+    Passwords();
 
     void setTitle(int index, QString val);
     void setPass(int index, QString val);
@@ -22,4 +22,4 @@ private:
     QVector<QString> passes;
 };
 
-#endif // PASSWORD_H
+#endif // PASSWORDS_H

@@ -53,5 +53,9 @@ private slots:
 private:
     Ui::MainWindow *ui;
     bool noAutoChange;
+
+    QColor defaultBackgroundColor;
+    QPalette redLineEditPalette;
+    QPalette defaultLineEditPalette;
 };
 #endif // MAINWINDOW_H

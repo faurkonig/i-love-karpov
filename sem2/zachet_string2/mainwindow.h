@@ -2,7 +2,8 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include <passwords.h>
+
+#include "stringcompare.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -17,16 +18,11 @@ public:
     ~MainWindow();
 
 private slots:
-
-    void on_pushButtonAdd_clicked();
-
-    void deleteButtonClick();
-
-    void on_tableWidget_cellChanged(int row, int column);
+    void on_pushButtonResult_clicked();
 
 private:
     Ui::MainWindow *ui;
 
-    Passwords passwords;
+    StringCompare comp;
 };
 #endif // MAINWINDOW_H

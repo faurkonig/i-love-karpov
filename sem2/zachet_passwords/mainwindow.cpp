@@ -1,42 +1,59 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+/// Конструктор
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
-    // Конструктор
     ui->setupUi(this);
+
+    ui->labelError->hide();
 }
 
+/// Деструктор
 MainWindow::~MainWindow()
 {
-    // Деструктор
     delete ui;
 }
 
+/// Нажатие кнопки "Добавить"
 void MainWindow::on_pushButtonAdd_clicked()
 {
-    // Нажатие кнопки "Добавить"
     QString titleText = ui->lineEditTitle->text();
     QString passwordText = ui->lineEditPassword->text();
-    passwords.addPassword(titleText, passwordText);
 
-    int count = passwords.getCount();
-    ui->tableWidget->setRowCount(count);
-    QTableWidgetItem * twi = new QTableWidgetItem(titleText);
-    ui->tableWidget->setItem(count - 1, 0, twi);
-    twi = new QTableWidgetItem(passwordText);
-    ui->tableWidget->setItem(count - 1, 1, twi);
-    QPushButton * pb = new QPushButton("Удалить");
-    pb->setProperty("row", count - 1);
-    connect(pb, SIGNAL(clicked()), this, SLOT(deleteButtonClick()));
-    ui->tableWidget->setCellWidget(count - 1, 2, pb);
+    if (titleText.length() >= 1 && passwordText.length() >= 1)
+    {
+        ui->labelError->hide();
+
+        passwords.addPassword(titleText, passwordText);
+
+        int count = passwords.getCount();
+        ui->tableWidget->setRowCount(count);
+
+        QTableWidgetItem * twi = new QTableWidgetItem(titleText);
+        twi->setFlags(twi->flags() & 0xfd);
+        ui->tableWidget->setItem(count - 1, 0, twi);
+        twi = new QTableWidgetItem(passwordText);
+        twi->setFlags(twi->flags() & 0xfd);
+        ui->tableWidget->setItem(count - 1, 1, twi);
+
+        QPushButton * pb = new QPushButton("Удалить");
+        pb->setProperty("row", count - 1);
+        connect(pb, SIGNAL(clicked()), this, SLOT(deleteButtonClick()));
+        ui->tableWidget->setCellWidget(count - 1, 2, pb);
+    }
+    else
+    {
+        // Если текст не соответствует критериям ввода, то выводим ошибку
+        ui->labelError->show();
+    }
 }
 
+/// Нажатие кнопки "Удалить" в таблице
 void MainWindow::deleteButtonClick()
 {
-    // Нажатие кнопки "Удалить" в таблице
     QPushButton * pb = qobject_cast<QPushButton *>(sender());
     if (pb != nullptr)
     {
@@ -49,8 +66,11 @@ void MainWindow::deleteButtonClick()
         {
             QTableWidgetItem * twi = new QTableWidgetItem(passwords.getTitle(i));
             ui->tableWidget->setItem(i, 0, twi);
+            twi->setFlags(twi->flags() & 0xfd);
             twi = new QTableWidgetItem(passwords.getPass(i));
+            twi->setFlags(twi->flags() & 0xfd);
             ui->tableWidget->setItem(i, 1, twi);
+
             QPushButton * pb = new QPushButton("Удалить");
             pb->setProperty("row", i);
             connect(pb, SIGNAL(clicked()), this, SLOT(deleteButtonClick()));
@@ -60,9 +80,9 @@ void MainWindow::deleteButtonClick()
     }
 }
 
+/// Изменение пароля
 void MainWindow::on_tableWidget_cellChanged(int row, int column)
 {
-    // Изменение пароля
     QString content = ui->tableWidget->item(row, column)->text();
     if (column == 0)
     {

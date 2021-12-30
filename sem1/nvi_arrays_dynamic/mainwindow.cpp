@@ -1,11 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-// Хранение фона для хранения
-// Чтобы работало красиво не только в светлой теме
-static QColor defaultBackgroundColor;
-static QPalette redLineEditPalette, defaultLineEditPalette;
-
+/// Конструктор
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
@@ -21,23 +17,23 @@ MainWindow::MainWindow(QWidget *parent)
     defaultLineEditPalette.setColor(QPalette::Base, defaultBackgroundColor);
 }
 
+/// Деструктор
 MainWindow::~MainWindow()
 {
     delete ui;
 }
 
-
+/// Изменение кол-ва значений в таблице на значение из спинбокса
 void MainWindow::on_spinBox_valueChanged(int arg1)
 {
-    // Изменение кол-ва значений в таблице на значение из спинбокса
     ui->tableWidget->setRowCount(arg1);
 }
 
+/// Обработка изменений в таблице
 void MainWindow::on_tableWidget_cellChanged(int row, int column)
 {
     if (noAutoChange)
     {
-        // Обработка изменений в таблице
         bool ok;
         ui->tableWidget->item(row, column)->text().toInt(&ok);
         if (ok)
@@ -56,6 +52,7 @@ void MainWindow::on_tableWidget_cellChanged(int row, int column)
     ui->labelResult->clear();
 }
 
+/// Заполнение массива случайными значениями
 void MainWindow::on_pushButtonRandom_clicked()
 {
     noAutoChange = false;
@@ -93,6 +90,7 @@ void MainWindow::on_pushButtonRandom_clicked()
     ui->labelResult->clear();
 }
 
+/// Поиск суммы значений
 void MainWindow::on_pushButtonSum_clicked()
 {
     noAutoChange = false;
@@ -152,6 +150,7 @@ void MainWindow::on_pushButtonSum_clicked()
 
 }
 
+/// Поиск минимального значения
 void MainWindow::on_pushButtonMin_clicked()
 {
     noAutoChange = false;
@@ -212,6 +211,7 @@ void MainWindow::on_pushButtonMin_clicked()
     noAutoChange = true;
 }
 
+/// Поиск максимального значения
 void MainWindow::on_pushButtonMax_clicked()
 {
     noAutoChange = false;
@@ -272,6 +272,7 @@ void MainWindow::on_pushButtonMax_clicked()
     noAutoChange = true;
 }
 
+/// Поиск среднего значения
 void MainWindow::on_pushButtonAverage_clicked()
 {
     noAutoChange = false;
@@ -331,7 +332,7 @@ void MainWindow::on_pushButtonAverage_clicked()
     noAutoChange = true;
 }
 
-// Сортировка пузырьком
+/// Сортировка пузырьком
 void MainWindow::on_pushButtonSort1_clicked()
 {
     noAutoChange = false;
@@ -412,7 +413,7 @@ void MainWindow::on_pushButtonSort1_clicked()
     noAutoChange = true;
 }
 
-// Гномья сортировка
+/// Гномья сортировка
 void MainWindow::on_pushButtonSort2_clicked()
 {
     noAutoChange = false;
@@ -500,7 +501,7 @@ void MainWindow::on_pushButtonSort2_clicked()
 
 // Быстрая сортировка значительно сложнее других, так что тут не обойтись без разделения на отдельные методы
 
-// Метод для разделения массива и, собственно, сортировки
+/// Метод для разделения массива и, собственно, сортировки
 int partition (int arr[], int low, int high)
 {
     int pivot = arr[high]; // Опорное значение
@@ -523,7 +524,7 @@ int partition (int arr[], int low, int high)
     return (i + 1);
 }
 
-// Метод для рекурсивной сортировки массива по частям
+/// Метод для рекурсивной сортировки массива по частям
 void quickSort(int arr[], int low, int high)
 {
     if (low < high)
@@ -537,7 +538,7 @@ void quickSort(int arr[], int low, int high)
     }
 }
 
-// Быстрая сортировка
+/// Быстрая сортировка
 void MainWindow::on_pushButtonSort3_clicked()
 {
     noAutoChange = false;
@@ -606,7 +607,7 @@ void MainWindow::on_pushButtonSort3_clicked()
     noAutoChange = true;
 }
 
-// Сортировка расчёской
+/// Сортировка расчёской
 void MainWindow::on_pushButtonSort4_clicked()
 {
     noAutoChange = false;
@@ -701,7 +702,7 @@ void MainWindow::on_pushButtonSort4_clicked()
     noAutoChange = true;
 }
 
-// Обезьянья сортировка
+/// Обезьянья сортировка
 void MainWindow::on_pushButtonSort5_clicked()
 {
     noAutoChange = false;
@@ -797,6 +798,7 @@ void MainWindow::on_pushButtonSort5_clicked()
     noAutoChange = true;
 }
 
+/// Удаление копий в массиве
 void MainWindow::on_pushButtonCopies_clicked()
 {
     noAutoChange = false;
@@ -886,6 +888,7 @@ void MainWindow::on_pushButtonCopies_clicked()
     noAutoChange = true;
 }
 
+/// Линейный поиск
 void MainWindow::on_pushButtonSearch1_clicked()
 {
     noAutoChange = false;
@@ -969,7 +972,7 @@ void MainWindow::on_pushButtonSearch1_clicked()
     noAutoChange = true;
 }
 
-// Рекурсивная функция бинарного поиска
+/// Рекурсивная функция бинарного поиска
 int binarySearch(int arr[], int start, int end, int value) {
    if (start <= end) {
        // Выбирается середина, если серединное значени равно искомому, то она выводится
@@ -986,6 +989,7 @@ int binarySearch(int arr[], int start, int end, int value) {
    return -1;
 }
 
+/// Бинарный поиск
 void MainWindow::on_pushButtonSearch2_clicked()
 {
     noAutoChange = false;

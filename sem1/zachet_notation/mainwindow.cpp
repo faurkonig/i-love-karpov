@@ -1,7 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-// Конструктор
+/// Конструктор
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
@@ -9,13 +9,13 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
 }
 
-// Деструктор
+/// Деструктор
 MainWindow::~MainWindow()
 {
     delete ui;
 }
 
-// Перевод числа в 10сс
+/// Перевод числа в 10сс
 void MainWindow::on_pushButtonConvert_clicked()
 {
     // Считывание числа из поля (в виде 2сс)

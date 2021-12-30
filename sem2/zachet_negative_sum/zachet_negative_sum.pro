@@ -11,11 +11,11 @@ CONFIG += c++11
 SOURCES += \
     main.cpp \
     mainwindow.cpp \
-    passwords.cpp
+    valuesarray.cpp
 
 HEADERS += \
     mainwindow.h \
-    passwords.h
+    valuesarray.h
 
 FORMS += \
     mainwindow.ui

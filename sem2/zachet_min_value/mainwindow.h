@@ -2,7 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include <passwords.h>
+#include "minvaluearray.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -17,16 +17,15 @@ public:
     ~MainWindow();
 
 private slots:
-
     void on_pushButtonAdd_clicked();
 
-    void deleteButtonClick();
+    void on_pushButtonResult_clicked();
 
-    void on_tableWidget_cellChanged(int row, int column);
+    void on_pushButtonClear_clicked();
 
 private:
     Ui::MainWindow *ui;
 
-    Passwords passwords;
+    MinValueArray array;
 };
 #endif // MAINWINDOW_H
