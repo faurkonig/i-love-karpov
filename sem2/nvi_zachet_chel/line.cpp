@@ -1,13 +1,14 @@
 #include "line.h"
 
-line::line()
+/// Конструктор
+Line::Line()
 {
-    // Конструктор
+
 }
 
-void line::draw(QImage &im)
+/// Рисование линии
+void Line::draw(QImage &im)
 {
-    // Рисование линии
     QPainter painter(&im);
 
     QPen pen(QColor(getRed(), getGreen(), getBlue(), getAlpha()));

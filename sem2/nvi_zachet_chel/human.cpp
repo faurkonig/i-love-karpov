@@ -1,59 +1,59 @@
 #include "human.h"
 
+/// Конструктор
 Human::Human()
 {
-    // Конструктор
     height = 1;
     width = 1;
     faceWidth = 1;
 }
 
+/// Указание высоты
 bool Human::setHeight(int value)
 {
-    // Указание высоты
     if (value < 20 || value > 300) return false;
     height = value;
     return true;
 }
 
+/// Указание ширины
 bool Human::setWidth(int value)
 {
-    // Указание ширины
     if (value < 5 || value > 100) return false;
     width = value;
     return true;
 }
 
+/// Указание размера лица
 bool Human::setFaceWidth(int value)
 {
-    // Указание размера лица
     if (value < 10 || value > 50) return false;
     faceWidth = value;
     return true;
 }
 
+/// Возвращение высоты
 int Human::getHeight()
 {
-    // Возвращение высоты
     return height;
 }
 
+/// Возвращение ширины
 int Human::getWidth()
 {
-    // Возвращение ширины
     return width;
 }
 
+/// Возвращение размера лица
 int Human::getFaceWidth()
 {
-    // Возвращение размера лица
     return faceWidth;
 }
 
+/// Рисование человечка
 void Human::draw(QImage * im)
 {
-    // Рисование человечка
-    pen mainPen;
+    Pen mainPen;
     mainPen.setWidth(5);
 
     // Некоторые изначальные вычисления
@@ -66,12 +66,12 @@ void Human::draw(QImage * im)
     int fac3 = faceWidth / 3;
 
     // Объявление классов и передача карандаша
-    line l1, l2, l3, l4;
-    ellipse body;
-    ellipse head;
-    arc smile;
-    pixel p1;
-    pixel p2;
+    Line l1, l2, l3, l4;
+    Ellipse body;
+    Ellipse head;
+    Arc smile;
+    Pixel p1;
+    Pixel p2;
     l1.setWidth(mainPen.getWidth());
     l2.setWidth(mainPen.getWidth());
     l3.setWidth(mainPen.getWidth());

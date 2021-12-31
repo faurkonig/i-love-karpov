@@ -8,10 +8,10 @@
 #include "pen.h"
 
 
-class pixel : public pen, public point
+class Pixel : public Pen, public Point
 {
 public:
-    pixel();
+    Pixel();
 
     void draw(QImage &im);
 };

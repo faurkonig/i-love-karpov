@@ -4,10 +4,10 @@
 #include "color.h"
 
 
-class pen : public color
+class Pen : public Color
 {
 public:
-    pen();
+    Pen();
 
     bool setWidth(int w);
     bool setStyle(int s);

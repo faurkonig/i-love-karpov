@@ -1,13 +1,14 @@
 #include "ellipse.h"
 
-ellipse::ellipse()
+/// Конструктор
+Ellipse::Ellipse()
 {
-    // Конструктор
+
 }
 
-void ellipse::draw(QImage &im)
+/// Рисование эллипса
+void Ellipse::draw(QImage &im)
 {
-    // Рисование эллипса
     QPainter painter(&im);
 
     QPen pen(QColor(rectPen.getRed(), rectPen.getGreen(), rectPen.getBlue(), rectPen.getAlpha()));

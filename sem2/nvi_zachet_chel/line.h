@@ -8,13 +8,13 @@
 #include "point.h"
 
 
-class line: public pen
+class Line: public Pen
 {
 public:
-    line();
+    Line();
 
-    point p1;
-    point p2;
+    Point p1;
+    Point p2;
 
     void draw(QImage &im);
 };

@@ -1,43 +1,43 @@
 #include "arc.h"
 
-arc::arc()
+/// Конструктор
+Arc::Arc()
 {
-    // Конструктор
     startAngle = 0;
     spanAngle = 0;
 }
 
-bool arc::setStartAngle(int angle)
+/// Установка начального угла
+bool Arc::setStartAngle(int angle)
 {
-    // Установка начального угла
     if (angle < -360 || angle > 360) return false;
     startAngle = angle;
     return true;
 }
 
-bool arc::setSpanAngle(int angle)
+/// Установка угла дуги
+bool Arc::setSpanAngle(int angle)
 {
-    // Установка угла дуги
     if (angle < -360 || angle > 360) return false;
     spanAngle = angle;
     return true;
 }
 
-int arc::getStartAngle()
+/// Возвращение начального угла
+int Arc::getStartAngle()
 {
-    // Возвращение начального угла
     return startAngle;
 }
 
-int arc::getSpanAngle()
+/// Возвращение угла дуги
+int Arc::getSpanAngle()
 {
-    // Возвращение угла дуги
     return spanAngle;
 }
 
-void arc::draw(QImage &im)
+/// Рисование дуги
+void Arc::draw(QImage &im)
 {
-    // Рисование дуги
     QPainter painter(&im);
 
     QPen pen(QColor(rectPen.getRed(), rectPen.getGreen(), rectPen.getBlue(), rectPen.getAlpha()));

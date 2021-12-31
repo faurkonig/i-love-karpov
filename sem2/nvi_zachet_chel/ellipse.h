@@ -6,10 +6,10 @@
 
 #include "elliptic.h"
 
-class ellipse : public elliptic
+class Ellipse : public Elliptic
 {
 public:
-    ellipse();
+    Ellipse();
 
     void draw(QImage &im);
 };

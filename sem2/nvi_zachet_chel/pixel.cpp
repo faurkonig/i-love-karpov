@@ -1,13 +1,14 @@
 #include "pixel.h"
 
-pixel::pixel()
+/// Конструктор
+Pixel::Pixel()
 {
-    // Конструктор
+
 }
 
-void pixel::draw(QImage &im)
+/// Рисование пикселя
+void Pixel::draw(QImage &im)
 {
-    // Рисование пикселя
     QPainter painter(&im);
 
     QPen pen(QColor(getRed(), getGreen(), getBlue(), getAlpha()));

@@ -7,10 +7,10 @@
 #include "elliptic.h"
 
 
-class arc : public elliptic
+class Arc : public Elliptic
 {
 public:
-    arc();
+    Arc();
 
     bool setStartAngle(int angle);
     bool setSpanAngle(int angle);

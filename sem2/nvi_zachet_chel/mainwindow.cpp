@@ -1,27 +1,27 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+/// Конструктор
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
-    // Конструктор
     ui->setupUi(this);
 
-    ui->widget->createImage();
+    ui->widget->createImage(ui->widget->width(), ui->widget->height());
 
     ui->labelError->hide();
 }
 
+/// Деструктор
 MainWindow::~MainWindow()
 {
-    // Деструктор
     delete ui;
 }
 
+/// Обработка рисования
 void MainWindow::on_pushButtonDraw_clicked()
 {
-    // Обработка рисования
     bool ok = true;
     ok = man.setHeight(ui->spinBoxHeight->value());
     if (ok) ok = man.setWidth(ui->spinBoxWidth->value());

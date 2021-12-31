@@ -4,17 +4,17 @@
 #include "pen.h"
 #include "point.h"
 
-class elliptic : public point
+class Elliptic : public Point
 {
 public:
-    elliptic();
+    Elliptic();
 
     bool setRadius1(int val);
     bool setRadius2(int val);
     int getRadius1();
     int getRadius2();
 
-    pen rectPen;
+    Pen rectPen;
 
 private:
     int radius1;

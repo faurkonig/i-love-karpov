@@ -5,22 +5,24 @@
 #include <QImage>
 #include <QPainter>
 
+
 class Canvas : public QWidget
 {
     Q_OBJECT
 public:
     explicit Canvas(QWidget *parent = nullptr);
 
-    void createImage();
     QImage image;
+    void createImage(int width, int height);
+
+private:
+    bool imCreated;
 
 protected:
     void paintEvent(QPaintEvent *);
-    bool imCreated = false;
 
 signals:
 
-public slots:
 };
 
 #endif // CANVAS_H

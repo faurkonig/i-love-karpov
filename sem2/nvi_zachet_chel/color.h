@@ -2,10 +2,10 @@
 #define COLOR_H
 
 
-class color
+class Color
 {
 public:
-    color();
+    Color();
 
     bool setRGBA(int r, int g, int b, int a = 255);
     int getRed();

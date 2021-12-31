@@ -2,10 +2,10 @@
 #define POINT_H
 
 
-class point
+class Point
 {
 public:
-    point();
+    Point();
 public:
     bool setX(int new_x);
     bool setY(int new_y);
