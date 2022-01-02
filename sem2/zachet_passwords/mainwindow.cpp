@@ -33,15 +33,13 @@ void MainWindow::on_pushButtonAdd_clicked()
         ui->tableWidget->setRowCount(count);
 
         QTableWidgetItem * twi = new QTableWidgetItem(titleText);
-        twi->setFlags(twi->flags() & 0xfd);
         ui->tableWidget->setItem(count - 1, 0, twi);
         twi = new QTableWidgetItem(passwordText);
-        twi->setFlags(twi->flags() & 0xfd);
         ui->tableWidget->setItem(count - 1, 1, twi);
 
         QPushButton * pb = new QPushButton("Удалить");
         pb->setProperty("row", count - 1);
-        connect(pb, SIGNAL(clicked()), this, SLOT(deleteButtonClick()));
+        connect(pb, &QPushButton::clicked, this, &MainWindow::deleteButtonClick);
         ui->tableWidget->setCellWidget(count - 1, 2, pb);
     }
     else
@@ -62,18 +60,16 @@ void MainWindow::deleteButtonClick()
 
         int count = passwords.getCount();
         ui->tableWidget->setRowCount(count);
-        for (int i = 0; i < count; i++)
+        for (int i = row; i < count; i++)
         {
             QTableWidgetItem * twi = new QTableWidgetItem(passwords.getTitle(i));
             ui->tableWidget->setItem(i, 0, twi);
-            twi->setFlags(twi->flags() & 0xfd);
             twi = new QTableWidgetItem(passwords.getPass(i));
-            twi->setFlags(twi->flags() & 0xfd);
             ui->tableWidget->setItem(i, 1, twi);
 
             QPushButton * pb = new QPushButton("Удалить");
             pb->setProperty("row", i);
-            connect(pb, SIGNAL(clicked()), this, SLOT(deleteButtonClick()));
+            connect(pb, &QPushButton::clicked, this, &MainWindow::deleteButtonClick);
             ui->tableWidget->removeCellWidget(i, 2);
             ui->tableWidget->setCellWidget(i, 2, pb);
         }
