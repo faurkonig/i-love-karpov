@@ -130,11 +130,9 @@ void MainWindow::on_pushButtonInsert_clicked()
     if (db != nullptr && db->isOpen())
     {
         QSqlQuery qw;
-        QString query{"INSERT INTO \"test\" VALUES ("};
-        query.append(QString::number(4) + ", ");
-        query.append("'BlaBla');");
+        QString query{"INSERT INTO \"test\" (name) VALUES ('BlaBla');"};
         qw = db->exec(query);
-        // QMessageBox::warning(this, "Error", db->lastError().text());
+         QMessageBox::warning(this, "Error", qw.lastError().text());
     }
     else
     {
