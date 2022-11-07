@@ -2,10 +2,12 @@
 #include "ui_mainwindow.h"
 #include "connectiondialog.h"
 #include "registerdialog.h"
+#include "storewindow.h"
 
 MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent)
-    , ui(new Ui::MainWindow)
+    : QMainWindow(parent),
+      DatabaseContainer(parent),
+      ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
 }
@@ -56,9 +58,16 @@ void MainWindow::on_radioButtonDeveloper_clicked()
 }
 
 
+void MainWindow::on_loginPushButton_clicked()
+{
+    if (ui->radioButtonGuest->isChecked()) {
+        auto window = new StoreWindow(SgUser(0, "_guest", "", "Гость", QDateTime::currentDateTime()), mainDatabase);
+        window->show();
+    }
+}
+
 void MainWindow::on_registerPushButton_clicked()
 {
     auto registerDialog = RegisterDialog(mainDatabase, this);
     registerDialog.exec();
 }
-

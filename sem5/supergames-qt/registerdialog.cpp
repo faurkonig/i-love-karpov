@@ -10,8 +10,8 @@
 
 RegisterDialog::RegisterDialog(QSqlDatabase *newDb, QWidget *parent) :
     QDialog(parent),
-    ui(new Ui::RegisterDialog),
-    db(newDb)
+    DatabaseContainer(parent, newDb),
+    ui(new Ui::RegisterDialog)
 {
     ui->setupUi(this);
 }
@@ -43,7 +43,7 @@ void RegisterDialog::on_registerButton_clicked()
         }
         if (!login.contains(CommonPatterns::loginRegex)) {
             DialogHelper::showValidationError(this, "Логин должен состоять из латинских букв, цифр или знака \"_\""
-                                      " (и может начинатся только с латинской буквы)");
+                                                    " (и может начинатся только с латинской буквы)");
             return;
         }
     } else if (!login.contains(CommonPatterns::emailRegex)) {
@@ -69,17 +69,15 @@ void RegisterDialog::on_registerButton_clicked()
         return;
     }
 
-    // Хэшируем пароль, чтобы в БД он не лежал в открытом виде
-    auto hashedPassword = hashString(password);
     if (isUser) {
         // Пробуем зарегистрировать пользователя
-        if (registerUser(login, hashedPassword, name)) {
+        if (registerUser(login, password, name)) {
             QMessageBox::information(this, "Регистрация", "Пользователь успешно зарегистрирован");
             accept();
         }
     } else {
         // Пробуем зарегистрировать разработчика
-        if (registerDeveloper(login, hashedPassword, name)) {
+        if (registerDeveloper(login, password, name)) {
             QMessageBox::information(this, "Регистрация", "Разработчик успешно зарегистрирован");
             accept();
         }
@@ -94,10 +92,14 @@ void RegisterDialog::on_cancelButton_clicked()
 
 bool RegisterDialog::registerUser(QString login, QString password, QString name)
 {
-    if (!db->isOpen()) DialogHelper::showDatabaseError(this, "Нет подключения к базе данных");
+    if (!checkDatabase()) return false;
 
-    auto query = QString("INSERT INTO \"users\" (login, password, name) VALUES ('%1', '%2', '%3');").arg(login, password, name);
-    auto q = db->exec(query);
+    // Хэшируем пароль, чтобы в БД он не лежал в открытом виде
+    auto hashedPassword = hashString(password);
+
+    auto query = QString("INSERT INTO \"users\" (login, password, name) VALUES ('%1', '%2', '%3');")
+            .arg(login, hashedPassword, name);
+    auto q = mainDatabase->exec(query);
     if (DialogHelper::isSqlError(q.lastError())) {
         DialogHelper::showSqlError(this, q.lastError(), query);
         return false;
@@ -107,10 +109,14 @@ bool RegisterDialog::registerUser(QString login, QString password, QString name)
 
 bool RegisterDialog::registerDeveloper(QString email, QString password, QString name)
 {
-    if (!db->isOpen()) DialogHelper::showDatabaseError(this, "Нет подключения к базе данных");
+    if (!checkDatabase()) return false;
 
-    auto query = QString("INSERT INTO \"developers\" (\"email\", \"password\", \"name\") VALUES ('%1', '%2', '%3');").arg(email, password, name);
-    auto q = db->exec(query);
+    // Хэшируем пароль, чтобы в БД он не лежал в открытом виде
+    auto hashedPassword = hashString(password);
+
+    auto query = QString("INSERT INTO \"developers\" (\"email\", \"password\", \"name\") VALUES ('%1', '%2', '%3');")
+            .arg(email, hashedPassword, name);
+    auto q = mainDatabase->exec(query);
     if (DialogHelper::isSqlError(q.lastError())) {
         DialogHelper::showSqlError(this, q.lastError(), query);
         return false;

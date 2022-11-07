@@ -1,8 +1,11 @@
 #include "connectiondialog.h"
 #include "ui_connectiondialog.h"
 #include <QtSql/QSqlError>
-#include <QCloseEvent>
 #include <QMessageBox>
+
+// Нужно чтобы во время разработки автоматически подключатся с тестовыми данными
+// В конечном итоге лучше закомментировать
+#define SG_DEBUG
 
 ConnectionDialog::ConnectionDialog(QSqlDatabase *newDb, bool *isSave, QWidget *parent) :
     QDialog(parent),
@@ -11,6 +14,12 @@ ConnectionDialog::ConnectionDialog(QSqlDatabase *newDb, bool *isSave, QWidget *p
     save(isSave)
 {
     ui->setupUi(this);
+
+    on_testConnectionButton_clicked();
+
+#ifdef SG_DEBUG
+    on_pushButtonSave_clicked();
+#endif
 }
 
 ConnectionDialog::~ConnectionDialog()
@@ -62,7 +71,9 @@ void ConnectionDialog::on_pushButtonSave_clicked()
 
         *save = true;
 
+#ifndef SG_DEBUG
         QMessageBox::information(this, "Подключение", "Успешное подключение к базе данных");
+#endif
         accept();
     } else {
         printError("Введены неверные данные, невозможно сохранить");

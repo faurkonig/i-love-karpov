@@ -10,24 +10,39 @@ CONFIG += c++17
 
 SOURCES += \
     connectiondialog.cpp \
+    databasecontainer.cpp \
     dialoghelper.cpp \
+    gamedialog.cpp \
+    gameitem.cpp \
     hash.cpp \
     main.cpp \
     mainwindow.cpp \
-    registerdialog.cpp
+    registerdialog.cpp \
+    sgdeveloper.cpp \
+    sguser.cpp \
+    storewindow.cpp
 
 HEADERS += \
     commonpatterns.h \
     connectiondialog.h \
+    databasecontainer.h \
     dialoghelper.h \
+    gamedialog.h \
+    gameitem.h \
     hash.h \
     mainwindow.h \
-    registerdialog.h
+    registerdialog.h \
+    sgdeveloper.h \
+    sguser.h \
+    storewindow.h
 
 FORMS += \
     connectiondialog.ui \
+    gamedialog.ui \
+    gameitem.ui \
     mainwindow.ui \
-    registerdialog.ui
+    registerdialog.ui \
+    storewindow.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

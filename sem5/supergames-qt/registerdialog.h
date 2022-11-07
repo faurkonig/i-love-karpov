@@ -1,14 +1,14 @@
 #ifndef REGISTERDIALOG_H
 #define REGISTERDIALOG_H
 
+#include "databasecontainer.h"
 #include <QDialog>
-#include <QtSql/QSqlDatabase>
 
 namespace Ui {
 class RegisterDialog;
 }
 
-class RegisterDialog : public QDialog
+class RegisterDialog : public QDialog, private DatabaseContainer
 {
     Q_OBJECT
 
@@ -25,8 +25,6 @@ private slots:
 
 private:
     Ui::RegisterDialog *ui;
-
-    QSqlDatabase *db;
 
     bool isUser{true};
 
