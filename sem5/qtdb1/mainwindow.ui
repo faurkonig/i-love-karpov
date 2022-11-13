@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>704</width>
+    <width>772</width>
     <height>590</height>
    </rect>
   </property>
@@ -83,18 +83,23 @@
      <rect>
       <x>330</x>
       <y>210</y>
-      <width>341</width>
+      <width>401</width>
       <height>231</height>
      </rect>
     </property>
     <column>
      <property name="text">
-      <string>1</string>
+      <string>Имя</string>
      </property>
     </column>
     <column>
      <property name="text">
-      <string>2</string>
+      <string>Поставщик</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
+      <string>Возрастное ограничение</string>
      </property>
     </column>
    </widget>
@@ -104,8 +109,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>704</width>
-     <height>21</height>
+     <width>772</width>
+     <height>22</height>
     </rect>
    </property>
   </widget>

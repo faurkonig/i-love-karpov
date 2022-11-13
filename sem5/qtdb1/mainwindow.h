@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QTableWidget>
 #include <QMessageBox>
 #include <QtSql/QSqlDatabase>
 #include <QtSql/QSqlError>
@@ -36,6 +37,8 @@ private:
     Ui::MainWindow *ui;
     QSqlDatabase *db;
     QSqlDatabase db1;
+
+    void initItems(QTableWidget *table, int index);
 };
 
 #endif // MAINWINDOW_H
