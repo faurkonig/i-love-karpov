@@ -12,8 +12,6 @@ public:
                 QString email = "", QString password = "", QString name = "", QString description = "",
                 QDateTime date = QDateTime::fromSecsSinceEpoch(0));
 
-    static SgDeveloper fromSql(QSqlQuery &query);
-
     int id;
     QString email;
     QString password;

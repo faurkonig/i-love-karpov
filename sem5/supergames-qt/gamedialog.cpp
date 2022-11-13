@@ -1,4 +1,5 @@
 #include "gamedialog.h"
+#include "commonpatterns.h"
 #include "ui_gamedialog.h"
 #include "dialoghelper.h"
 #include <QtSql/QSqlQuery>
@@ -55,12 +56,12 @@ void GameDialog::updateData()
     ui->gameDeveloper->setText(QString("Разработана <u>%1</u>")
                                .arg(devName));
     ui->gameDate->setText(QString("Добавлена <u>%1</u>")
-                          .arg(gameDate.toLocalTime().toString("dd.MM.yyyy hh:mm")));
+                          .arg(gameDate.toLocalTime().toString(CommonPatterns::dateTimeFormat)));
     ui->gameCollectionCount->setText(QString("В коллекции у <u>%1</u> пользователей")
                                      .arg(collectionCount));
     ui->developerDescription->setText(devDescription);
     ui->developerDate->setText(QString("Зарегистрирован <u>%1</u>")
-                               .arg(devDate.toLocalTime().toString("dd.MM.yyyy hh:mm")));
+                               .arg(devDate.toLocalTime().toString(CommonPatterns::dateTimeFormat)));
     ui->developerEmail->setText(devEmail);
 
     if (gamePrice > 0) {

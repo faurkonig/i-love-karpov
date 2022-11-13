@@ -20,6 +20,10 @@ public:
 private slots:
     void on_updateButton_clicked();
 
+    void on_profileButton_clicked();
+
+    void openGame(int gameId);
+
 private:
     Ui::StoreWindow *ui;
 
@@ -29,25 +33,14 @@ private:
 
     const QString gamesQuerySql{
         "SELECT"
-        " g.id,"
-        " g.\"name\","
-        " g.description,"
-        " g.price,"
-        " ("
-        " SELECT"
-        "  d.name AS developer"
-        " FROM"
-        "  public.developers d"
-        " WHERE"
-        "  g.developer = d.id"
-        " )"
-        "FROM"
-        " public.games g;"
+        " g.id, g.\"name\", g.description, g.price,"
+        " (SELECT d.name AS developer"
+        " FROM public.developers d"
+        " WHERE g.developer = d.id) "
+        "FROM public.games g"
     };
 
     void updateGames();
-
-    void openGame(int gameId);
 };
 
 #endif // STOREWINDOW_H

@@ -7,17 +7,6 @@ SgUser::SgUser(int id, QString login, QString password, QString name, QDateTime 
 {
 }
 
-SgUser SgUser::fromSql(QSqlQuery &query)
-{
-    return SgUser(
-                query.value(0).toInt(),
-                query.value(1).toString(),
-                query.value(2).toString(),
-                query.value(3).toString(),
-                query.value(4).toDateTime()
-                );
-}
-
 bool SgUser::isGuest()
 {
     return id == 0;

@@ -14,5 +14,15 @@ void DialogHelper::showDatabaseError(QWidget *parent, QString text) {
 }
 
 void DialogHelper::showSqlError(QWidget *parent, QSqlError error, QString query) {
-    showDatabaseError(parent, QString("Не удалось выполнить SQL запрос:\n%1\n\nОшибка:\n%2").arg(query, error.text()));
+    showDatabaseError(parent,
+                      QString("Не удалось выполнить SQL запрос:\n%1\n\nОшибка:\n%2")
+                      .arg(query, error.text()));
+}
+
+void DialogHelper::showAuthError(QWidget *parent, bool isUser)
+{
+    QString errorBase = "\nСкорее всего логин или пароль введены неверно";
+    QMessageBox::warning(parent,
+                         "Ошибка авторазации",
+                         (isUser ? "Пользователь не найден" : "Разработчик не найден") + errorBase);
 }

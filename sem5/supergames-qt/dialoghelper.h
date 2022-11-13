@@ -12,6 +12,8 @@ void showValidationError(QWidget *parent, QString text);
 void showDatabaseError(QWidget *parent, QString text);
 
 void showSqlError(QWidget *parent, QSqlError error, QString query);
+
+void showAuthError(QWidget *parent, bool isUser);
 }
 
 #endif // DIALOGHELPER_H

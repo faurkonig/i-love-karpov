@@ -31,10 +31,14 @@ private slots:
 
     void on_loginPushButton_clicked();
 
+    void on_loginField_returnPressed();
+
+    void on_passwordField_returnPressed();
+
 private:
     Ui::MainWindow *ui;
 
-    SgUser loginAsUser(QString login, QString password);
-    SgDeveloper loginAsDeveloper(QString login, QString password);
+    SgUser loginAsUser(QString login, QString password, bool &ok);
+    SgDeveloper loginAsDeveloper(QString login, QString password, bool &ok);
 };
 #endif // MAINWINDOW_H

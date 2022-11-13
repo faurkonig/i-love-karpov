@@ -3,6 +3,7 @@
 #include "dialoghelper.h"
 #include "gameitem.h"
 #include "gamedialog.h"
+#include "userprofiledialog.h"
 
 StoreWindow::StoreWindow(SgUser user, QSqlDatabase *newDb, QWidget *parent) :
     QMainWindow(parent),
@@ -74,5 +75,11 @@ void StoreWindow::openGame(int gameId)
 {
     auto gameDialog = GameDialog(mainDatabase, gameId, user, this);
     gameDialog.exec();
+}
+
+
+void StoreWindow::on_profileButton_clicked()
+{
+    UserProfileDialog(user.id, user.id, mainDatabase, this).exec();
 }
 

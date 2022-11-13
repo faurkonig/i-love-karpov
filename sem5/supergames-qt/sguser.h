@@ -12,8 +12,6 @@ public:
            QString login = "", QString password = "", QString name = "",
            QDateTime date = QDateTime::fromSecsSinceEpoch(0));
 
-    static SgUser fromSql(QSqlQuery &query);
-
     int id;
     QString login;
     QString password;
