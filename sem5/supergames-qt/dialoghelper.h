@@ -5,6 +5,7 @@
 #include <QWidget>
 
 namespace DialogHelper {
+/// Проверка запроса
 bool isSqlError(QSqlError error);
 
 void showValidationError(QWidget *parent, QString text);

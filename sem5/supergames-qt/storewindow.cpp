@@ -1,6 +1,5 @@
 #include "storewindow.h"
 #include "ui_storewindow.h"
-#include "dialoghelper.h"
 #include "gameitem.h"
 #include "gamedialog.h"
 #include "userprofiledialog.h"
@@ -35,13 +34,9 @@ void StoreWindow::on_updateButton_clicked()
 
 void StoreWindow::updateGames()
 {
-    if (!checkDatabase()) return;
-
-    auto getGamesQ = mainDatabase->exec(gamesQuerySql);
-    if (DialogHelper::isSqlError(getGamesQ.lastError())) {
-        DialogHelper::showSqlError(this, getGamesQ.lastError(), gamesQuerySql);
-        return;
-    }
+    bool ok;
+    auto getGamesQ = execQuery(gamesQuerySql, ok);
+    if (!ok) return;
 
     for (auto gi : qAsConst(gameItems)) {
         ui->scrollVerticalLayout->removeWidget(gi);
@@ -73,8 +68,7 @@ void StoreWindow::updateGames()
 
 void StoreWindow::openGame(int gameId)
 {
-    auto gameDialog = GameDialog(mainDatabase, gameId, user, this);
-    gameDialog.exec();
+    GameDialog(mainDatabase, gameId, user, this).exec();
 }
 
 

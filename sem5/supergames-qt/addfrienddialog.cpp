@@ -1,7 +1,6 @@
 #include "addfrienddialog.h"
 #include "ui_addfrienddialog.h"
 #include "commonpatterns.h"
-#include "dialoghelper.h"
 #include <QtSql/QSqlQuery>
 
 AddFriendDialog::AddFriendDialog(QSqlDatabase *newDb, int currentUser, QWidget *parent) :
@@ -33,12 +32,10 @@ void AddFriendDialog::on_addButton_clicked()
         return;
     }
 
-    auto findByLoginQuery = QString("SELECT id, \"name\" FROM users WHERE login = '%1'").arg(loginToAdd);
-    auto foundUser = mainDatabase->exec(findByLoginQuery);
-    if (DialogHelper::isSqlError(foundUser.lastError())) {
-        DialogHelper::showSqlError(this, foundUser.lastError(), findByLoginQuery);
-        return;
-    }
+    bool ok;
+    auto foundUser = execQuery(QString("SELECT id, \"name\" FROM users WHERE login = '%1'")
+                               .arg(loginToAdd), ok);
+    if (!ok) return;
     if (foundUser.size() < 1) {
         showError("Пользователь с таким логином не найден");
         return;
@@ -52,26 +49,18 @@ void AddFriendDialog::on_addButton_clicked()
         return;
     }
 
-    auto findFriendshipQuery = QString("SELECT id FROM internal.friendship "
-                                       "WHERE \"source\" = %1 AND \"target\" = %2")
-            .arg(sourceId).arg(userId);
-    auto foundFriendship = mainDatabase->exec(findFriendshipQuery);
-    if (DialogHelper::isSqlError(foundFriendship.lastError())) {
-        DialogHelper::showSqlError(this, foundFriendship.lastError(), findFriendshipQuery);
-        return;
-    }
+    auto foundFriendship = execQuery(QString("SELECT id FROM internal.friendship "
+                                                 "WHERE \"source\" = %1 AND \"target\" = %2")
+                                     .arg(sourceId).arg(userId), ok);
+    if (!ok) return;
     if (foundFriendship.size() != 0) {
         showError("Этот пользователь уже у вас в друзьях");
         return;
     }
 
-    auto addFriendQuery = QString("INSERT INTO internal.friendship (\"source\", \"target\") "
-                                  "VALUES (%1, %2)").arg(sourceId).arg(userId);
-    auto insertedFriendship = mainDatabase->exec(addFriendQuery);
-    if (DialogHelper::isSqlError(insertedFriendship.lastError())) {
-        DialogHelper::showSqlError(this, insertedFriendship.lastError(), addFriendQuery);
-        return;
-    }
+    execQuery(QString("INSERT INTO internal.friendship (\"source\", \"target\") "
+                          "VALUES (%1, %2)").arg(sourceId).arg(userId), ok);
+    if (!ok) return;
 
     showSuccess("Пользователь \""+userName+"\" добавлен в друзья!");
 }

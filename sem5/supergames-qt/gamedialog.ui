@@ -30,8 +30,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>414</width>
-        <height>497</height>
+        <width>428</width>
+        <height>496</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -198,7 +198,7 @@
            <widget class="QLabel" name="noReviewLabel">
             <property name="font">
              <font>
-              <pointsize>12</pointsize>
+              <pointsize>11</pointsize>
               <bold>true</bold>
              </font>
             </property>

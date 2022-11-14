@@ -92,34 +92,24 @@ void RegisterDialog::on_cancelButton_clicked()
 
 bool RegisterDialog::registerUser(QString login, QString password, QString name)
 {
-    if (!checkDatabase()) return false;
-
     // Хэшируем пароль, чтобы в БД он не лежал в открытом виде
     auto hashedPassword = hashString(password);
 
-    auto query = QString("INSERT INTO \"users\" (login, password, name) VALUES ('%1', '%2', '%3');")
-            .arg(login, hashedPassword, name);
-    auto q = mainDatabase->exec(query);
-    if (DialogHelper::isSqlError(q.lastError())) {
-        DialogHelper::showSqlError(this, q.lastError(), query);
-        return false;
-    }
-    return true;
+    bool ok;
+    execQuery(QString("INSERT INTO \"users\" (login, password, name) "
+                      "VALUES ('%1', '%2', '%3');")
+              .arg(login, hashedPassword, name), ok);
+    return ok;
 }
 
 bool RegisterDialog::registerDeveloper(QString email, QString password, QString name)
 {
-    if (!checkDatabase()) return false;
-
     // Хэшируем пароль, чтобы в БД он не лежал в открытом виде
     auto hashedPassword = hashString(password);
 
-    auto query = QString("INSERT INTO \"developers\" (\"email\", \"password\", \"name\") VALUES ('%1', '%2', '%3');")
-            .arg(email, hashedPassword, name);
-    auto q = mainDatabase->exec(query);
-    if (DialogHelper::isSqlError(q.lastError())) {
-        DialogHelper::showSqlError(this, q.lastError(), query);
-        return false;
-    }
-    return true;
+    bool ok;
+    execQuery(QString("INSERT INTO \"developers\" (\"email\", \"password\", \"name\") "
+                      "VALUES ('%1', '%2', '%3');")
+              .arg(email, hashedPassword, name), ok);
+    return ok;
 }

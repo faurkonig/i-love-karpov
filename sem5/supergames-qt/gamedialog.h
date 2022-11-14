@@ -17,11 +17,19 @@ public:
     explicit GameDialog(QSqlDatabase *newDb, int id, SgUser user, QWidget *parent = nullptr);
     ~GameDialog();
 
+private slots:
+    void on_buyButton_clicked();
+
 private:
     Ui::GameDialog *ui;
 
     int gameId;
     SgUser user;
+
+    int gamePrice;
+
+    bool inCollection;
+    bool inCart;
 
     QString gameQuerySql {
         "SELECT"
@@ -42,6 +50,8 @@ private:
     };
 
     void updateData();
+
+    void updateBuyButton();
 };
 
 #endif // GAMEDIALOG_H

@@ -109,27 +109,19 @@ SgUser MainWindow::loginAsUser(QString login, QString password, bool &ok)
 {
     SgUser user;
 
-    if (!checkDatabase()) {
-        ok = false;
-        return user;
-    }
-
     auto hashedPassword = hashString(password);
 
-    auto query = QString("SELECT * FROM users WHERE login = '%1' AND \"password\" = '%2'")
-            .arg(login, hashedPassword);
-    auto q = mainDatabase->exec(query);
+    auto q = execQuery(QString("SELECT * FROM users "
+                                   "WHERE login = '%1' AND \"password\" = '%2'")
+                       .arg(login, hashedPassword), ok);
+    if (!ok) return user;
+
+    // Проверяем вообще, нашёлся ли такой пользователь
     if (q.size() < 1) {
         ok = false;
         return user;
     }
     q.first();
-
-    if (DialogHelper::isSqlError(q.lastError())) {
-        DialogHelper::showSqlError(this, q.lastError(), query);
-        ok = false;
-        return user;
-    }
 
     user.id = q.value(0).toInt();
     user.login = q.value(1).toString();
@@ -145,23 +137,21 @@ SgDeveloper MainWindow::loginAsDeveloper(QString login, QString password, bool &
 {
     SgDeveloper dev;
 
-    if (!checkDatabase()) {
-        ok = false;
-        return dev;
-    }
-
     auto hashedPassword = hashString(password);
 
-    auto query = QString("SELECT * FROM developers WHERE email = '%1' AND \"password\" = '%2'")
-            .arg(login, hashedPassword);
-    auto q = mainDatabase->exec(query);
-    if (DialogHelper::isSqlError(q.lastError())) {
-        DialogHelper::showSqlError(this, q.lastError(), query);
+    auto q = execQuery(QString("SELECT * FROM developers "
+                               "WHERE email = '%1' AND \"password\" = '%2'")
+                       .arg(login, hashedPassword), ok);
+    if (!ok) return dev;
+
+    // Проверяем вообще, нашёлся ли такой разработчик
+    if (q.size() < 1) {
         ok = false;
         return dev;
     }
+    q.first();
 
-    dev.id = q.value(0).toInt();
+//    dev.id = q.value(0).toInt();
 
     ok = true;
     return dev;

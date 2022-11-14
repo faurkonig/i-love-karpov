@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include <QtSql/QSqlDatabase>
+#include <QtSql/QSqlQuery>
 
 class DatabaseContainer
 {
@@ -15,6 +16,8 @@ protected:
     QSqlDatabase *mainDatabase;
 
     bool checkDatabase();
+
+    QSqlQuery execQuery(QString query, bool &ok);
 };
 
 #endif // DATABASECONTAINER_H

@@ -1,7 +1,6 @@
 #include "userprofiledialog.h"
 #include "commonpatterns.h"
 #include "ui_userprofiledialog.h"
-#include "dialoghelper.h"
 #include "addfrienddialog.h"
 #include <QtSql/QSqlQuery>
 #include <QtSql/QSqlError>
@@ -27,15 +26,10 @@ UserProfileDialog::~UserProfileDialog()
 
 void UserProfileDialog::updateProfile()
 {
-    if (!checkDatabase()) return;
-
-    auto query = userQuerySql.arg(profileUserId);
-    auto q = mainDatabase->exec(query);
+    bool ok;
+    auto q = execQuery(userQuerySql.arg(profileUserId), ok);
+    if (!ok) return;
     q.first();
-    if (DialogHelper::isSqlError(q.lastError())) {
-        DialogHelper::showSqlError(this, q.lastError(), query);
-        return;
-    }
 
     auto login = q.value(0).toString();
     auto userName = q.value(1).toString();
@@ -56,12 +50,8 @@ void UserProfileDialog::updateProfile()
     if (friendsCount > 0) {
         ui->noFriendsLabel->hide();
 
-        auto friendsQuery = friendsQuerySql.arg(profileUserId);
-        auto friends = mainDatabase->exec(friendsQuery);
-        if (DialogHelper::isSqlError(friends.lastError())) {
-            DialogHelper::showSqlError(this, friends.lastError(), friendsQuery);
-            return;
-        }
+        auto friends = execQuery(friendsQuerySql.arg(profileUserId), ok);
+        if (!ok) return;
 
         while(friends.next()) {
             auto fi = new FriendItem(friends.value(0).toInt(), friends.value(1).toString(),
@@ -75,12 +65,14 @@ void UserProfileDialog::updateProfile()
 
 void UserProfileDialog::deleteFriend(int friendshipId)
 {
-    auto query = removeFriendQuerySql.arg(friendshipId);
-    auto q = mainDatabase->exec(query);
-    if (DialogHelper::isSqlError(q.lastError())) {
-        DialogHelper::showSqlError(this, q.lastError(), query);
-        return;
-    }
+    bool ok;
+    auto q = execQuery(removeFriendQuerySql.arg(friendshipId), ok);
+    if (!ok) return;
+
+    auto fi = static_cast<FriendItem *>(sender());
+    ui->friendsLayout->removeWidget(fi);
+    friendItems.removeOne(fi);
+    fi->deleteLater();
 
     if (q.size() > 0) {
         q.first();
@@ -88,8 +80,6 @@ void UserProfileDialog::deleteFriend(int friendshipId)
                                  QString("Вы больше не друзья с \"%1\" ;(")
                                  .arg(q.value(0).toString()));
     }
-
-    updateProfile();
 }
 
 void UserProfileDialog::on_addByLoginButton_clicked()
