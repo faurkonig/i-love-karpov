@@ -2,7 +2,6 @@
 #define GAMEDIALOG_H
 
 #include "databasecontainer.h"
-#include "sguser.h"
 #include <QDialog>
 
 namespace Ui {
@@ -14,7 +13,7 @@ class GameDialog : public QDialog, private DatabaseContainer
     Q_OBJECT
 
 public:
-    explicit GameDialog(QSqlDatabase *newDb, int id, SgUser user, QWidget *parent = nullptr);
+    explicit GameDialog(QSqlDatabase *newDb, int id, int currentUser, QWidget *parent = nullptr);
     ~GameDialog();
 
 private slots:
@@ -24,7 +23,7 @@ private:
     Ui::GameDialog *ui;
 
     int gameId;
-    SgUser user;
+    int userId;
 
     int gamePrice;
 

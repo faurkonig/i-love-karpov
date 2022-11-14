@@ -24,6 +24,10 @@ private slots:
 
     void openGame(int gameId);
 
+    void on_collectionButton_clicked();
+
+    void on_cartButton_clicked();
+
 private:
     Ui::StoreWindow *ui;
 

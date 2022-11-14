@@ -3,6 +3,8 @@
 #include "gameitem.h"
 #include "gamedialog.h"
 #include "userprofiledialog.h"
+#include "usercollectiondialog.h"
+#include "usercartdialog.h"
 
 StoreWindow::StoreWindow(SgUser user, QSqlDatabase *newDb, QWidget *parent) :
     QMainWindow(parent),
@@ -68,12 +70,22 @@ void StoreWindow::updateGames()
 
 void StoreWindow::openGame(int gameId)
 {
-    GameDialog(mainDatabase, gameId, user, this).exec();
+    GameDialog(mainDatabase, gameId, user.id, this).exec();
 }
 
 
 void StoreWindow::on_profileButton_clicked()
 {
     UserProfileDialog(user.id, user.id, mainDatabase, this).exec();
+}
+
+void StoreWindow::on_collectionButton_clicked()
+{
+    UserCollectionDialog(this).exec();
+}
+
+void StoreWindow::on_cartButton_clicked()
+{
+    UserCartDialog(user.id, mainDatabase, this).exec();
 }
 

@@ -80,6 +80,11 @@ void UserProfileDialog::deleteFriend(int friendshipId)
                                  QString("Вы больше не друзья с \"%1\" ;(")
                                  .arg(q.value(0).toString()));
     }
+
+    // Показываем текст о том, что пользователя нет друзей, если мы только что удалили последнего
+    if (friendItems.isEmpty()) {
+        ui->noFriendsLabel->show();
+    }
 }
 
 void UserProfileDialog::on_addByLoginButton_clicked()

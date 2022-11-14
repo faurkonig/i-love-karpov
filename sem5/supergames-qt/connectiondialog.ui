@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Подключение к SuperGames</string>
+   <string>SuperGames: Подключение к БД</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_2">
    <item>

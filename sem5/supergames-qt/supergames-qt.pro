@@ -22,6 +22,8 @@ SOURCES += \
     sgdeveloper.cpp \
     sguser.cpp \
     storewindow.cpp \
+    usercartdialog.cpp \
+    usercollectiondialog.cpp \
     userprofiledialog.cpp
 
 HEADERS += \
@@ -39,6 +41,8 @@ HEADERS += \
     sgdeveloper.h \
     sguser.h \
     storewindow.h \
+    usercartdialog.h \
+    usercollectiondialog.h \
     userprofiledialog.h
 
 FORMS += \
@@ -50,6 +54,8 @@ FORMS += \
     mainwindow.ui \
     registerdialog.ui \
     storewindow.ui \
+    usercartdialog.ui \
+    usercollectiondialog.ui \
     userprofiledialog.ui
 
 # Default rules for deployment.

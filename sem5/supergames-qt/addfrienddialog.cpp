@@ -27,11 +27,6 @@ void AddFriendDialog::on_addButton_clicked()
         return;
     }
 
-    if (!checkDatabase()) {
-        showError("Нет подключения к базе данных");
-        return;
-    }
-
     bool ok;
     auto foundUser = execQuery(QString("SELECT id, \"name\" FROM users WHERE login = '%1'")
                                .arg(loginToAdd), ok);

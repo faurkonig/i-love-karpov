@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Регистрация аккаунта SuperGames</string>
+   <string>SuperGames: Регистрация аккаунта</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>

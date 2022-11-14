@@ -15,7 +15,11 @@ GameItem::GameItem(int id, QString name, QString description, QString developer,
     ui->gameTitle->setText(name);
     ui->gameDescription->setText(description);
     ui->gameDeveloper->setText(developer);
-    ui->priceLabel->setText(QString::number(price) + " руб.");
+    if (price > 0) {
+        ui->priceLabel->setText(QString::number(price) + " руб.");
+    } else {
+        ui->priceLabel->setText("Бесплатно");
+    }
 }
 
 GameItem::~GameItem()
@@ -27,4 +31,3 @@ void GameItem::on_buyButton_clicked()
 {
     emit onGameButtonPressed(id);
 }
-

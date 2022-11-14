@@ -5,18 +5,19 @@
 #include <QtSql/QSqlError>
 #include <QDateTime>
 
-GameDialog::GameDialog(QSqlDatabase *newDb, int id, SgUser user, QWidget *parent) :
+GameDialog::GameDialog(QSqlDatabase *newDb, int id, int currentUser, QWidget *parent) :
     QDialog(parent),
     DatabaseContainer(parent, newDb),
     ui(new Ui::GameDialog),
     gameId(id),
-    user(user)
+    userId(currentUser)
 {
     ui->setupUi(this);
 
     updateData();
 
-    if (user.isGuest()) {
+    // Блокируем кнопку покупки для гостевого профиля
+    if (currentUser == 0) {
         ui->buyButton->setEnabled(false);
     }
 }
@@ -63,7 +64,7 @@ void GameDialog::updateData()
     // Проверяем, есть ли эта игра уже у нас в коллекции
     auto collectionQ = execQuery(QString("SELECT id FROM internal.collection_elements "
                                              "WHERE game = %1 AND \"user\" = %2")
-                                 .arg(gameId).arg(user.id), ok);
+                                 .arg(gameId).arg(userId), ok);
     if (!ok) return;
 
     if (collectionQ.size() > 0) {
@@ -73,7 +74,7 @@ void GameDialog::updateData()
         // Если нет в коллекции, то проверяем в корзине
         auto cartQ = execQuery(QString("SELECT id FROM internal.cart_elements "
                                            "WHERE game = %1 AND \"user\" = %2")
-                               .arg(gameId).arg(user.id), ok);
+                               .arg(gameId).arg(userId), ok);
         if (!ok) return;
 
         if (cartQ.size() > 0) {
@@ -98,7 +99,7 @@ void GameDialog::on_buyButton_clicked()
             // Удаляем игру из корзины
             execQuery(QString("DELETE FROM internal.cart_elements "
                                   "WHERE game = %1 AND \"user\" = %2")
-                      .arg(gameId).arg(user.id), ok);
+                      .arg(gameId).arg(userId), ok);
             if (!ok) return;
 
             inCart = false;
@@ -106,7 +107,7 @@ void GameDialog::on_buyButton_clicked()
             // Добавляем игру в корзину
             execQuery(QString("INSERT INTO internal.cart_elements (game, \"user\") "
                                   "VALUES (%1, %2)")
-                      .arg(gameId).arg(user.id), ok);
+                      .arg(gameId).arg(userId), ok);
             if (!ok) return;
 
             inCart = true;
@@ -116,7 +117,7 @@ void GameDialog::on_buyButton_clicked()
         // Добавляем игру в коллекцию
         execQuery(QString("INSERT INTO internal.collection_elements (game, \"user\") "
                               "VALUES (%1, %2)")
-                  .arg(gameId).arg(user.id), ok);
+                  .arg(gameId).arg(userId), ok);
         if (!ok) return;
 
         inCollection = true;
