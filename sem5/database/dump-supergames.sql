@@ -5,7 +5,7 @@
 -- Dumped from database version 10.21 (Debian 10.21-1.pgdg90+1)
 -- Dumped by pg_dump version 14.5
 
--- Started on 2022-11-07 16:27:00 MSK
+-- Started on 2022-11-14 22:24:08 MSK
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -399,6 +399,7 @@ ALTER TABLE ONLY public.users ALTER COLUMN id SET DEFAULT nextval('public.users_
 --
 
 COPY internal.cart_elements (id, game, "user", date) FROM stdin;
+31	6	7	2022-11-14 19:17:54.631738
 \.
 
 
@@ -409,6 +410,11 @@ COPY internal.cart_elements (id, game, "user", date) FROM stdin;
 --
 
 COPY internal.collection_elements (id, game, "user", date) FROM stdin;
+5	2	5	2022-11-14 18:04:25.402792
+6	4	5	2022-11-14 18:04:27.738747
+7	1	5	2022-11-14 19:02:09.332232
+8	2	7	2022-11-14 19:18:00.824322
+9	5	7	2022-11-14 19:18:05.721139
 \.
 
 
@@ -431,6 +437,7 @@ COPY internal.friendship (id, source, target, date) FROM stdin;
 COPY public.developers (id, email, password, name, description, date) FROM stdin;
 1	debils.tech@gmail.com	25d55ad283aa400af464c76d713c07ad	Debils Technologies		2022-11-06 15:47:20.729339
 2	support@chucklefish.org	25d55ad283aa400af464c76d713c07ad	Chucklefish	Маленькая инди компания	2022-11-07 13:37:31.10793
+3	mail@idsoftware.com	b4f945433ea4c369c12741f62a23ccc0	id Software		2022-11-14 19:07:51.617211
 \.
 
 
@@ -444,6 +451,8 @@ COPY public.games (id, name, description, developer, price, date) FROM stdin;
 1	Super Flexer 2D	Абсолютно крутая игра!	1	0	2022-11-07 00:02:41.581935
 4	Animal Crossing: New Horizons	Новая часть игры про разведение животных на острове! Здесь есть лиса, медведь, собака, кошка (больше не знаю)...\nИгра выполнена в "мультяшном" стиле\n\n(Исключительно для платформы Nintendo Switch)	1	1500	2022-11-07 13:17:18.994499
 2	Starbound	Прикольная игра про космос	2	399	2022-11-07 01:45:16.143021
+5	Doom	Убивай демонов, стреляй из оружия, очисти мир от служителей ада!	3	600	2022-11-14 22:05:58.972199
+6	Doom Eternal	Продолжение легендарной игры про демонов. Теперь можно мочить демонов в разы быстрее с новым огнемётом и мечом прямо в броне!\\nДля любителей паркура добавлена возможность карабкаться по стенам и цепляться крюком за объекты	3	2000	2022-11-14 22:09:48.802467
 \.
 
 
@@ -465,7 +474,9 @@ COPY public.reviews (id, game, "user", rating, description, date) FROM stdin;
 
 COPY public.users (id, login, password, name, date) FROM stdin;
 5	uslashvlad	81dc9bdb52d04dc20036dbd8313ed055	u/vlad	2022-11-06 15:45:30.507127
-6	a1234	b59c67bf196a4758191e42f76670ceba	jopa	2022-11-06 20:57:14.023344
+7	test1	81dc9bdb52d04dc20036dbd8313ed055	Тестовый пользователь 1	2022-11-14 19:03:57.5851
+8	test2	d93591bdf7860e1e4ee2fca799911215	Тестовый пользователь 2	2022-11-14 19:04:17.046483
+6	a1234	b59c67bf196a4758191e42f76670ceba	Cool guy	2022-11-06 20:57:14.023344
 \.
 
 
@@ -475,7 +486,7 @@ COPY public.users (id, login, password, name, date) FROM stdin;
 -- Name: cart_elements_id_seq; Type: SEQUENCE SET; Schema: internal; Owner: postgres
 --
 
-SELECT pg_catalog.setval('internal.cart_elements_id_seq', 1, false);
+SELECT pg_catalog.setval('internal.cart_elements_id_seq', 31, true);
 
 
 --
@@ -484,7 +495,7 @@ SELECT pg_catalog.setval('internal.cart_elements_id_seq', 1, false);
 -- Name: collection_elements_id_seq; Type: SEQUENCE SET; Schema: internal; Owner: postgres
 --
 
-SELECT pg_catalog.setval('internal.collection_elements_id_seq', 1, false);
+SELECT pg_catalog.setval('internal.collection_elements_id_seq', 9, true);
 
 
 --
@@ -493,7 +504,7 @@ SELECT pg_catalog.setval('internal.collection_elements_id_seq', 1, false);
 -- Name: friendship_id_seq; Type: SEQUENCE SET; Schema: internal; Owner: postgres
 --
 
-SELECT pg_catalog.setval('internal.friendship_id_seq', 1, false);
+SELECT pg_catalog.setval('internal.friendship_id_seq', 18, true);
 
 
 --
@@ -502,7 +513,7 @@ SELECT pg_catalog.setval('internal.friendship_id_seq', 1, false);
 -- Name: developers_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.developers_id_seq', 2, true);
+SELECT pg_catalog.setval('public.developers_id_seq', 3, true);
 
 
 --
@@ -511,7 +522,7 @@ SELECT pg_catalog.setval('public.developers_id_seq', 2, true);
 -- Name: games_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.games_id_seq', 4, true);
+SELECT pg_catalog.setval('public.games_id_seq', 6, true);
 
 
 --
@@ -529,7 +540,7 @@ SELECT pg_catalog.setval('public.reviews_id_seq', 1, false);
 -- Name: users_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.users_id_seq', 6, true);
+SELECT pg_catalog.setval('public.users_id_seq', 8, true);
 
 
 --
@@ -694,7 +705,7 @@ ALTER TABLE ONLY public.reviews
     ADD CONSTRAINT created_on_fk FOREIGN KEY (game) REFERENCES public.games(id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
--- Completed on 2022-11-07 16:27:00 MSK
+-- Completed on 2022-11-14 22:24:08 MSK
 
 --
 -- PostgreSQL database dump complete

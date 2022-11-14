@@ -81,7 +81,7 @@ void StoreWindow::on_profileButton_clicked()
 
 void StoreWindow::on_collectionButton_clicked()
 {
-    UserCollectionDialog(this).exec();
+    UserCollectionDialog(user.id, mainDatabase, this).exec();
 }
 
 void StoreWindow::on_cartButton_clicked()

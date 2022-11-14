@@ -41,7 +41,8 @@ private:
         " (SELECT d.name AS developer"
         " FROM public.developers d"
         " WHERE g.developer = d.id) "
-        "FROM public.games g"
+        "FROM public.games g "
+        "ORDER BY g.\"date\""
     };
 
     void updateGames();
