@@ -63,7 +63,7 @@ void GameDialog::updateData()
     inCollection = inCart = false;
     // Проверяем, есть ли эта игра уже у нас в коллекции
     auto collectionQ = execQuery(QString("SELECT id FROM internal.collection_elements "
-                                             "WHERE game = %1 AND \"user\" = %2")
+                                         "WHERE game = %1 AND \"user\" = %2")
                                  .arg(gameId).arg(userId), ok);
     if (!ok) return;
 
@@ -73,7 +73,7 @@ void GameDialog::updateData()
     } else {
         // Если нет в коллекции, то проверяем в корзине
         auto cartQ = execQuery(QString("SELECT id FROM internal.cart_elements "
-                                           "WHERE game = %1 AND \"user\" = %2")
+                                       "WHERE game = %1 AND \"user\" = %2")
                                .arg(gameId).arg(userId), ok);
         if (!ok) return;
 
@@ -87,6 +87,25 @@ void GameDialog::updateData()
 
     if (reviewCount > 0) {
         ui->noReviewLabel->hide();
+
+        auto reviewsQ = execQuery(gameReviewsQuerySql.arg(gameId), ok);
+        if (!ok) return;
+
+        while (reviewsQ.next()) {
+            auto userName = reviewsQ.value(0).toString();
+            auto reviewRating = reviewsQ.value(1).toInt();
+            auto reviewContent = reviewsQ.value(2).toString();
+            auto reviewDate = reviewsQ.value(3).toDateTime();
+
+            auto reviewText = QString("<b style=\"font-size: 15px\">%1</b> оставил отзыв %2:<br>"
+                                      "<b style=\"font-size: 11px\">Оценка %3 из 10</b><br>%4")
+                    .arg(userName, reviewDate.toString(CommonPatterns::dateTimeFormat))
+                    .arg(reviewRating).arg(reviewContent);
+
+            auto label = new QLabel(reviewText, ui->reviewGroupBox);
+            label->setWordWrap(true);
+            ui->reviewsVerticalLayout->addWidget(label);
+        }
     }
 }
 
@@ -98,7 +117,7 @@ void GameDialog::on_buyButton_clicked()
         if (inCart) {
             // Удаляем игру из корзины
             execQuery(QString("DELETE FROM internal.cart_elements "
-                                  "WHERE game = %1 AND \"user\" = %2")
+                              "WHERE game = %1 AND \"user\" = %2")
                       .arg(gameId).arg(userId), ok);
             if (!ok) return;
 
@@ -106,7 +125,7 @@ void GameDialog::on_buyButton_clicked()
         } else {
             // Добавляем игру в корзину
             execQuery(QString("INSERT INTO internal.cart_elements (game, \"user\") "
-                                  "VALUES (%1, %2)")
+                              "VALUES (%1, %2)")
                       .arg(gameId).arg(userId), ok);
             if (!ok) return;
 
@@ -116,7 +135,7 @@ void GameDialog::on_buyButton_clicked()
         // Если игра бесплатная
         // Добавляем игру в коллекцию
         execQuery(QString("INSERT INTO internal.collection_elements (game, \"user\") "
-                              "VALUES (%1, %2)")
+                          "VALUES (%1, %2)")
                   .arg(gameId).arg(userId), ok);
         if (!ok) return;
 

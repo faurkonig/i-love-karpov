@@ -5,7 +5,7 @@
 -- Dumped from database version 10.21 (Debian 10.21-1.pgdg90+1)
 -- Dumped by pg_dump version 14.5
 
--- Started on 2022-11-14 22:24:08 MSK
+-- Started on 2022-11-15 09:23:05 MSK
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -263,7 +263,7 @@ CREATE TABLE public.reviews (
     game integer NOT NULL,
     "user" integer NOT NULL,
     rating smallint NOT NULL,
-    description text DEFAULT ''::text NOT NULL,
+    content text DEFAULT ''::text NOT NULL,
     date timestamp without time zone DEFAULT now() NOT NULL
 );
 
@@ -462,7 +462,10 @@ COPY public.games (id, name, description, developer, price, date) FROM stdin;
 -- Data for Name: reviews; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.reviews (id, game, "user", rating, description, date) FROM stdin;
+COPY public.reviews (id, game, "user", rating, content, date) FROM stdin;
+1	5	6	10	Просто обожаю убивать демонов! 10/10!!!	2022-11-14 23:51:46.774
+2	1	5	9	Почти идеальная игра. 1 балл снял из-за того, что глючит на моём телефоне	2022-11-15 09:17:42.654193
+3	1	8	10	Лучшая игра в истории человечества!!!	2022-11-15 09:17:42.670324
 \.
 
 
@@ -531,7 +534,7 @@ SELECT pg_catalog.setval('public.games_id_seq', 6, true);
 -- Name: reviews_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.reviews_id_seq', 1, false);
+SELECT pg_catalog.setval('public.reviews_id_seq', 3, true);
 
 
 --
@@ -705,7 +708,7 @@ ALTER TABLE ONLY public.reviews
     ADD CONSTRAINT created_on_fk FOREIGN KEY (game) REFERENCES public.games(id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
--- Completed on 2022-11-14 22:24:08 MSK
+-- Completed on 2022-11-15 09:23:05 MSK
 
 --
 -- PostgreSQL database dump complete

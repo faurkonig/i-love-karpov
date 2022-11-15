@@ -193,7 +193,7 @@
          <property name="title">
           <string>Отзывы</string>
          </property>
-         <layout class="QVBoxLayout" name="verticalLayout_5">
+         <layout class="QVBoxLayout" name="reviewsVerticalLayout">
           <item>
            <widget class="QLabel" name="noReviewLabel">
             <property name="font">

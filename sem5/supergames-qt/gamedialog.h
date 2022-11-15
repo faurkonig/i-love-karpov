@@ -47,6 +47,14 @@ private:
         " ON d.id = g.developer "
         "WHERE g.id = %1"
     };
+    QString gameReviewsQuerySql {
+        "SELECT (SELECT u.\"name\" FROM public.users u"
+        " WHERE u.id = r.\"user\"),"
+        " r.rating, r.\"content\", r.\"date\" "
+        "FROM public.reviews r "
+        "WHERE r.game = %1 "
+        "ORDER BY r.\"date\" DESC"
+    };
 
     void updateData();
 
