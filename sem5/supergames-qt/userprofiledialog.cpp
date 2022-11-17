@@ -41,7 +41,8 @@ void UserProfileDialog::updateProfile()
     ui->nameTitle->setText(userName);
     ui->loginLabel->setText(QString("Логин: <b>%1</b>").arg(login));
     ui->dateLabel->setText(QString("Зарегистрирован <u>%1</u>")
-                           .arg(userDate.toLocalTime().toString(CommonPatterns::dateTimeFormat)));
+                           .arg(userDate.toLocalTime()
+                                .toString(*CommonPatterns::dateTimeFormat)));
 
     // Очищаем список друзей
     for (auto fi : qAsConst(friendItems)) {

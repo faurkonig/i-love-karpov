@@ -44,12 +44,12 @@ void RegisterDialog::on_registerButton_clicked()
             DialogHelper::showValidationError(this, "Логин должен быть длиной от 4 символов");
             return;
         }
-        if (!login.contains(CommonPatterns::loginRegex)) {
+        if (!login.contains(*CommonPatterns::loginRegex)) {
             DialogHelper::showValidationError(this, "Логин должен состоять из латинских букв, цифр или знака \"_\""
                                                     " (и может начинатся только с латинской буквы)");
             return;
         }
-    } else if (!login.contains(CommonPatterns::emailRegex)) {
+    } else if (!login.contains(*CommonPatterns::emailRegex)) {
         DialogHelper::showValidationError(this, "Введена некорректная почта");
         return;
     }

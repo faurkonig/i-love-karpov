@@ -53,13 +53,13 @@ void GameDialog::updateData()
     ui->gameDeveloper->setText(QString("Разработана <u>%1</u>")
                                .arg(devName));
     ui->gameDate->setText(QString("Добавлена <u>%1</u>")
-                          .arg(gameDate.toLocalTime().toString(CommonPatterns::dateTimeFormat)));
+                          .arg(gameDate.toLocalTime().toString(*CommonPatterns::dateTimeFormat)));
     ui->gameCollectionCount->setText(QString("В коллекции у <u>%1</u> пользовател%2")
                                      .arg(collectionCount)
                                      .arg(collectionCount % 10 == 1 ? "я" : "ей"));
     ui->developerDescription->setText(devDescription);
     ui->developerDate->setText(QString("Зарегистрирован <u>%1</u>")
-                               .arg(devDate.toLocalTime().toString(CommonPatterns::dateTimeFormat)));
+                               .arg(devDate.toLocalTime().toString(*CommonPatterns::dateTimeFormat)));
     ui->developerEmail->setText(devEmail);
 
     inCollection = inCart = false;
@@ -103,7 +103,7 @@ void GameDialog::updateData()
             // Каждый виджет с отзывом - это просто QLabel с заданным текстом
             auto reviewText = QString("<b style=\"font-size: 15px\">%1</b> оставил отзыв %2:<br>"
                                       "<b style=\"font-size: 11px\">Оценка %3 из 10</b><br>%4")
-                    .arg(userName, reviewDate.toString(CommonPatterns::dateTimeFormat))
+                    .arg(userName, reviewDate.toString(*CommonPatterns::dateTimeFormat))
                     .arg(reviewRating).arg(reviewContent);
 
             auto label = new QLabel(reviewText, ui->reviewGroupBox);

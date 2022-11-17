@@ -1,9 +1,9 @@
 #ifndef USERCOLLECTIONDIALOG_H
 #define USERCOLLECTIONDIALOG_H
 
-
 #include "databasecontainer.h"
 #include <QDialog>
+
 
 namespace Ui {
 class UserCollectionDialog;

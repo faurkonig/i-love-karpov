@@ -6,6 +6,7 @@
 #include <QDialog>
 #include <QList>
 
+
 namespace Ui {
 class UserProfileDialog;
 }
