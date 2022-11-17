@@ -1,6 +1,5 @@
 #include "storewindow.h"
 #include "ui_storewindow.h"
-#include "gameitem.h"
 #include "gamedialog.h"
 #include "userprofiledialog.h"
 #include "usercollectiondialog.h"
@@ -40,6 +39,7 @@ void StoreWindow::updateGames()
     auto getGamesQ = execQuery(gamesQuerySql, ok);
     if (!ok) return;
 
+    // Очищаем старые виджеты, если есть
     for (auto gi : qAsConst(gameItems)) {
         ui->scrollVerticalLayout->removeWidget(gi);
         gi->deleteLater();
@@ -53,18 +53,21 @@ void StoreWindow::updateGames()
     QString developerName;
     GameItem *gi;
     while (getGamesQ.next()) {
+        // Получаем данные из запроса
         id = getGamesQ.value(0).toInt();
         name = getGamesQ.value(1).toString();
         description = getGamesQ.value(2).toString();
         price = getGamesQ.value(3).toDouble();
         developerName = getGamesQ.value(4).toString();
 
+        // Выводим загруженные игры
         gi = new GameItem(id, name, description, developerName, price, ui->scrollAreaWidgetContents);
         connect(gi, &GameItem::onGameButtonPressed, this, &StoreWindow::openGame);
         gameItems.append(gi);
         ui->scrollVerticalLayout->insertWidget(1, gi);
     }
 
+    // Выводим конечное количество игр
     ui->totalCountLabel->setText("Загружено игр: " + QString::number(gameItems.length()));
 }
 

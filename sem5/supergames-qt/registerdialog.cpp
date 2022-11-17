@@ -25,9 +25,11 @@ RegisterDialog::~RegisterDialog()
 void RegisterDialog::on_typeComboBox_currentIndexChanged(int index)
 {
     if (index == 0) {
+        // Регистрация пользователя
         isUser = true;
         ui->userLoginTitle->setText("Логин:");
     } else {
+        // Регистрация разработчика
         isUser = false;
         ui->userLoginTitle->setText("Почта:");
     }
@@ -36,6 +38,7 @@ void RegisterDialog::on_typeComboBox_currentIndexChanged(int index)
 void RegisterDialog::on_registerButton_clicked()
 {
     auto login = ui->userLoginField->text().trimmed().toLower();
+    // Проверка корректности логина
     if (isUser){
         if (login.length() < 4) {
             DialogHelper::showValidationError(this, "Логин должен быть длиной от 4 символов");
@@ -51,18 +54,21 @@ void RegisterDialog::on_registerButton_clicked()
         return;
     }
 
+    // Проверка корректности пароля
     auto password = ui->userPasswordField->text().trimmed();
     if (password.length() < 4) {
         DialogHelper::showValidationError(this, "Пароль должен быть длиной от 5 символов");
         return;
     }
 
+    // Проверка совпадения пароля и его повтора
     auto repeatedPassword = ui->userPasswordRepeatField->text().trimmed();
     if (repeatedPassword != password) {
         DialogHelper::showValidationError(this, "Пароли не совпадают");
         return;
     }
 
+    // Проверка корректности имени
     auto name = ui->userNameField->text().trimmed();
     if (name.isEmpty()) {
         DialogHelper::showValidationError(this, "Имя не может быть пустым");
@@ -86,6 +92,7 @@ void RegisterDialog::on_registerButton_clicked()
 
 void RegisterDialog::on_cancelButton_clicked()
 {
+    // Закрываем диалог
     reject();
 }
 

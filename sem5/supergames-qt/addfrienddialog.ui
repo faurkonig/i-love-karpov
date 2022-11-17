@@ -67,7 +67,7 @@
       </font>
      </property>
      <property name="text">
-      <string>Инфо</string>
+      <string/>
      </property>
      <property name="wordWrap">
       <bool>true</bool>

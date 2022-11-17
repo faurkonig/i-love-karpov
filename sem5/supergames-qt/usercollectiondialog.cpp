@@ -25,15 +25,15 @@ UserCollectionDialog::~UserCollectionDialog()
 void UserCollectionDialog::updateSideList()
 {
     bool ok;
+    // Грузим игры для боковой панели из БД
     auto q = execQuery(collectionListSqlQuery.arg(userId), ok);
-    if (!ok) return;
-
-    if (q.size() < 1) {
+    if (!ok || q.size() < 1) {
         ui->noSelectionLabel->setText("Нет ни одной игры в коллекции");
         return;
     }
 
     while (q.next()) {
+        // Выводи игры
         ui->sideList->addItem(q.value(1).toString());
         gameIds.append(q.value(0).toInt());
     }
@@ -46,6 +46,7 @@ void UserCollectionDialog::on_sideList_currentRowChanged(int currentRow)
     auto q = execQuery(gameSqlQuery.arg(gameIds[currentRow]).arg(userId), ok);
     if (!ok || q.size() < 1) return;
 
+    // Получаем и выводим данные об выбранной игре
     q.first();
     ui->gameTitle->setText(q.value(0).toString());
     ui->descriptionLabel->setText(q.value(1).toString());

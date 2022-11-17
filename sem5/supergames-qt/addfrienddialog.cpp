@@ -10,8 +10,6 @@ AddFriendDialog::AddFriendDialog(QSqlDatabase *newDb, int currentUser, QWidget *
     sourceId(currentUser)
 {
     ui->setupUi(this);
-
-    ui->infoLabel->hide();
 }
 
 AddFriendDialog::~AddFriendDialog()
@@ -21,6 +19,7 @@ AddFriendDialog::~AddFriendDialog()
 
 void AddFriendDialog::on_addButton_clicked()
 {
+    // Проверяем введённый логин на корректность
     auto loginToAdd = ui->loginField->text().trimmed().toLower();
     if (!loginToAdd.contains(CommonPatterns::loginRegex)) {
         showError("Неверный логин");
@@ -28,10 +27,11 @@ void AddFriendDialog::on_addButton_clicked()
     }
 
     bool ok;
+    // Проверяем существование такого пользователя в базе данных
+    // Ищем ID и имя пользователя по логину
     auto foundUser = execQuery(QString("SELECT id, \"name\" FROM users WHERE login = '%1'")
                                .arg(loginToAdd), ok);
-    if (!ok) return;
-    if (foundUser.size() < 1) {
+    if (!ok || foundUser.size() < 1) {
         showError("Пользователь с таким логином не найден");
         return;
     }
@@ -39,22 +39,24 @@ void AddFriendDialog::on_addButton_clicked()
     auto userId = foundUser.value(0).toInt();
     auto userName = foundUser.value(1).toString();
 
+    // Сверяем ID найденного пользователя со своим
     if (userId == sourceId) {
         showError("Нельзя добавить в друзья самого себя");
         return;
     }
 
+    // Проверяем, есть ли уже дружба с этим пользователем
     auto foundFriendship = execQuery(QString("SELECT id FROM internal.friendship "
-                                                 "WHERE \"source\" = %1 AND \"target\" = %2")
+                                             "WHERE \"source\" = %1 AND \"target\" = %2")
                                      .arg(sourceId).arg(userId), ok);
-    if (!ok) return;
-    if (foundFriendship.size() != 0) {
+    if (!ok || foundFriendship.size() != 0) {
         showError("Этот пользователь уже у вас в друзьях");
         return;
     }
 
+    // Если все предыдущие проверки прошли, то добавляем пользователя в друзья
     execQuery(QString("INSERT INTO internal.friendship (\"source\", \"target\") "
-                          "VALUES (%1, %2)").arg(sourceId).arg(userId), ok);
+                      "VALUES (%1, %2)").arg(sourceId).arg(userId), ok);
     if (!ok) return;
 
     showSuccess("Пользователь \""+userName+"\" добавлен в друзья!");
@@ -63,17 +65,18 @@ void AddFriendDialog::on_addButton_clicked()
 
 void AddFriendDialog::on_exitButton_clicked()
 {
+    // Просто закрываем окно
     accept();
 }
 
 void AddFriendDialog::showError(QString text)
 {
+    // Просто выводим красный текст
     ui->infoLabel->setText("<font color=\"red\">"+text+"</font>");
-    ui->infoLabel->show();
 }
 
 void AddFriendDialog::showSuccess(QString text)
 {
+    // Просто выводим зелённый текст
     ui->infoLabel->setText("<font color=\"green\">"+text+"</font>");
-    ui->infoLabel->show();
 }

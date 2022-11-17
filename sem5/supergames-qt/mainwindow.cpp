@@ -66,24 +66,32 @@ void MainWindow::on_radioButtonDeveloper_clicked()
 void MainWindow::on_loginPushButton_clicked()
 {
     if (ui->radioButtonGuest->isChecked()) {
+        // Вход как гость
         auto window = new StoreWindow(SgUser(0, "_guest", "", "Гость", QDateTime::currentDateTime()), mainDatabase);
         window->show();
     } else {
+        // Вход как пользователь или разработчик
+
+        // Определяем тип входа
         auto isUser = ui->radioButtonUser->isChecked();
 
+        // Проверяем логин
         auto login = ui->loginField->text().trimmed();
         if (isUser) {
+            // Для пользователя это просто логин
             if (!login.contains(CommonPatterns::loginRegex)) {
                 DialogHelper::showValidationError(this, "Неверный логин");
                 return;
             }
         } else {
+            // Для разработчика это почта
             if (!login.contains(CommonPatterns::emailRegex)) {
                 DialogHelper::showValidationError(this, "Неверная почта");
                 return;
             }
         }
 
+        // Проверяем пароль
         auto password = ui->passwordField->text().trimmed();
         if (password.isEmpty()) {
             DialogHelper::showValidationError(this, "Пароль не может быть пустым");
@@ -91,6 +99,7 @@ void MainWindow::on_loginPushButton_clicked()
         }
 
         if (isUser) {
+            // Входим как пользователь
             bool ok;
             auto user = loginAsUser(login, password, ok);
 
@@ -111,23 +120,22 @@ SgUser MainWindow::loginAsUser(QString login, QString password, bool &ok)
 
     auto hashedPassword = hashString(password);
 
-    auto q = execQuery(QString("SELECT * FROM users "
+    auto q = execQuery(QString("SELECT id, \"name\", \"date\" FROM users "
                                    "WHERE login = '%1' AND \"password\" = '%2'")
                        .arg(login, hashedPassword), ok);
-    if (!ok) return user;
-
     // Проверяем вообще, нашёлся ли такой пользователь
-    if (q.size() < 1) {
+    if (!ok || q.size() < 1) {
         ok = false;
         return user;
     }
     q.first();
 
+    // Записываем данные
     user.id = q.value(0).toInt();
-    user.login = q.value(1).toString();
-    user.password = q.value(2).toString();
-    user.name = q.value(3).toString();
-    user.date = q.value(4).toDateTime();
+    user.login = login;
+    user.password = password;
+    user.name = q.value(1).toString();
+    user.date = q.value(2).toDateTime();
 
     ok = true;
     return user;
@@ -142,16 +150,12 @@ SgDeveloper MainWindow::loginAsDeveloper(QString login, QString password, bool &
     auto q = execQuery(QString("SELECT * FROM developers "
                                "WHERE email = '%1' AND \"password\" = '%2'")
                        .arg(login, hashedPassword), ok);
-    if (!ok) return dev;
-
     // Проверяем вообще, нашёлся ли такой разработчик
-    if (q.size() < 1) {
+    if (!ok || q.size() < 1) {
         ok = false;
         return dev;
     }
     q.first();
-
-//    dev.id = q.value(0).toInt();
 
     ok = true;
     return dev;

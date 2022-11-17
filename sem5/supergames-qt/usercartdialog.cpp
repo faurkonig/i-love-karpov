@@ -26,44 +26,50 @@ void UserCartDialog::updateContent()
     auto q = execQuery(gamesInCartSqlQuery.arg(userId), ok);
     if (!ok) return;
 
+    // Очищаем старые элементы корзины
     for (auto ci : qAsConst(cartItems)) {
         ui->scrollVerticalLayout->removeWidget(ci);
         ci->deleteLater();
     }
     cartItems.clear();
 
-    if (q.size() > 0) {
-        ui->noItemsLabel->hide();
-
-        while (q.next()) {
-            auto cartItem = new QWidget(ui->scrollArea);
-            auto cartItemLayout = new QVBoxLayout(cartItem);
-            ui->scrollVerticalLayout->insertWidget(1, cartItem);
-            cartItems.append(cartItem);
-
-            auto gameId = q.value(1);
-            auto gameName = q.value(2);
-            auto gameDescription = q.value(3).toString();
-            auto gamePrice = q.value(4);
-            auto gameDeveloper = q.value(5);
-
-            auto gi = new GameItem(gameId.toInt(), gameName.toString(),
-                                   gameDescription, gameDeveloper.toString(),
-                                   gamePrice.toInt(), cartItem);
-            connect(gi, &GameItem::onGameButtonPressed, this, &UserCartDialog::openGame);
-            cartItemLayout->addWidget(gi);
-
-            auto pb = new QPushButton("Купить", cartItem);
-            connect(pb, &QPushButton::clicked, this, &UserCartDialog::buyGame);
-            pb->setProperty("cartId", q.value(0));
-            pb->setProperty("gameId", gameId);
-            pb->setProperty("name", gameName);
-            pb->setProperty("price", gamePrice);
-            pb->setProperty("developer", gameDeveloper);
-            cartItemLayout->addWidget(pb);
-        }
-    } else {
+    // Проверяем, вернулись ли какие-либо данные по запросу
+    if (q.size() < 1) {
         ui->noItemsLabel->show();
+        return;
+    }
+    ui->noItemsLabel->hide();
+
+    while (q.next()) {
+        // Создаём базовые виджеты
+        auto cartItem = new QWidget(ui->scrollArea);
+        auto cartItemLayout = new QVBoxLayout(cartItem);
+        ui->scrollVerticalLayout->insertWidget(1, cartItem);
+        cartItems.append(cartItem);
+
+        // Берём данные из зароса
+        auto gameId = q.value(1);
+        auto gameName = q.value(2);
+        auto gameDescription = q.value(3).toString();
+        auto gamePrice = q.value(4);
+        auto gameDeveloper = q.value(5);
+
+        // Создаём и заполняем внутренние виджеты
+        // Верхняя часть (игра)
+        auto gi = new GameItem(gameId.toInt(), gameName.toString(),
+                               gameDescription, gameDeveloper.toString(),
+                               gamePrice.toInt(), cartItem);
+        connect(gi, &GameItem::onGameButtonPressed, this, &UserCartDialog::openGame);
+        cartItemLayout->addWidget(gi);
+        // Нижняя часть (кнопка покупки)
+        auto pb = new QPushButton("Купить", cartItem);
+        connect(pb, &QPushButton::clicked, this, &UserCartDialog::buyGame);
+        pb->setProperty("cartId", q.value(0));
+        pb->setProperty("gameId", gameId);
+        pb->setProperty("name", gameName);
+        pb->setProperty("price", gamePrice);
+        pb->setProperty("developer", gameDeveloper);
+        cartItemLayout->addWidget(pb);
     }
 }
 
@@ -80,6 +86,7 @@ void UserCartDialog::openGame(int gameId)
 
 void UserCartDialog::buyGame()
 {
+    // Получение ранее записанных данных
     auto source = static_cast<QPushButton *>(sender());
     auto cartId = source->property("cartId").toInt();
     auto gameId = source->property("gameId").toInt();
@@ -87,12 +94,14 @@ void UserCartDialog::buyGame()
     auto price = source->property("price").toDouble();
     auto developer = source->property("developer").toString();
 
+    // Диалог о подтверждении
     auto question = QMessageBox::question(this, "Покупка",
                                           QString("Вы уверены что хотите купить игру \"%1\" "
                                                   "от разработчика \"%2\" "
                                                   "за %3 рублей?")
                                           .arg(name, developer).arg(price),
                                           QMessageBox:: Yes | QMessageBox::Cancel);
+    // Проверяем ответ пользователя
     if (question != QMessageBox::Yes) return;
 
     bool ok;

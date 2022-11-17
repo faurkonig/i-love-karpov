@@ -5,14 +5,14 @@
 
 namespace CommonPatterns {
 /// Регулярное выражение для проверки логина пользователя
-const QRegExp loginRegex{"^[a-z][a-z0-9_]+$"};
+QRegExp loginRegex{"^[a-z][a-z0-9_]+$"};
 
-/// Очень простое и наивное регулярное выражение для проверки почты пользователя
-/// Но есть, конечно, и умнее: https://www.emailregex.com
-/// Просто с ним можно замучатся
-const QRegExp emailRegex{"^.+@.+\\..+$"};
+/// Очень простое и наивное регулярное выражение для проверки почты пользователя.
+/// Есть, конечно, и умнее: https://www.emailregex.com
+QRegExp emailRegex{"^.+@.+\\..+$"};
 
-const QString dateTimeFormat{"dd.MM.yyyy hh:mm"};
+/// Типичный формат отображения даты ("день:месяц:год час:минуты")
+QString dateTimeFormat{"dd.MM.yyyy hh:mm"};
 }
 
 #endif // COMMONPATTERNS_H

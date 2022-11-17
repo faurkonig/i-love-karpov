@@ -35,6 +35,7 @@ void GameDialog::updateData()
 
     gameQ.first();
 
+    // Собираем данные основного запроса
     auto gameName = gameQ.value(0).toString();
     auto gameDescription = gameQ.value(1).toString();
     gamePrice = gameQ.value(2).toDouble();
@@ -46,6 +47,7 @@ void GameDialog::updateData()
     auto reviewCount = gameQ.value(8).toInt();
     auto collectionCount = gameQ.value(9).toInt();
 
+    // Выводим данные основного запроса
     ui->gameTitle->setText(gameName);
     ui->gameDescription->setText(gameDescription);
     ui->gameDeveloper->setText(QString("Разработана <u>%1</u>")
@@ -86,6 +88,7 @@ void GameDialog::updateData()
     updateBuyButton();
 
     if (reviewCount > 0) {
+        // Если уже известно, что на игру есть отзывы, то грузим их
         ui->noReviewLabel->hide();
 
         auto reviewsQ = execQuery(gameReviewsQuerySql.arg(gameId), ok);
@@ -97,6 +100,7 @@ void GameDialog::updateData()
             auto reviewContent = reviewsQ.value(2).toString();
             auto reviewDate = reviewsQ.value(3).toDateTime();
 
+            // Каждый виджет с отзывом - это просто QLabel с заданным текстом
             auto reviewText = QString("<b style=\"font-size: 15px\">%1</b> оставил отзыв %2:<br>"
                                       "<b style=\"font-size: 11px\">Оценка %3 из 10</b><br>%4")
                     .arg(userName, reviewDate.toString(CommonPatterns::dateTimeFormat))

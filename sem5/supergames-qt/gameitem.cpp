@@ -4,14 +4,11 @@
 GameItem::GameItem(int id, QString name, QString description, QString developer, double price, QWidget *parent)
     : QWidget(parent),
       ui(new Ui::GameItem),
-      id(id)/*,
-      name(name),
-      description(description),
-      developer(developer),
-      price(price)*/
+      id(id)
 {
     ui->setupUi(this);
 
+    // Обновляем виджеты по заданным в конструкторе данным
     ui->gameTitle->setText(name);
     ui->gameDescription->setText(description);
     ui->gameDeveloper->setText(developer);

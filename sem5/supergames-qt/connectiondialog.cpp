@@ -3,9 +3,6 @@
 #include <QtSql/QSqlError>
 #include <QMessageBox>
 
-// Нужно чтобы во время разработки автоматически подключатся с тестовыми данными
-// В конечном итоге лучше закомментировать
-#define SG_DEBUG
 
 ConnectionDialog::ConnectionDialog(QSqlDatabase *newDb, bool *isSave, QWidget *parent) :
     QDialog(parent),
@@ -15,16 +12,15 @@ ConnectionDialog::ConnectionDialog(QSqlDatabase *newDb, bool *isSave, QWidget *p
 {
     ui->setupUi(this);
 
+    // Автоматически проверяем соединение со стандартными параметрами
     on_testConnectionButton_clicked();
-
-#ifdef SG_DEBUG
-    on_pushButtonSave_clicked();
-#endif
 }
 
 ConnectionDialog::~ConnectionDialog()
 {
     delete ui;
+
+    if (!isSavedInside) delete db;
 }
 
 
@@ -34,12 +30,14 @@ void ConnectionDialog::on_testConnectionButton_clicked()
     auto fields = getFieldsData(correctFields);
     if (correctFields) {
         print("Тест подключения...");
+        // Записываем значения
         db->setHostName(fields.address);
         db->setPort(fields.port);
         db->setDatabaseName(fields.dbName);
         db->setUserName(fields.dbUser);
         db->setPassword(fields.dbPassword);
 
+        // Проверяем соединение
         if (db->open()) {
             printSuccess("Соединение с базой данных успешно установлено! Данные корректные");
             db->close();
@@ -57,12 +55,14 @@ void ConnectionDialog::on_pushButtonSave_clicked()
     bool correctFields;
     auto fields = getFieldsData(correctFields);
     if (correctFields) {
+        // Записываем значения
         db->setHostName(fields.address);
         db->setPort(fields.port);
         db->setDatabaseName(fields.dbName);
         db->setUserName(fields.dbUser);
         db->setPassword(fields.dbPassword);
 
+        // Проверяем соединение
         if (!db->open()) {
             printError("Не удалось подключится к базе данных. Проверьте данные для подключения");
             printError(db->lastError().text());
@@ -70,10 +70,10 @@ void ConnectionDialog::on_pushButtonSave_clicked()
         }
 
         *save = true;
+        // Устанавливаем этот флаг чтобы БД не удалилась после закрытия диалога
+        isSavedInside = true;
 
-#ifndef SG_DEBUG
         QMessageBox::information(this, "Подключение", "Успешное подключение к базе данных");
-#endif
         accept();
     } else {
         printError("Введены неверные данные, невозможно сохранить");
@@ -91,6 +91,7 @@ ConnectionFields ConnectionDialog::getFieldsData(bool &ok)
     ConnectionFields fields;
     ok = true;
 
+    // Сохраняем поля по введённым данным
     fields.address = ui->hostField->text();
     bool correctPort;
     fields.port = ui->portField->text().toInt(&correctPort);
@@ -98,6 +99,7 @@ ConnectionFields ConnectionDialog::getFieldsData(bool &ok)
     fields.dbUser = ui->dbUserField->text();
     fields.dbPassword = ui->dbPasswordField->text();
 
+    // Проверяем поля
     if (fields.address.isEmpty()) {
         printError("Адрес хоста не может быть пустым");
         ok = false;
