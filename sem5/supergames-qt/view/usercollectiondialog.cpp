@@ -1,6 +1,6 @@
 #include "usercollectiondialog.h"
 #include "ui_usercollectiondialog.h"
-#include "commonpatterns.h"
+#include "utils/commonpatterns.h"
 #include <QDateTime>
 
 UserCollectionDialog::UserCollectionDialog(int currentUser, QSqlDatabase *newDb, QWidget *parent) :

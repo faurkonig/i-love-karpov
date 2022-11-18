@@ -1,7 +1,7 @@
 #ifndef ADDFRIENDDIALOG_H
 #define ADDFRIENDDIALOG_H
 
-#include "databasecontainer.h"
+#include "utils/databasecontainer.h"
 #include <QDialog>
 
 namespace Ui {

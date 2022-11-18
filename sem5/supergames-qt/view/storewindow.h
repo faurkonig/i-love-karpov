@@ -1,9 +1,9 @@
 #ifndef STOREWINDOW_H
 #define STOREWINDOW_H
 
-#include "databasecontainer.h"
+#include "utils/databasecontainer.h"
 #include "sguser.h"
-#include "gameitem.h"
+#include "components/gameitem.h"
 #include <QMainWindow>
 
 namespace Ui {

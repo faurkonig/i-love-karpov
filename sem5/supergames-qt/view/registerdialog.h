@@ -1,7 +1,7 @@
 #ifndef REGISTERDIALOG_H
 #define REGISTERDIALOG_H
 
-#include "databasecontainer.h"
+#include "utils/databasecontainer.h"
 #include <QDialog>
 
 namespace Ui {

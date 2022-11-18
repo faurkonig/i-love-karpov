@@ -1,5 +1,5 @@
 #include "gamedialog.h"
-#include "commonpatterns.h"
+#include "utils/commonpatterns.h"
 #include "ui_gamedialog.h"
 #include <QtSql/QSqlQuery>
 #include <QtSql/QSqlError>

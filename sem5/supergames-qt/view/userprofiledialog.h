@@ -1,8 +1,8 @@
 #ifndef USERPROFILEDIALOG_H
 #define USERPROFILEDIALOG_H
 
-#include "databasecontainer.h"
-#include "frienditem.h"
+#include "utils/databasecontainer.h"
+#include "components/frienditem.h"
 #include <QDialog>
 #include <QList>
 

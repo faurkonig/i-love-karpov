@@ -1,5 +1,5 @@
 #include "userprofiledialog.h"
-#include "commonpatterns.h"
+#include "utils/commonpatterns.h"
 #include "ui_userprofiledialog.h"
 #include "addfrienddialog.h"
 #include <QtSql/QSqlQuery>

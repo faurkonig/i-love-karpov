@@ -1,7 +1,7 @@
 #ifndef USERCOLLECTIONDIALOG_H
 #define USERCOLLECTIONDIALOG_H
 
-#include "databasecontainer.h"
+#include "utils/databasecontainer.h"
 #include <QDialog>
 
 

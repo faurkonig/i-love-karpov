@@ -1,8 +1,8 @@
 #include "registerdialog.h"
 #include "ui_registerdialog.h"
-#include "dialoghelper.h"
-#include "hash.h"
-#include "commonpatterns.h"
+#include "utils/dialoghelper.h"
+#include "utils/hash.h"
+#include "utils/commonpatterns.h"
 #include <QMessageBox>
 #include <QtSql/QSqlQuery>
 #include <QtSql/QSqlError>

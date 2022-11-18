@@ -1,6 +1,6 @@
 #include "addfrienddialog.h"
 #include "ui_addfrienddialog.h"
-#include "commonpatterns.h"
+#include "utils/commonpatterns.h"
 #include <QtSql/QSqlQuery>
 
 AddFriendDialog::AddFriendDialog(QSqlDatabase *newDb, int currentUser, QWidget *parent) :

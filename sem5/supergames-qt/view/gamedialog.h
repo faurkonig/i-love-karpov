@@ -1,7 +1,7 @@
 #ifndef GAMEDIALOG_H
 #define GAMEDIALOG_H
 
-#include "databasecontainer.h"
+#include "utils/databasecontainer.h"
 #include <QDialog>
 
 namespace Ui {

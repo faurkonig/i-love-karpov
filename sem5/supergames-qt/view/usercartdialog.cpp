@@ -1,6 +1,6 @@
 #include "usercartdialog.h"
 #include "ui_usercartdialog.h"
-#include "gameitem.h"
+#include "components/gameitem.h"
 #include "gamedialog.h"
 #include <QMessageBox>
 

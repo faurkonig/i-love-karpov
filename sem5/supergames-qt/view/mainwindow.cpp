@@ -3,9 +3,9 @@
 #include "connectiondialog.h"
 #include "registerdialog.h"
 #include "storewindow.h"
-#include "commonpatterns.h"
-#include "dialoghelper.h"
-#include "hash.h"
+#include "utils/commonpatterns.h"
+#include "utils/dialoghelper.h"
+#include "utils/hash.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent),

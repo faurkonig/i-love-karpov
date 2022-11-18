@@ -5,7 +5,7 @@
 -- Dumped from database version 10.21 (Debian 10.21-1.pgdg90+1)
 -- Dumped by pg_dump version 14.5
 
--- Started on 2022-11-15 09:23:05 MSK
+-- Started on 2022-11-19 00:51:08 MSK
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -399,7 +399,6 @@ ALTER TABLE ONLY public.users ALTER COLUMN id SET DEFAULT nextval('public.users_
 --
 
 COPY internal.cart_elements (id, game, "user", date) FROM stdin;
-31	6	7	2022-11-14 19:17:54.631738
 \.
 
 
@@ -415,6 +414,9 @@ COPY internal.collection_elements (id, game, "user", date) FROM stdin;
 7	1	5	2022-11-14 19:02:09.332232
 8	2	7	2022-11-14 19:18:00.824322
 9	5	7	2022-11-14 19:18:05.721139
+10	4	7	2022-11-15 07:47:03.679684
+11	6	7	2022-11-15 07:51:27.356674
+12	6	8	2022-11-15 09:05:37.249763
 \.
 
 
@@ -425,6 +427,7 @@ COPY internal.collection_elements (id, game, "user", date) FROM stdin;
 --
 
 COPY internal.friendship (id, source, target, date) FROM stdin;
+21	8	6	2022-11-15 09:06:09.028303
 \.
 
 
@@ -489,7 +492,7 @@ COPY public.users (id, login, password, name, date) FROM stdin;
 -- Name: cart_elements_id_seq; Type: SEQUENCE SET; Schema: internal; Owner: postgres
 --
 
-SELECT pg_catalog.setval('internal.cart_elements_id_seq', 31, true);
+SELECT pg_catalog.setval('internal.cart_elements_id_seq', 37, true);
 
 
 --
@@ -498,7 +501,7 @@ SELECT pg_catalog.setval('internal.cart_elements_id_seq', 31, true);
 -- Name: collection_elements_id_seq; Type: SEQUENCE SET; Schema: internal; Owner: postgres
 --
 
-SELECT pg_catalog.setval('internal.collection_elements_id_seq', 9, true);
+SELECT pg_catalog.setval('internal.collection_elements_id_seq', 12, true);
 
 
 --
@@ -507,7 +510,7 @@ SELECT pg_catalog.setval('internal.collection_elements_id_seq', 9, true);
 -- Name: friendship_id_seq; Type: SEQUENCE SET; Schema: internal; Owner: postgres
 --
 
-SELECT pg_catalog.setval('internal.friendship_id_seq', 18, true);
+SELECT pg_catalog.setval('internal.friendship_id_seq', 21, true);
 
 
 --
@@ -708,7 +711,7 @@ ALTER TABLE ONLY public.reviews
     ADD CONSTRAINT created_on_fk FOREIGN KEY (game) REFERENCES public.games(id) ON UPDATE CASCADE ON DELETE CASCADE;
 
 
--- Completed on 2022-11-15 09:23:05 MSK
+-- Completed on 2022-11-19 00:51:08 MSK
 
 --
 -- PostgreSQL database dump complete

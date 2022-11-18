@@ -8,55 +8,58 @@ CONFIG += c++17
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
-    addfrienddialog.cpp \
-    connectiondialog.cpp \
-    databasecontainer.cpp \
-    dialoghelper.cpp \
-    frienditem.cpp \
-    gamedialog.cpp \
-    gameitem.cpp \
-    hash.cpp \
     main.cpp \
-    mainwindow.cpp \
-    registerdialog.cpp \
     sgdeveloper.cpp \
     sguser.cpp \
-    storewindow.cpp \
-    usercartdialog.cpp \
-    usercollectiondialog.cpp \
-    userprofiledialog.cpp
+    utils/databasecontainer.cpp \
+    utils/dialoghelper.cpp \
+    utils/hash.cpp \
+    view/addfrienddialog.cpp \
+    view/components/frienditem.cpp \
+    view/components/gameitem.cpp \
+    view/connectiondialog.cpp \
+    view/gamedialog.cpp \
+    view/mainwindow.cpp \
+    view/registerdialog.cpp \
+    view/reviewdialog.cpp \
+    view/storewindow.cpp \
+    view/usercartdialog.cpp \
+    view/usercollectiondialog.cpp \
+    view/userprofiledialog.cpp
 
 HEADERS += \
-    addfrienddialog.h \
-    commonpatterns.h \
-    connectiondialog.h \
-    databasecontainer.h \
-    dialoghelper.h \
-    frienditem.h \
-    gamedialog.h \
-    gameitem.h \
-    hash.h \
-    mainwindow.h \
-    registerdialog.h \
     sgdeveloper.h \
     sguser.h \
-    storewindow.h \
-    usercartdialog.h \
-    usercollectiondialog.h \
-    userprofiledialog.h
+    utils/commonpatterns.h \
+    utils/databasecontainer.h \
+    utils/dialoghelper.h \
+    utils/hash.h \
+    view/addfrienddialog.h \
+    view/components/frienditem.h \
+    view/components/gameitem.h \
+    view/connectiondialog.h \
+    view/gamedialog.h \
+    view/mainwindow.h \
+    view/registerdialog.h \
+    view/reviewdialog.h \
+    view/storewindow.h \
+    view/usercartdialog.h \
+    view/usercollectiondialog.h \
+    view/userprofiledialog.h
 
 FORMS += \
-    addfrienddialog.ui \
-    connectiondialog.ui \
-    frienditem.ui \
-    gamedialog.ui \
-    gameitem.ui \
-    mainwindow.ui \
-    registerdialog.ui \
-    storewindow.ui \
-    usercartdialog.ui \
-    usercollectiondialog.ui \
-    userprofiledialog.ui
+    view/addfrienddialog.ui \
+    view/components/frienditem.ui \
+    view/components/gameitem.ui \
+    view/connectiondialog.ui \
+    view/gamedialog.ui \
+    view/mainwindow.ui \
+    view/registerdialog.ui \
+    view/reviewdialog.ui \
+    view/storewindow.ui \
+    view/usercartdialog.ui \
+    view/usercollectiondialog.ui \
+    view/userprofiledialog.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
