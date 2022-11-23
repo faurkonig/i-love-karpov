@@ -16,6 +16,48 @@ SET xmloption = content;
 SET client_min_messages = warning;
 SET row_security = off;
 
+ALTER TABLE ONLY public.reviews DROP CONSTRAINT created_on_fk;
+ALTER TABLE ONLY public.reviews DROP CONSTRAINT created_by_fk;
+ALTER TABLE ONLY public.games DROP CONSTRAINT created_by_fk;
+ALTER TABLE ONLY internal.friendship DROP CONSTRAINT target_fk;
+ALTER TABLE ONLY internal.friendship DROP CONSTRAINT source_fk;
+ALTER TABLE ONLY internal.collection_elements DROP CONSTRAINT created_on_fk;
+ALTER TABLE ONLY internal.cart_elements DROP CONSTRAINT created_on_fk;
+ALTER TABLE ONLY internal.collection_elements DROP CONSTRAINT created_by_fk;
+ALTER TABLE ONLY internal.cart_elements DROP CONSTRAINT created_by_fk;
+ALTER TABLE ONLY public.users DROP CONSTRAINT users_pk;
+ALTER TABLE ONLY public.reviews DROP CONSTRAINT reviews_pk;
+ALTER TABLE ONLY public.users DROP CONSTRAINT login_un;
+ALTER TABLE ONLY public.games DROP CONSTRAINT games_pk;
+ALTER TABLE ONLY public.developers DROP CONSTRAINT email_un;
+ALTER TABLE ONLY public.developers DROP CONSTRAINT developers_pk;
+ALTER TABLE ONLY internal.friendship DROP CONSTRAINT friendship_pk;
+ALTER TABLE ONLY internal.collection_elements DROP CONSTRAINT collection_elements_pk;
+ALTER TABLE ONLY internal.cart_elements DROP CONSTRAINT cart_elements_pk;
+ALTER TABLE public.users ALTER COLUMN id DROP DEFAULT;
+ALTER TABLE public.reviews ALTER COLUMN id DROP DEFAULT;
+ALTER TABLE public.games ALTER COLUMN id DROP DEFAULT;
+ALTER TABLE public.developers ALTER COLUMN id DROP DEFAULT;
+ALTER TABLE internal.friendship ALTER COLUMN id DROP DEFAULT;
+ALTER TABLE internal.collection_elements ALTER COLUMN id DROP DEFAULT;
+ALTER TABLE internal.cart_elements ALTER COLUMN id DROP DEFAULT;
+DROP SEQUENCE public.users_id_seq;
+DROP TABLE public.users;
+DROP SEQUENCE public.reviews_id_seq;
+DROP TABLE public.reviews;
+DROP SEQUENCE public.games_id_seq;
+DROP TABLE public.games;
+DROP SEQUENCE public.developers_id_seq;
+DROP TABLE public.developers;
+DROP SEQUENCE internal.friendship_id_seq;
+DROP TABLE internal.friendship;
+DROP SEQUENCE internal.collection_elements_id_seq;
+DROP TABLE internal.collection_elements;
+DROP SEQUENCE internal.cart_elements_id_seq;
+DROP TABLE internal.cart_elements;
+DROP EXTENSION plpgsql;
+DROP SCHEMA public;
+DROP SCHEMA internal;
 --
 -- Name: internal; Type: SCHEMA; Schema: -; Owner: postgres
 --
@@ -24,6 +66,15 @@ CREATE SCHEMA internal;
 
 
 ALTER SCHEMA internal OWNER TO postgres;
+
+--
+-- Name: public; Type: SCHEMA; Schema: -; Owner: postgres
+--
+
+CREATE SCHEMA public;
+
+
+ALTER SCHEMA public OWNER TO postgres;
 
 --
 -- Name: plpgsql; Type: EXTENSION; Schema: -; Owner: 
