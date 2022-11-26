@@ -26,7 +26,11 @@ private slots:
     /// Обработчик сохранения отзыва
     void on_saveButton_clicked();
 
+    /// Обработчик удаления отзыва
     void on_deleteButton_clicked();
+
+    /// Обравботчик закрытия окна
+    void reject();
 
 private:
     Ui::ReviewDialog *ui;
@@ -36,10 +40,17 @@ private:
     int gameId;
     int reviewId{0};
 
+    int lastSavedRating;
+    QString lastSavedContent;
+
     /// Метод, обновляющий состояние и данные в диалоге
     void updateContent();
+
     /// Метод, сбрасывающий виджеты в состояние, как если отзыва на игру нет
     void resetContent();
+
+    /// Метод, который сохраняет состояние введённых данных для подтверждения выхода
+    void updateLastSavedState();
 };
 
 #endif // REVIEWDIALOG_H

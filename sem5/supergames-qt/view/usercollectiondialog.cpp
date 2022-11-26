@@ -64,6 +64,10 @@ void UserCollectionDialog::on_sideList_currentRowChanged(int currentRow)
 
 void UserCollectionDialog::on_reviewButton_clicked()
 {
-    ReviewDialog(userId, gameIds[ui->sideList->currentRow()],
-            mainDatabase, this).exec();
+    // Вот эта запись в переменную и вызов по указателю были сделаны только для того,
+    // чтобы избежать ошибки "*** stack smashing detected ***: terminated",
+    // которая появилась после определения метода reject()
+    auto d = new ReviewDialog(userId, gameIds[ui->sideList->currentRow()],
+            mainDatabase, this);
+    d->exec();
 }
