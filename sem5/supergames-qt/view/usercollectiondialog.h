@@ -23,6 +23,8 @@ private slots:
     /// Обработчик выбора игры в боковой панеле
     void on_sideList_currentRowChanged(int currentRow);
 
+    void on_reviewButton_clicked();
+
 private:
     Ui::UserCollectionDialog *ui;
 

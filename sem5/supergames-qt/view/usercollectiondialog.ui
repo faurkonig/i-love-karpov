@@ -76,7 +76,7 @@
           <x>0</x>
           <y>0</y>
           <width>660</width>
-          <height>526</height>
+          <height>523</height>
          </rect>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -170,9 +170,6 @@
             </item>
             <item>
              <widget class="QPushButton" name="reviewButton">
-              <property name="enabled">
-               <bool>false</bool>
-              </property>
               <property name="font">
                <font>
                 <pointsize>11</pointsize>

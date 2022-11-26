@@ -1,6 +1,7 @@
 #include "usercollectiondialog.h"
 #include "ui_usercollectiondialog.h"
 #include "utils/commonpatterns.h"
+#include "reviewdialog.h"
 #include <QDateTime>
 
 UserCollectionDialog::UserCollectionDialog(int currentUser, QSqlDatabase *newDb, QWidget *parent) :
@@ -54,8 +55,15 @@ void UserCollectionDialog::on_sideList_currentRowChanged(int currentRow)
                               .arg(q.value(2).toString()));
     ui->dateLabel->setText(QString("Куплена <u>%1</u>")
                            .arg(q.value(3).toDateTime()
-                                .toLocalTime().toString(*CommonPatterns::dateTimeFormat)));
+                                .toLocalTime().toString(CommonPatterns::dateTimeFormat)));
 
     ui->noSelectionLabel->hide();
     ui->gameBlock->show();
+}
+
+
+void UserCollectionDialog::on_reviewButton_clicked()
+{
+    ReviewDialog(userId, gameIds[ui->sideList->currentRow()],
+            mainDatabase, this).exec();
 }

@@ -79,13 +79,13 @@ void MainWindow::on_loginPushButton_clicked()
         auto login = ui->loginField->text().trimmed();
         if (isUser) {
             // Для пользователя это просто логин
-            if (!login.contains(*CommonPatterns::loginRegex)) {
+            if (!login.contains(CommonPatterns::loginRegex)) {
                 DialogHelper::showValidationError(this, "Неверный логин");
                 return;
             }
         } else {
             // Для разработчика это почта
-            if (!login.contains(*CommonPatterns::emailRegex)) {
+            if (!login.contains(CommonPatterns::emailRegex)) {
                 DialogHelper::showValidationError(this, "Неверная почта");
                 return;
             }

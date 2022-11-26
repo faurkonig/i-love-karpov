@@ -21,7 +21,7 @@ void AddFriendDialog::on_addButton_clicked()
 {
     // Проверяем введённый логин на корректность
     auto loginToAdd = ui->loginField->text().trimmed().toLower();
-    if (!loginToAdd.contains(*CommonPatterns::loginRegex)) {
+    if (!loginToAdd.contains(CommonPatterns::loginRegex)) {
         showError("Неверный логин");
         return;
     }
