@@ -39,22 +39,9 @@ private slots:
 private:
     Ui::StoreWindow *ui;
 
-    /// Пользователь, под которым мы вошли
     SgUser user;
 
-    /// Список всех виджетов игр
     QList<GameItem *> gameItems;
-
-    /// SQL запрос для получения списка всех игры и информации для их отображения
-    const QString gamesQuerySql{
-        "SELECT"
-        " g.id, g.\"name\", g.description, g.price,"
-        " (SELECT d.name AS developer"
-        "  FROM public.developers d"
-        "  WHERE g.developer = d.id) "
-        "FROM public.games g "
-        "ORDER BY g.\"date\""
-    };
 
     /// Метод для обновления списка игр
     void updateGames();

@@ -38,34 +38,6 @@ private:
     /// Флаг, отвечающий за присутствие игры в корзине
     bool inCart;
 
-    /// SQL запрос для получения игры и всей информации о ней для отображения
-    QString gameQuerySql {
-        "SELECT"
-        " g.\"name\", g.description, g.price, g.\"date\","
-        " d.\"name\" AS dev_name, d.description AS dev_description, d.email AS dev_email, d.\"date\" AS dev_date,"
-        " (SELECT count(r.id) AS review_count"
-        " FROM public.reviews r"
-        " WHERE r.game = g.id),"
-        " (SELECT count (ce.id) AS collection_count"
-        " FROM internal.collection_elements ce"
-        " WHERE ce.game = g.id) "
-        "FROM public.games g "
-        "JOIN (SELECT"
-        "  id, \"name\", description, email, \"date\""
-        " FROM public.developers) AS d"
-        " ON d.id = g.developer "
-        "WHERE g.id = %1"
-    };
-    /// SQL запрос для получения всех отзывов на игру
-    QString gameReviewsQuerySql {
-        "SELECT (SELECT u.\"name\" FROM public.users u"
-        " WHERE u.id = r.\"user\"),"
-        " r.rating, r.\"content\", r.\"date\" "
-        "FROM public.reviews r "
-        "WHERE r.game = %1 "
-        "ORDER BY r.\"date\" DESC"
-    };
-
     /// Метод для обновления данных внутри диалога
     void updateData();
 

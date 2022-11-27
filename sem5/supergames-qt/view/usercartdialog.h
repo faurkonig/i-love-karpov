@@ -33,21 +33,6 @@ private:
 
     int userId;
 
-    /// SQL запрос для получения списка игр в корзине и всей информации для их отображения
-    QString gamesInCartSqlQuery{
-        "SELECT ce.id AS cart_id, g.id AS game_id,"
-        " g.\"name\", g.description, g.price,"
-        " (SELECT d.\"name\" FROM public.developers d"
-        " WHERE d.id = g.developer) "
-        "FROM internal.cart_elements ce "
-        "JOIN (SELECT"
-        " id, \"name\", description, price, developer"
-        " FROM public.games) AS g"
-        " ON g.id = ce.game "
-        "WHERE ce.\"user\" = %1"
-    };
-
-    /// Список виджетов элементов игр в корзине
     QList<QWidget *> cartItems;
 
     /// Метод для обновления корзины

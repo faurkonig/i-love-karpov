@@ -3,6 +3,7 @@
 #include "connectiondialog.h"
 #include "registerdialog.h"
 #include "storewindow.h"
+#include "developerdashboardwindow.h"
 #include "utils/commonpatterns.h"
 #include "utils/dialoghelper.h"
 #include "utils/hash.h"
@@ -98,9 +99,9 @@ void MainWindow::on_loginPushButton_clicked()
             return;
         }
 
+        bool ok;
         if (isUser) {
             // Входим как пользователь
-            bool ok;
             auto user = loginAsUser(login, password, ok);
 
             if (!ok) {
@@ -108,8 +109,16 @@ void MainWindow::on_loginPushButton_clicked()
                 return;
             }
 
-            auto window = new StoreWindow(user, mainDatabase);
-            window->show();
+            (new StoreWindow(user, mainDatabase, this))->show();
+        } else {
+            auto dev = loginAsDeveloper(login, password, ok);
+
+            if (!ok) {
+                DialogHelper::showAuthError(this, isUser);
+                return;
+            }
+
+            (new DeveloperDashboardWindow(dev, mainDatabase, this))->show();
         }
     }
 }
@@ -147,7 +156,7 @@ SgDeveloper MainWindow::loginAsDeveloper(QString login, QString password, bool &
 
     auto hashedPassword = hashString(password);
 
-    auto q = execQuery(QString("SELECT * FROM developers "
+    auto q = execQuery(QString("SELECT id, \"name\", description, \"date\" FROM developers "
                                "WHERE email = '%1' AND \"password\" = '%2'")
                        .arg(login, hashedPassword), ok);
     // Проверяем вообще, нашёлся ли такой разработчик
@@ -156,6 +165,14 @@ SgDeveloper MainWindow::loginAsDeveloper(QString login, QString password, bool &
         return dev;
     }
     q.first();
+
+    // Записываем данные
+    dev.id = q.value(0).toInt();
+    dev.email = login;
+    dev.password = password;
+    dev.name = q.value(1).toString();
+    dev.description = q.value(2).toString();
+    dev.date = q.value(3).toDateTime();
 
     ok = true;
     return dev;

@@ -1,4 +1,5 @@
 #include "dialoghelper.h"
+#include "commonpatterns.h"
 #include <QMessageBox>
 
 bool DialogHelper::isSqlError(QSqlError error) {
@@ -25,4 +26,10 @@ void DialogHelper::showAuthError(QWidget *parent, bool isUser)
     QMessageBox::warning(parent,
                          "Ошибка авторазации",
                          (isUser ? "Пользователь не найден" : "Разработчик не найден") + errorBase);
+}
+
+QString DialogHelper::formatTime(QDateTime time)
+{
+    time.setTimeSpec(Qt::UTC);
+    return time.toLocalTime().toString(CommonPatterns::dateTimeFormat);
 }

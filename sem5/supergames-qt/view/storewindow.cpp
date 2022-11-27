@@ -36,7 +36,13 @@ void StoreWindow::on_updateButton_clicked()
 void StoreWindow::updateGames()
 {
     bool ok;
-    auto getGamesQ = execQuery(gamesQuerySql, ok);
+    auto getGamesQ = execQuery(QString("SELECT"
+                                       " g.id, g.\"name\", g.description, g.price,"
+                                       " (SELECT d.name AS developer"
+                                       "  FROM public.developers d"
+                                       "  WHERE g.developer = d.id) "
+                                       "FROM public.games g "
+                                       "ORDER BY g.\"date\""), ok);
     if (!ok) return;
 
     // Очищаем старые виджеты, если есть

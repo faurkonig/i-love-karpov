@@ -3,6 +3,7 @@
 
 #include <QtSql/QSqlError>
 #include <QWidget>
+#include <QDateTime>
 
 namespace DialogHelper {
 /// Проверка запроса на ошибки
@@ -19,6 +20,9 @@ void showSqlError(QWidget *parent, QSqlError error, QString query);
 
 /// Вывод ошибки авторизации
 void showAuthError(QWidget *parent, bool isUser);
+
+/// Форматирование времени по UTC в текущее
+QString formatTime(QDateTime time);
 }
 
 #endif // DIALOGHELPER_H

@@ -1,6 +1,6 @@
 #include "usercollectiondialog.h"
 #include "ui_usercollectiondialog.h"
-#include "utils/commonpatterns.h"
+#include "utils/dialoghelper.h"
 #include "reviewdialog.h"
 #include <QDateTime>
 
@@ -27,7 +27,11 @@ void UserCollectionDialog::updateSideList()
 {
     bool ok;
     // Грузим игры для боковой панели из БД
-    auto q = execQuery(collectionListSqlQuery.arg(userId), ok);
+    auto q = execQuery(QString("SELECT g.id, g.\"name\" FROM public.games g "
+                               "WHERE g.id IN (SELECT ce.game"
+                               " FROM internal.collection_elements ce"
+                               " WHERE ce.\"user\" = %1) ")
+                       .arg(userId), ok);
     if (!ok || q.size() < 1) {
         ui->noSelectionLabel->setText("Нет ни одной игры в коллекции");
         return;
@@ -44,7 +48,16 @@ void UserCollectionDialog::updateSideList()
 void UserCollectionDialog::on_sideList_currentRowChanged(int currentRow)
 {
     bool ok;
-    auto q = execQuery(gameSqlQuery.arg(gameIds[currentRow]).arg(userId), ok);
+    auto q = execQuery(QString("SELECT g.\"name\", g.description,"
+                               " (SELECT d.\"name\" AS dev_name  FROM public.developers d"
+                               "  WHERE d.id = g.developer),"
+                               " ce.date "
+                               "FROM internal.collection_elements ce "
+                               "JOIN (SELECT id, \"name\", description, developer"
+                               " FROM public.games) AS g"
+                               " ON g.id = ce.game "
+                               "WHERE ce.game = %1 AND ce.\"user\" = %2")
+                       .arg(gameIds[currentRow]).arg(userId), ok);
     if (!ok || q.size() < 1) return;
 
     // Получаем и выводим данные об выбранной игре
@@ -54,8 +67,7 @@ void UserCollectionDialog::on_sideList_currentRowChanged(int currentRow)
     ui->devNameLabel->setText(QString("Разработана <u>%1</u>")
                               .arg(q.value(2).toString()));
     ui->dateLabel->setText(QString("Куплена <u>%1</u>")
-                           .arg(q.value(3).toDateTime()
-                                .toLocalTime().toString(CommonPatterns::dateTimeFormat)));
+                           .arg(DialogHelper::formatTime(q.value(3).toDateTime())));
 
     ui->noSelectionLabel->hide();
     ui->gameBlock->show();

@@ -1,5 +1,5 @@
 #include "userprofiledialog.h"
-#include "utils/commonpatterns.h"
+#include "utils/dialoghelper.h"
 #include "ui_userprofiledialog.h"
 #include "addfrienddialog.h"
 #include <QtSql/QSqlQuery>
@@ -27,7 +27,13 @@ UserProfileDialog::~UserProfileDialog()
 void UserProfileDialog::updateProfile()
 {
     bool ok;
-    auto q = execQuery(userQuerySql.arg(profileUserId), ok);
+    auto q = execQuery(QString("SELECT"
+                               " u.login, u.\"name\", u.\"date\","
+                               " (SELECT count(id) AS friends_count"
+                               " FROM internal.friendship f"
+                               " WHERE f.\"source\" = u.id) "
+                               "FROM users u "
+                               "WHERE u.id = %1").arg(profileUserId), ok);
     if (!ok) return;
     q.first();
 
@@ -41,8 +47,7 @@ void UserProfileDialog::updateProfile()
     ui->nameTitle->setText(userName);
     ui->loginLabel->setText(QString("Логин: <b>%1</b>").arg(login));
     ui->dateLabel->setText(QString("Зарегистрирован <u>%1</u>")
-                           .arg(userDate.toLocalTime()
-                                .toString(CommonPatterns::dateTimeFormat)));
+                           .arg(DialogHelper::formatTime(userDate)));
 
     // Очищаем список друзей
     for (auto fi : qAsConst(friendItems)) {
@@ -55,7 +60,11 @@ void UserProfileDialog::updateProfile()
     if (friendsCount < 1) return;
     ui->noFriendsLabel->hide();
 
-    auto friends = execQuery(friendsQuerySql.arg(profileUserId), ok);
+    auto friends = execQuery(QString("SELECT id,"
+                                     " (SELECT \"name\" FROM public.users u"
+                                     " WHERE u.id = f.target) "
+                                     "FROM internal.friendship f "
+                                     "WHERE f.\"source\" = %1").arg(profileUserId), ok);
     if (!ok) return;
 
     while(friends.next()) {
@@ -72,7 +81,10 @@ void UserProfileDialog::deleteFriend(int friendshipId)
 {
     bool ok;
     // Удаляем друга
-    auto q = execQuery(removeFriendQuerySql.arg(friendshipId), ok);
+    auto q = execQuery(QString("DELETE FROM internal.friendship f "
+                               "WHERE f.id = %1 "
+                               "RETURNING (SELECT u.\"name\" FROM public.users u"
+                               " WHERE u.id = f.target)").arg(friendshipId), ok);
     if (!ok) return;
 
     // Получаем элемент, который вызвал слот и удаляем его

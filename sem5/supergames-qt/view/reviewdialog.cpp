@@ -1,6 +1,6 @@
 #include "reviewdialog.h"
 #include "ui_reviewdialog.h"
-#include "utils/commonpatterns.h"
+#include "utils/dialoghelper.h"
 #include <QDateTime>
 #include <QMessageBox>
 #include <QCloseEvent>
@@ -85,8 +85,7 @@ void ReviewDialog::updateContent()
     ui->ratingSpinBox->setValue(reviewQ.value(1).toInt());
     ui->contentField->setText(reviewQ.value(2).toString());
     ui->dateLabel->setText(QString("Последнее обновление <u>%1</u>")
-                           .arg(reviewQ.value(3).toDateTime().toLocalTime()
-                                .toString(CommonPatterns::dateTimeFormat)));
+                           .arg(DialogHelper::formatTime(reviewQ.value(3).toDateTime())));
 
     isExists = true;
 }

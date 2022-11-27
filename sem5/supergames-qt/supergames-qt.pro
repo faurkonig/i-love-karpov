@@ -15,9 +15,11 @@ SOURCES += \
     utils/dialoghelper.cpp \
     utils/hash.cpp \
     view/addfrienddialog.cpp \
+    view/components/devgameitem.cpp \
     view/components/frienditem.cpp \
     view/components/gameitem.cpp \
     view/connectiondialog.cpp \
+    view/developerdashboardwindow.cpp \
     view/gamedialog.cpp \
     view/mainwindow.cpp \
     view/registerdialog.cpp \
@@ -35,9 +37,11 @@ HEADERS += \
     utils/dialoghelper.h \
     utils/hash.h \
     view/addfrienddialog.h \
+    view/components/devgameitem.h \
     view/components/frienditem.h \
     view/components/gameitem.h \
     view/connectiondialog.h \
+    view/developerdashboardwindow.h \
     view/gamedialog.h \
     view/mainwindow.h \
     view/registerdialog.h \
@@ -49,9 +53,11 @@ HEADERS += \
 
 FORMS += \
     view/addfrienddialog.ui \
+    view/components/devgameitem.ui \
     view/components/frienditem.ui \
     view/components/gameitem.ui \
     view/connectiondialog.ui \
+    view/developerdashboardwindow.ui \
     view/gamedialog.ui \
     view/mainwindow.ui \
     view/registerdialog.ui \

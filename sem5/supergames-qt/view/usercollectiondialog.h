@@ -30,28 +30,6 @@ private:
 
     int userId;
 
-    /// SQL запрос для получения списка игр в коллекции
-    QString collectionListSqlQuery{
-        "SELECT g.id, g.\"name\" FROM public.games g "
-        "WHERE g.id IN (SELECT ce.game"
-        " FROM internal.collection_elements ce"
-        " WHERE ce.\"user\" = %1) "
-    };
-
-    /// SQL запрос для получения информации о конкретной игре
-    QString gameSqlQuery{
-        "SELECT g.\"name\", g.description,"
-        " (SELECT d.\"name\" AS dev_name  FROM public.developers d"
-        "  WHERE d.id = g.developer),"
-        " ce.date "
-        "FROM internal.collection_elements ce "
-        "JOIN (SELECT id, \"name\", description, developer"
-        " FROM public.games) AS g"
-        " ON g.id = ce.game "
-        "WHERE ce.game = %1 AND ce.\"user\" = %2"
-    };
-
-    /// Список ID игр, который соотнесён с элементами в боковом меню
     QList<int> gameIds;
 
     /// Метод для обновления списка в боковом меню

@@ -1,5 +1,5 @@
 #include "gamedialog.h"
-#include "utils/commonpatterns.h"
+#include "utils/dialoghelper.h"
 #include "ui_gamedialog.h"
 #include <QtSql/QSqlQuery>
 #include <QtSql/QSqlError>
@@ -30,7 +30,21 @@ GameDialog::~GameDialog()
 void GameDialog::updateData()
 {
     bool ok;
-    auto gameQ = execQuery(gameQuerySql.arg(gameId), ok);
+    auto gameQ = execQuery(QString("SELECT"
+                                   " g.\"name\", g.description, g.price, g.\"date\","
+                                   " d.\"name\" AS dev_name, d.description AS dev_description, d.email AS dev_email, d.\"date\" AS dev_date,"
+                                   " (SELECT count(r.id) AS review_count"
+                                   " FROM public.reviews r"
+                                   " WHERE r.game = g.id),"
+                                   " (SELECT count (ce.id) AS collection_count"
+                                   " FROM internal.collection_elements ce"
+                                   " WHERE ce.game = g.id) "
+                                   "FROM public.games g "
+                                   "JOIN (SELECT"
+                                   "  id, \"name\", description, email, \"date\""
+                                   " FROM public.developers) AS d"
+                                   " ON d.id = g.developer "
+                                   "WHERE g.id = %1").arg(gameId), ok);
     if (!ok) return;
 
     gameQ.first();
@@ -53,13 +67,13 @@ void GameDialog::updateData()
     ui->gameDeveloper->setText(QString("Разработана <u>%1</u>")
                                .arg(devName));
     ui->gameDate->setText(QString("Добавлена <u>%1</u>")
-                          .arg(gameDate.toLocalTime().toString(CommonPatterns::dateTimeFormat)));
+                          .arg(DialogHelper::formatTime(gameDate)));
     ui->gameCollectionCount->setText(QString("В коллекции у <u>%1</u> пользовател%2")
                                      .arg(collectionCount)
                                      .arg(collectionCount % 10 == 1 ? "я" : "ей"));
     ui->developerDescription->setText(devDescription);
     ui->developerDate->setText(QString("Зарегистрирован <u>%1</u>")
-                               .arg(devDate.toLocalTime().toString(CommonPatterns::dateTimeFormat)));
+                               .arg(DialogHelper::formatTime(devDate)));
     ui->developerEmail->setText(devEmail);
 
     inCollection = inCart = false;
@@ -91,7 +105,12 @@ void GameDialog::updateData()
         // Если уже известно, что на игру есть отзывы, то грузим их
         ui->noReviewLabel->hide();
 
-        auto reviewsQ = execQuery(gameReviewsQuerySql.arg(gameId), ok);
+        auto reviewsQ = execQuery(QString("SELECT (SELECT u.\"name\" FROM public.users u"
+                                          " WHERE u.id = r.\"user\"),"
+                                          " r.rating, r.\"content\", r.\"date\" "
+                                          "FROM public.reviews r "
+                                          "WHERE r.game = %1 "
+                                          "ORDER BY r.\"date\" DESC").arg(gameId), ok);
         if (!ok) return;
 
         while (reviewsQ.next()) {
@@ -103,7 +122,7 @@ void GameDialog::updateData()
             // Каждый виджет с отзывом - это просто QLabel с заданным текстом
             auto reviewText = QString("<b style=\"font-size: 15px\">%1</b> оставил отзыв %2:<br>"
                                       "<b style=\"font-size: 11px\">Оценка %3 из 10</b><br>%4")
-                    .arg(userName, reviewDate.toString(CommonPatterns::dateTimeFormat))
+                    .arg(userName, DialogHelper::formatTime(reviewDate))
                     .arg(reviewRating).arg(reviewContent);
 
             auto label = new QLabel(reviewText, ui->reviewGroupBox);

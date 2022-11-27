@@ -38,33 +38,6 @@ private:
     // Разделение этих двух ID нужен был для того, чтобы реализовать
     // возможность смотреть профили других пользователей
 
-    /// SQL запрос для поулчения всей необходимой информации о пользователе
-    QString userQuerySql{
-        "SELECT"
-        " u.login, u.\"name\", u.\"date\","
-        " (SELECT count(id) AS friends_count"
-        " FROM internal.friendship f"
-        " WHERE f.\"source\" = u.id) "
-        "FROM users u "
-        "WHERE u.id = %1"
-    };
-    /// SQL запрос для получения списка друзей пользователя
-    QString friendsQuerySql{
-        "SELECT id,"
-        " (SELECT \"name\" FROM public.users u"
-        " WHERE u.id = f.target) "
-        "FROM internal.friendship f "
-        "WHERE f.\"source\" = %1"
-    };
-    /// SQL запрос для удаления пользователя из друзей
-    QString removeFriendQuerySql{
-        "DELETE FROM internal.friendship f "
-        "WHERE f.id = %1 "
-        "RETURNING (SELECT u.\"name\" FROM public.users u"
-        " WHERE u.id = f.target)"
-    };
-
-    /// Список виджета "друга"
     QList<FriendItem *> friendItems;
 
     /// Метод для обновления профиля

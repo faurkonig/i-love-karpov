@@ -23,7 +23,17 @@ UserCartDialog::~UserCartDialog()
 void UserCartDialog::updateContent()
 {
     bool ok;
-    auto q = execQuery(gamesInCartSqlQuery.arg(userId), ok);
+    auto q = execQuery(QString("SELECT ce.id AS cart_id, g.id AS game_id,"
+                               " g.\"name\", g.description, g.price,"
+                               " (SELECT d.\"name\" FROM public.developers d"
+                               " WHERE d.id = g.developer) "
+                               "FROM internal.cart_elements ce "
+                               "JOIN (SELECT"
+                               " id, \"name\", description, price, developer"
+                               " FROM public.games) AS g"
+                               " ON g.id = ce.game "
+                               "WHERE ce.\"user\" = %1")
+                       .arg(userId), ok);
     if (!ok) return;
 
     // Очищаем старые элементы корзины
