@@ -22,3 +22,9 @@ void DevGameItem::on_openButton_clicked()
 {
     emit onOpenGameButtonPressed(gameId);
 }
+
+void DevGameItem::on_editButton_clicked()
+{
+    emit onEditGameButtonPressed(gameId);
+}
+

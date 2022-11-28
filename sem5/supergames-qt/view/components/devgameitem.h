@@ -21,9 +21,15 @@ signals:
     /// Сигнал о нажатии на основную кнопку игры
     void onOpenGameButtonPressed(int gameId);
 
+    /// Сигнал о нажатии на кнопку редактирования игры
+    void onEditGameButtonPressed(int gameId);
+
 private slots:
     /// Обработчик нажатия на кнопку "Открыть в магазине"
     void on_openButton_clicked();
+
+    /// Обработчик нажатия на кнопку редактирования
+    void on_editButton_clicked();
 
 private:
     Ui::DevGameItem *ui;

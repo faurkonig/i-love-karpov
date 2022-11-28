@@ -1,6 +1,7 @@
 #include "developerdashboardwindow.h"
 #include "ui_developerdashboardwindow.h"
 #include "gamedialog.h"
+#include "gameeditdialog.h"
 #include <QDateTime>
 
 DeveloperDashboardWindow::DeveloperDashboardWindow(SgDeveloper dev, QSqlDatabase *newDb, QWidget *parent) :
@@ -89,8 +90,9 @@ void DeveloperDashboardWindow::updateStats()
 void DeveloperDashboardWindow::updateGameList()
 {
     bool ok;
-    auto gamesQ = execQuery(QString("SELECT id, \"name\", description FROM public.games g "
-                                    "WHERE g.developer = %1").arg(devId), ok);
+    auto gamesQ = execQuery(QString("SELECT id, \"name\", description FROM public.games "
+                                    "WHERE developer = %1 "
+                                    "ORDER BY \"date\"").arg(devId), ok);
     if (!ok) return;
 
     // Заранее очищаем все виджеты с экрана
@@ -116,6 +118,7 @@ void DeveloperDashboardWindow::updateGameList()
                              gamesQ.value(1).toString(), gamesQ.value(2).toString(),
                              ui->gamesBlock);
         connect(gi, &DevGameItem::onOpenGameButtonPressed, this, &DeveloperDashboardWindow::onOpenGame);
+        connect(gi, &DevGameItem::onEditGameButtonPressed, this, &DeveloperDashboardWindow::onEditGame);
         ui->gamesVerticalLayout->insertWidget(0, gi);
         gameItems.append(gi);
     }
@@ -130,4 +133,19 @@ void DeveloperDashboardWindow::on_updateStatsButton_clicked()
 void DeveloperDashboardWindow::onOpenGame(int gameId)
 {
     GameDialog(mainDatabase, gameId, 0, this).exec();
+}
+
+void DeveloperDashboardWindow::onEditGame(int gameId)
+{
+    bool isChanged;
+    GameEditDialog(false, gameId, devId, &isChanged, mainDatabase, this).exec();
+    if (isChanged) updateGameList();
+}
+
+
+void DeveloperDashboardWindow::on_addGameButton_clicked()
+{
+    bool isChanged;
+    GameEditDialog(true, 0, devId, &isChanged, mainDatabase, this).exec();
+    if (isChanged) updateGameList();
 }

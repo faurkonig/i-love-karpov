@@ -21,6 +21,7 @@ SOURCES += \
     view/connectiondialog.cpp \
     view/developerdashboardwindow.cpp \
     view/gamedialog.cpp \
+    view/gameeditdialog.cpp \
     view/mainwindow.cpp \
     view/registerdialog.cpp \
     view/reviewdialog.cpp \
@@ -43,6 +44,7 @@ HEADERS += \
     view/connectiondialog.h \
     view/developerdashboardwindow.h \
     view/gamedialog.h \
+    view/gameeditdialog.h \
     view/mainwindow.h \
     view/registerdialog.h \
     view/reviewdialog.h \
@@ -59,6 +61,7 @@ FORMS += \
     view/connectiondialog.ui \
     view/developerdashboardwindow.ui \
     view/gamedialog.ui \
+    view/gameeditdialog.ui \
     view/mainwindow.ui \
     view/registerdialog.ui \
     view/reviewdialog.ui \

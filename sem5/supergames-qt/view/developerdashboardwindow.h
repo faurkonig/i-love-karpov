@@ -21,9 +21,17 @@ public:
     ~DeveloperDashboardWindow();
 
 private slots:
+    /// Обработчик нажатия на кнопку обновления статистики
     void on_updateStatsButton_clicked();
 
+    /// Обработчик нажатия на кнопку добавления игры
+    void on_addGameButton_clicked();
+
+    /// Обработчик кнопки "Об игре" в списке игр
     void onOpenGame(int gameId);
+
+    /// Обработчик кнопки "Редактировать" в списке игр
+    void onEditGame(int gameId);
 
 private:
     Ui::DeveloperDashboardWindow *ui;
