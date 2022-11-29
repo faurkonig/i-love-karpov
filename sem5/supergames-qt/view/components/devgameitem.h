@@ -7,6 +7,7 @@ namespace Ui {
 class DevGameItem;
 }
 
+/// Виджет отображения игры в списке у разработчика
 class DevGameItem : public QWidget
 {
     Q_OBJECT

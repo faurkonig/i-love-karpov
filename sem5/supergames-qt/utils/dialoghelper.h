@@ -5,6 +5,7 @@
 #include <QWidget>
 #include <QDateTime>
 
+/// Пространство имён для управления диалогами и визуальной частью
 namespace DialogHelper {
 /// Проверка запроса на ошибки
 bool isSqlError(QSqlError error);

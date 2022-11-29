@@ -49,7 +49,7 @@ void RegisterDialog::on_registerButton_clicked()
                                                     " (и может начинатся только с латинской буквы)");
             return;
         }
-    } else if (!login.contains(CommonPatterns::emailRegex)) {
+    } else if (!login.contains(CommonPatterns::emailRegex) || login.contains("'")) {
         DialogHelper::showValidationError(this, "Введена некорректная почта");
         return;
     }
@@ -105,7 +105,7 @@ bool RegisterDialog::registerUser(QString login, QString password, QString name)
     bool ok;
     execQuery(QString("INSERT INTO \"users\" (login, password, name) "
                       "VALUES ('%1', '%2', '%3');")
-              .arg(login, hashedPassword, name), ok);
+              .arg(login, hashedPassword, name.replace("'", "''")), ok);
     return ok;
 }
 
@@ -117,6 +117,6 @@ bool RegisterDialog::registerDeveloper(QString email, QString password, QString 
     bool ok;
     execQuery(QString("INSERT INTO \"developers\" (\"email\", \"password\", \"name\") "
                       "VALUES ('%1', '%2', '%3');")
-              .arg(email, hashedPassword, name), ok);
+              .arg(email, hashedPassword, name.replace("'", "''")), ok);
     return ok;
 }

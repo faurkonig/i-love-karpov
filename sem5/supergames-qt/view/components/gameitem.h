@@ -7,6 +7,7 @@ namespace Ui {
 class GameItem;
 }
 
+/// Виджет отображения игры в магазине
 class GameItem : public QWidget
 {
     Q_OBJECT

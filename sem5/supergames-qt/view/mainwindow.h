@@ -10,6 +10,7 @@ QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
 
+/// Главное окно (вход в аккаунты)
 class MainWindow : public QMainWindow, private DatabaseContainer
 {
     Q_OBJECT

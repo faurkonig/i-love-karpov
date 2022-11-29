@@ -5,6 +5,7 @@
 #include <QDialog>
 
 namespace Ui {
+/// Диалог с корзиной пользователя
 class UserCartDialog;
 }
 

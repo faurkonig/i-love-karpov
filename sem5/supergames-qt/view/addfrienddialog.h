@@ -8,6 +8,7 @@ namespace Ui {
 class AddFriendDialog;
 }
 
+/// Диалог добавления пользователя в друзья
 class AddFriendDialog : public QDialog, private DatabaseContainer
 {
     Q_OBJECT

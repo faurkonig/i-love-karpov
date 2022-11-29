@@ -86,7 +86,7 @@ void MainWindow::on_loginPushButton_clicked()
             }
         } else {
             // Для разработчика это почта
-            if (!login.contains(CommonPatterns::emailRegex)) {
+            if (!login.contains(CommonPatterns::emailRegex) || login.contains("'")) {
                 DialogHelper::showValidationError(this, "Неверная почта");
                 return;
             }

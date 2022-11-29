@@ -7,6 +7,7 @@
 #include <QMainWindow>
 
 namespace Ui {
+/// Окно магазина (у пользователя)
 class StoreWindow;
 }
 

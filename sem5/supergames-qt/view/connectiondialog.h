@@ -16,6 +16,7 @@ struct ConnectionFields {
     QString dbPassword;
 };
 
+/// Диалог подключения к базе данных
 class ConnectionDialog : public QDialog
 {
     Q_OBJECT

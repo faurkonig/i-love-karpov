@@ -10,6 +10,7 @@ namespace Ui {
 class DeveloperDashboardWindow;
 }
 
+/// Окно отображения магазины (для разработчика)
 class DeveloperDashboardWindow : public QMainWindow, private DatabaseContainer
 {
     Q_OBJECT

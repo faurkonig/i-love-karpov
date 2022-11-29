@@ -6,6 +6,7 @@
 
 
 namespace Ui {
+/// Диалог с коллекцией пользователя
 class UserCollectionDialog;
 }
 
@@ -25,6 +26,8 @@ private slots:
 
     void on_reviewButton_clicked();
 
+    void on_storeButton_clicked();
+
 private:
     Ui::UserCollectionDialog *ui;
 
@@ -34,6 +37,9 @@ private:
 
     /// Метод для обновления списка в боковом меню
     void updateSideList();
+
+    /// Метод для обновления кнопки для отзыва
+    void updateReviewButton();
 };
 
 #endif // USERCOLLECTIONDIALOG_H

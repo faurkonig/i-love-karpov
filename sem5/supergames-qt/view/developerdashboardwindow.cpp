@@ -21,6 +21,7 @@ DeveloperDashboardWindow::~DeveloperDashboardWindow()
     delete ui;
 }
 
+
 void DeveloperDashboardWindow::updateStats()
 {
     bool ok;

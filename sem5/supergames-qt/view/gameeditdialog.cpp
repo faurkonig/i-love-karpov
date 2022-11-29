@@ -81,7 +81,8 @@ void GameEditDialog::on_saveButton_clicked()
                                           "(\"name\", description, developer, price) "
                                           "VALUES ('%2', '%3', %1, %4) "
                                           "RETURNING id").arg(devId)
-                                  .arg(name, description).arg(price), ok);
+                                  .arg(name.replace("'", "''"), description.replace("'", "''"))
+                                  .arg(price), ok);
         if (!ok || newGameQ.size() < 1) return;
         // Получаем ID новой игры
         newGameQ.first();
@@ -96,7 +97,8 @@ void GameEditDialog::on_saveButton_clicked()
         execQuery(QString("UPDATE public.games "
                           "SET \"name\" = '%2', description = '%3', price = %4 "
                           "WHERE id = %1").arg(gameId)
-                  .arg(name, description).arg(price), ok);
+                  .arg(name.replace("'", "''"), description.replace("'", "''"))
+                  .arg(price), ok);
         if (!ok) return;
 
         QMessageBox::information(this, "Успех", "Игра успешно отредактированна");
@@ -128,7 +130,8 @@ void GameEditDialog::on_deleteButton_clicked()
 
     isGameNew = true;
     *isSomethingChanged = true;
-    updateContent();
+//    updateContent();
+    accept();
 }
 
 void GameEditDialog::on_cancelButton_clicked()

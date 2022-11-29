@@ -8,6 +8,7 @@ namespace Ui {
 class GameDialog;
 }
 
+/// Диалог для отображения игры
 class GameDialog : public QDialog, private DatabaseContainer
 {
     Q_OBJECT

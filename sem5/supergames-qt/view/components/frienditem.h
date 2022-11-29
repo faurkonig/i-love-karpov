@@ -7,6 +7,7 @@ namespace Ui {
 class FriendItem;
 }
 
+/// Виджет для отображения друга в списке
 class FriendItem : public QWidget
 {
     Q_OBJECT

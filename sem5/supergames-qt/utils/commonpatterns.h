@@ -3,6 +3,7 @@
 
 #include <QRegExp>
 
+/// Пространство имён, содержащее универсальные паттерны проверки и отображения
 namespace CommonPatterns {
 /// Регулярное выражение для проверки логина пользователя
 static const QRegExp loginRegex("^[a-z][a-z0-9_]+$");

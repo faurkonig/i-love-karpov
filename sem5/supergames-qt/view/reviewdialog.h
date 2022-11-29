@@ -5,6 +5,7 @@
 #include <QDialog>
 
 namespace Ui {
+/// Диалог создания / редактирования отзыва на игру
 class ReviewDialog;
 }
 
@@ -15,7 +16,7 @@ class ReviewDialog : public QDialog, private DatabaseContainer
 public:
     /// Конструктор
     /// Принимает ID пользователя и БД для выполнения запросов
-    explicit ReviewDialog(int userId, int gameId, QSqlDatabase *newDb, QWidget *parent = nullptr);
+    explicit ReviewDialog(int userId, int gameId, bool *isChanged, QSqlDatabase *newDb, QWidget *parent = nullptr);
     /// Деструктор
     ~ReviewDialog();
 
@@ -39,6 +40,8 @@ private:
     int userId;
     int gameId;
     int reviewId{0};
+
+    bool *isSomethingChanged;
 
     int lastSavedRating;
     QString lastSavedContent;

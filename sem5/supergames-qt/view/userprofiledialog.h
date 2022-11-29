@@ -8,6 +8,7 @@
 
 
 namespace Ui {
+/// Диалог с профилем пользователя
 class UserProfileDialog;
 }
 

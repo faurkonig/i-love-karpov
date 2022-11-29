@@ -5,14 +5,17 @@
 #include <QMessageBox>
 #include <QCloseEvent>
 
-ReviewDialog::ReviewDialog(int userId, int gameId, QSqlDatabase *newDb, QWidget *parent) :
+ReviewDialog::ReviewDialog(int userId, int gameId, bool *isChanged, QSqlDatabase *newDb, QWidget *parent) :
     QDialog(parent),
     DatabaseContainer(this, newDb),
     ui(new Ui::ReviewDialog),
     userId(userId),
-    gameId(gameId)
+    gameId(gameId),
+    isSomethingChanged(isChanged)
 {
     ui->setupUi(this);
+
+    *isChanged = false;
 
     updateContent();
     updateLastSavedState();
@@ -112,7 +115,11 @@ void ReviewDialog::on_deleteButton_clicked()
                       "WHERE id = %1").arg(reviewId), ok);
 
     // Если удаление прошло успешно, то обновляем страницу
-    if (ok) updateContent();
+    if (!ok) return;
+
+//    updateContent();
+    accept();
+    *isSomethingChanged = true;
 }
 
 void ReviewDialog::on_cancelButton_clicked()
@@ -131,20 +138,23 @@ void ReviewDialog::on_saveButton_clicked()
         // Если отзыв уже есть, то обновляем его
         execQuery(QString("UPDATE public.reviews "
                           "SET rating = %1, content = '%2', \"date\" = now() "
-                          "WHERE id = %3").arg(rating).arg(content).arg(reviewId), ok);
+                          "WHERE id = %3").arg(rating).arg(content.replace("'", "''"))
+                  .arg(reviewId), ok);
 
         if (ok) QMessageBox::information(this, "Успех", "Отзыв успешно обновлён");
     } else {
         // Если отзыва ещё нет, то добавляем его
         execQuery(QString("INSERT INTO public.reviews (game, \"user\", rating, content) "
                           "VALUES (%1, %2, %3, '%4')").arg(gameId).arg(userId)
-                  .arg(rating).arg(content), ok);
+                  .arg(rating).arg(content.replace("'", "''")), ok);
 
         if (ok) QMessageBox::information(this, "Успех", "Отзыв успешно создан");
     }
     // Проверяем, что бы мы не сделали, что это удалось
     if (!ok) return;
 
-    updateContent();
-    updateLastSavedState();
+//    updateContent();
+//    updateLastSavedState();
+    accept();
+    *isSomethingChanged = true;
 }

@@ -5,6 +5,7 @@
 #include <QtSql/QSqlDatabase>
 #include <QtSql/QSqlQuery>
 
+/// Универсальный класс для взаимодействия с базой данных
 class DatabaseContainer
 {
 public:

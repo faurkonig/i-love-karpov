@@ -2,6 +2,7 @@
 #include "ui_usercollectiondialog.h"
 #include "utils/dialoghelper.h"
 #include "reviewdialog.h"
+#include "gamedialog.h"
 #include <QDateTime>
 
 UserCollectionDialog::UserCollectionDialog(int currentUser, QSqlDatabase *newDb, QWidget *parent) :
@@ -71,15 +72,44 @@ void UserCollectionDialog::on_sideList_currentRowChanged(int currentRow)
 
     ui->noSelectionLabel->hide();
     ui->gameBlock->show();
+
+    updateReviewButton();
+}
+
+void UserCollectionDialog::updateReviewButton()
+{
+    bool ok;
+    auto gameId = gameIds[ui->sideList->currentRow()];
+    auto reviewQ = execQuery(QString("SELECT id FROM public.reviews "
+                                     "WHERE \"user\" = %1 AND game = %2")
+                             .arg(userId).arg(gameId), ok);
+
+    if (!ok || reviewQ.size() < 1) {
+        // Отзыва на эту игру нет
+        ui->reviewButton->setText("Оставить отзыв");
+    } else {
+        ui->reviewButton->setText("Редактировать отзыв");
+    }
 }
 
 
 void UserCollectionDialog::on_reviewButton_clicked()
 {
+    bool isChanged;
     // Вот эта запись в переменную и вызов по указателю были сделаны только для того,
     // чтобы избежать ошибки "*** stack smashing detected ***: terminated",
     // которая появилась после определения метода reject()
     auto d = new ReviewDialog(userId, gameIds[ui->sideList->currentRow()],
-            mainDatabase, this);
+            &isChanged, mainDatabase, this);
     d->exec();
+
+    if (isChanged) {
+        updateReviewButton();
+    }
+}
+
+void UserCollectionDialog::on_storeButton_clicked()
+{
+    GameDialog(mainDatabase, gameIds[ui->sideList->currentRow()],
+            0, this).exec();
 }

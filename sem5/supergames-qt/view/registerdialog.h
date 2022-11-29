@@ -5,6 +5,7 @@
 #include <QDialog>
 
 namespace Ui {
+/// Диалог регистрации пользователя / разработчика
 class RegisterDialog;
 }
 
