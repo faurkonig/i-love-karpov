@@ -1,0 +1,289 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>800</width>
+    <height>600</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Пекари</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <item>
+     <widget class="QWidget" name="widget" native="true">
+      <layout class="QHBoxLayout" name="horizontalLayout">
+       <item>
+        <widget class="QLabel" name="moneyLabel">
+         <property name="font">
+          <font>
+           <pointsize>12</pointsize>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="frameShape">
+          <enum>QFrame::Box</enum>
+         </property>
+         <property name="text">
+          <string>0 $</string>
+         </property>
+         <property name="margin">
+          <number>7</number>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="timeLabel">
+         <property name="font">
+          <font>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="frameShape">
+          <enum>QFrame::Box</enum>
+         </property>
+         <property name="text">
+          <string>00:00</string>
+         </property>
+         <property name="margin">
+          <number>7</number>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item>
+     <widget class="QTabWidget" name="tabWidget">
+      <property name="currentIndex">
+       <number>0</number>
+      </property>
+      <widget class="QWidget" name="ordersTab">
+       <attribute name="title">
+        <string>Заказы</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_2">
+        <item>
+         <widget class="QLabel" name="orderStatsLabel">
+          <property name="text">
+           <string>Всего выполнено &lt;b&gt;0&lt;/b&gt; заказов на сумму &lt;b&gt;0 $&lt;/b&gt;</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="orderTimeLabel">
+          <property name="text">
+           <string>Секунд до следующего заказа: &lt;b&gt;0&lt;/b&gt;</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="verticalSpacer">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeType">
+           <enum>QSizePolicy::Fixed</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QTableWidget" name="ordersTable">
+          <column>
+           <property name="text">
+            <string>№ заказа</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Имя покупателя</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Кол-во заказано</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Кол-во получено</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Время заказа</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Время готовности</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Статус</string>
+           </property>
+          </column>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="backeryTab">
+       <attribute name="title">
+        <string>Пекарня</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_3">
+        <item>
+         <widget class="QLabel" name="bunStatsLabel">
+          <property name="text">
+           <string>Всего изготовлено &lt;b&gt;0&lt;/b&gt; булочек</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="bunStatsLabel_2">
+          <property name="text">
+           <string>На складе &lt;b&gt;0&lt;/b&gt; из &lt;b&gt;0&lt;/b&gt; булочек</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="backerStatsLabel">
+          <property name="text">
+           <string>Нанято &lt;b&gt;0&lt;/b&gt; пекарей</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="verticalSpacer_2">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeType">
+           <enum>QSizePolicy::Fixed</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QTableWidget" name="backersTable">
+          <column>
+           <property name="text">
+            <string>№ пекаря</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Имя пекаря</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Кол-во выполнено</string>
+           </property>
+          </column>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="courierTab">
+       <attribute name="title">
+        <string>Курьеры</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_4">
+        <item>
+         <widget class="QLabel" name="courierStatsLabel">
+          <property name="text">
+           <string>Нанято &lt;b&gt;0&lt;/b&gt; курьеров</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="verticalSpacer_3">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeType">
+           <enum>QSizePolicy::Fixed</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QTableWidget" name="courierTable">
+          <column>
+           <property name="text">
+            <string>№ курьера</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Имя курьера</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Кол-во доставлено</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Статус</string>
+           </property>
+          </column>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>800</width>
+     <height>22</height>
+    </rect>
+   </property>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
