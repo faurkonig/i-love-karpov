@@ -80,11 +80,10 @@ class MainWindow(QMainWindow):
         print('Added order:', newOrder.id)
         # Добавляем заказ в начало списка
         newOrder.orderTime = self._globalTimer.currentTime
-        self.orders.insert(0, newOrder)
+        self.orders.append(newOrder)
         # Обновляем таблицу заказов
         self.ui.ordersTable.setRowCount(len(self.orders))
-        for i in range(len(self.orders)):
-            self._updateOrder(i)
+        self._updateOrder(len(self.orders) - 1)
 
     def _updateOrder(self, index: int):
         table = self.ui.ordersTable

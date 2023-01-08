@@ -11,18 +11,21 @@ import constants
 
 
 class InitialConfig:
-    backers = 1
-    couriers = 1
-    storage = 10
+    backers = constants.initialBackers
+    couriers = constants.initialCouriers
+    storage = constants.initialStorage
 
-    maxMoney = 1000
+    maxMoney = constants.initialMoney
 
     isAccepted = False
 
     def calculateMoney(self):
-        backersCost = self.backers * constants.backersCost
-        courierCost = self.couriers * constants.courierCost
-        storageCost = self.storage * constants.storageCost
+        backersCost = (self.backers - constants.initialBackers) * \
+            constants.backersCost
+        courierCost = (self.couriers - constants.initialCouriers) * \
+            constants.courierCost
+        storageCost = (self.storage - constants.initialStorage) * \
+            constants.storageCost
         return self.maxMoney - (backersCost + courierCost + storageCost)
 
 
@@ -69,10 +72,18 @@ class InitialWindow(QDialog):
             self.close()
 
     def _updateInitialContent(self):
+        self.ui.backersSpinBox.setMinimum(self.config.backers)
+        self.ui.backersSpinBox.setMaximum(constants.maxInitialBackers)
         self.ui.backersLabel.setText(
             'Нанять пекаря <i>({} $)</i>'.format(constants.backersCost))
+
+        self.ui.couriersSpinBox.setMinimum(self.config.couriers)
+        self.ui.couriersSpinBox.setMaximum(constants.maxInitialCouriers)
         self.ui.couriersLabel.setText(
             'Нанять курьера <i>({} $)</i>'.format(constants.courierCost))
+
+        self.ui.storageSpinBox.setMinimum(self.config.storage)
+        self.ui.storageSpinBox.setMaximum(constants.maxInitialStorage)
         self.ui.storageLabel.setText(
             'Увеличить склад <i>({} $)</i>'.format(constants.storageCost))
 
