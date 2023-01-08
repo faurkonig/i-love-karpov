@@ -1,11 +1,14 @@
 {
     "files": [
+        "constants.py",
         "models/backer.py",
         "models/courier.py",
         "models/order.py",
         "models/storage.py",
         "form.ui",
+        "welcome.ui",
         "mainwindow.py",
+        "initialwindow.py",
         "helpers/global_timer.py",
         "helpers/names.py"
     ]

@@ -1,6 +1,7 @@
 import random
 
 from helpers.names import getRandomName
+import constants
 
 
 class Backer:
@@ -17,5 +18,5 @@ def createNew():
 
 
 def newBunTimeout():
-    return 5
+    return constants.bunTimeout
     # return 2

@@ -7,6 +7,7 @@ from PySide6.QtCore import Slot
 # pyside6-uic form.ui -o ui_form.py
 from ui_form import Ui_MainWindow
 
+from initialwindow import InitialWindow, InitialConfig
 from helpers.global_timer import GlobalTimer
 import models.order
 import models.backer
@@ -27,19 +28,22 @@ class MainWindow(QMainWindow):
 
     money = 0
 
-    def __init__(self, parent=None):
+    def __init__(self, config: InitialConfig, parent=None):
         super().__init__(parent)
 
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
         self.ui.pauseButton.clicked.connect(self._gamePause)
 
-        self._updateStorage()
-
-        for _ in range(3):
+        self.money = config.calculateMoney()
+        self.storage.maximumStorage = config.storage
+        for _ in range(config.backers):
             self.addBacker()
-        for _ in range(2):
+        for _ in range(config.couriers):
             self.addCourier()
+
+        self._updateStorage()
+        self._updateMoney()
 
         # Глобальный счётчик времени
         self._globalTimer = GlobalTimer(self)
@@ -246,6 +250,16 @@ def _initTableRow(table: QTableWidget, y: int):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    widget = MainWindow()
-    widget.show()
-    sys.exit(app.exec())
+
+    config = InitialConfig()
+    welcome = InitialWindow(config)
+    welcome.exec()
+
+    if config.isAccepted:
+        print('Game accepted')
+        widget = MainWindow(config)
+        widget.show()
+        sys.exit(app.exec())
+    else:
+        print('Game aborted')
+        sys.exit(0)

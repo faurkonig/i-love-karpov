@@ -3,6 +3,7 @@ import random
 from enum import Enum
 
 from helpers.names import getRandomName
+import constants
 
 
 class Courier:
@@ -68,4 +69,4 @@ def createNew():
 
 
 def newDeliveryTimeout(ordersCount: int):
-    return 8 + ordersCount * 2
+    return constants.deliveryTimeout + ordersCount * constants.deliveryDeltaTimeout

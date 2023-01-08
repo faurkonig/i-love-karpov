@@ -18,4 +18,3 @@ class BackeryStorage:
 
     def hasSpace(self):
         return self.collected < self.maximumStorage
-

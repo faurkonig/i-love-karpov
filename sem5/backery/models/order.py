@@ -5,6 +5,7 @@ from PySide6.QtCore import QTime
 from enum import Enum
 
 from helpers.names import getRandomName
+import constants
 
 
 class Order:
@@ -42,9 +43,9 @@ def createNew():
     ) + '-' + str(random.randint(1000, 9999))
     return Order(orderId,
                  getRandomName(),
-                 random.randint(1, 4))
+                 random.randint(constants.minOrderSize, constants.maxOrderSize))
 
 
 def newOrderTimeout():
-    return random.randint(3, 12)
+    return random.randint(constants.minOrderTimeout, constants.maxOrderTimeout)
     # return random.randint(1, 2)
