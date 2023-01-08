@@ -1,5 +1,7 @@
 __pycache__
 
 /ui_*.py
+*.autosave
+*.db
 
 /.vscode

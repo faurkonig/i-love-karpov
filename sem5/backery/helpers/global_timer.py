@@ -5,6 +5,8 @@ class GlobalTimer(QObject):
     onTick = Signal()
     currentTime = QTime(0, 0, 0, 0)
 
+    isPaused = False
+
     _timer = QTimer()
     _thread = QThread()
 
@@ -24,5 +26,6 @@ class GlobalTimer(QObject):
 
     @Slot()
     def _timerTick(self):
-        self.currentTime = self.currentTime.addSecs(1)
-        self.onTick.emit()
+        if not self.isPaused:
+            self.currentTime = self.currentTime.addSecs(1)
+            self.onTick.emit()

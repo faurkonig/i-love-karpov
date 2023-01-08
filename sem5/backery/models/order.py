@@ -15,8 +15,20 @@ class Order:
         self.id = id
         self.customerName = customerName
         self.orderSize = size
-        self.readySize = 0
         self.status = OrderState.created
+
+    def complete(self, time: QTime):
+        self.readyTime = time
+        self.status = OrderState.ready
+
+    def statusText(self):
+        match self.status:
+            case OrderState.created:
+                return 'Не готово'
+            case OrderState.inProcess:
+                return 'Обрабатывается'
+            case OrderState.ready:
+                return 'Готово!'
 
 
 class OrderState(Enum):
@@ -30,8 +42,9 @@ def createNew():
     ) + '-' + str(random.randint(1000, 9999))
     return Order(orderId,
                  getRandomName(),
-                 random.randint(1, 5))
+                 random.randint(1, 4))
 
 
-def randomOrderTimeout():
-    return random.randint(10, 20)
+def newOrderTimeout():
+    return random.randint(3, 12)
+    # return random.randint(1, 2)

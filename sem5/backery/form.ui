@@ -23,6 +23,7 @@
          <property name="font">
           <font>
            <pointsize>12</pointsize>
+           <weight>75</weight>
            <bold>true</bold>
           </font>
          </property>
@@ -41,6 +42,7 @@
         <widget class="QLabel" name="timeLabel">
          <property name="font">
           <font>
+           <weight>50</weight>
            <bold>false</bold>
           </font>
          </property>
@@ -68,6 +70,16 @@
          </property>
         </spacer>
        </item>
+       <item>
+        <widget class="QPushButton" name="pauseButton">
+         <property name="text">
+          <string>Пауза</string>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
       </layout>
      </widget>
     </item>
@@ -84,7 +96,7 @@
         <item>
          <widget class="QLabel" name="orderStatsLabel">
           <property name="text">
-           <string>Всего выполнено &lt;b&gt;0&lt;/b&gt; заказов на сумму &lt;b&gt;0 $&lt;/b&gt;</string>
+           <string>Всего выполнено &lt;b&gt;0&lt;/b&gt; заказов на сумму &lt;b&gt;0&lt;/b&gt; $</string>
           </property>
          </widget>
         </item>
@@ -113,6 +125,15 @@
         </item>
         <item>
          <widget class="QTableWidget" name="ordersTable">
+          <attribute name="horizontalHeaderCascadingSectionResizes">
+           <bool>true</bool>
+          </attribute>
+          <attribute name="horizontalHeaderMinimumSectionSize">
+           <number>100</number>
+          </attribute>
+          <attribute name="horizontalHeaderDefaultSectionSize">
+           <number>120</number>
+          </attribute>
           <column>
            <property name="text">
             <string>№ заказа</string>
@@ -126,11 +147,6 @@
           <column>
            <property name="text">
             <string>Кол-во заказано</string>
-           </property>
-          </column>
-          <column>
-           <property name="text">
-            <string>Кол-во получено</string>
            </property>
           </column>
           <column>
@@ -158,23 +174,16 @@
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout_3">
         <item>
-         <widget class="QLabel" name="bunStatsLabel">
-          <property name="text">
-           <string>Всего изготовлено &lt;b&gt;0&lt;/b&gt; булочек</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="bunStatsLabel_2">
+         <widget class="QLabel" name="storageStatsLabel">
           <property name="text">
            <string>На складе &lt;b&gt;0&lt;/b&gt; из &lt;b&gt;0&lt;/b&gt; булочек</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QLabel" name="backerStatsLabel">
+         <widget class="QLabel" name="backerTimeLabel">
           <property name="text">
-           <string>Нанято &lt;b&gt;0&lt;/b&gt; пекарей</string>
+           <string>Секунд до изготовления булочек: &lt;b&gt;0&lt;/b&gt;</string>
           </property>
          </widget>
         </item>
@@ -196,6 +205,15 @@
         </item>
         <item>
          <widget class="QTableWidget" name="backersTable">
+          <attribute name="horizontalHeaderCascadingSectionResizes">
+           <bool>true</bool>
+          </attribute>
+          <attribute name="horizontalHeaderMinimumSectionSize">
+           <number>100</number>
+          </attribute>
+          <attribute name="horizontalHeaderDefaultSectionSize">
+           <number>120</number>
+          </attribute>
           <column>
            <property name="text">
             <string>№ пекаря</string>
@@ -221,13 +239,6 @@
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout_4">
         <item>
-         <widget class="QLabel" name="courierStatsLabel">
-          <property name="text">
-           <string>Нанято &lt;b&gt;0&lt;/b&gt; курьеров</string>
-          </property>
-         </widget>
-        </item>
-        <item>
          <spacer name="verticalSpacer_3">
           <property name="orientation">
            <enum>Qt::Vertical</enum>
@@ -245,6 +256,15 @@
         </item>
         <item>
          <widget class="QTableWidget" name="courierTable">
+          <attribute name="horizontalHeaderCascadingSectionResizes">
+           <bool>true</bool>
+          </attribute>
+          <attribute name="horizontalHeaderMinimumSectionSize">
+           <number>100</number>
+          </attribute>
+          <attribute name="horizontalHeaderDefaultSectionSize">
+           <number>150</number>
+          </attribute>
           <column>
            <property name="text">
             <string>№ курьера</string>
@@ -279,7 +299,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>22</height>
+     <height>30</height>
     </rect>
    </property>
   </widget>
