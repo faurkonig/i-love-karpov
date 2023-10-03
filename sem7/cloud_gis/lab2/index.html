@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>Quick start. Placing an interactive map on a page</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <script src="yandex.js" type="text/javascript"></script>
+    <link rel="stylesheet" href="styles.css" />
+    <script src="main.js" type="text/javascript"></script>
+  </head>
+
+  <body>
+    <div id="map"></div>
+
+    <table id="points-table" style="border: 1px solid black">
+      <thead>
+        <tr>
+          <th>Номер</th>
+          <th>X</th>
+          <th>Y</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <button onclick="resetPoints()">Сбросить</button>
+  </body>
+</html>
