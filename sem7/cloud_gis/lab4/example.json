@@ -1,0 +1,43 @@
+{
+    "type": "FeatureCollection",
+    "features": [
+        {
+            "type": "Feature",
+            "options": {
+                "strokeColor": "#255F06",
+                "opacity": 0.5
+            },
+            "geometry": {
+                "coordinates": [
+                    [
+                        37.397077269177295,
+                        55.50935822203312
+                    ],
+                    [
+                        38.21062707386479,
+                        55.63123562686851
+                    ],
+                    [
+                        37.71131066761479,
+                        55.84556122347454
+                    ]
+                ],
+                "type": "LineString"
+            }
+        },
+        {
+            "type": "Feature",
+            "options": {
+                "color": "#FF0000",
+                "iconSize": 30
+            },
+            "geometry": {
+                "coordinates": [
+                    37.111432737926975,
+                    55.792011431710925
+                ],
+                "type": "Point"
+            }
+        }
+    ]
+}
