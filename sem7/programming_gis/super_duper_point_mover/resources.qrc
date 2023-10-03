@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/plugins/super_duper_point_mover" >
+        <file>icon.png</file>
+    </qresource>
+</RCC>
