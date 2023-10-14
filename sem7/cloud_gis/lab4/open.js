@@ -82,31 +82,30 @@ function _addObjectToMap(object) {
 
 function _addFeatureToMap(object) {
   console.log('Add feature', object);
+  const type = object.geometry.type;
   const geoObject = new ymaps.GeoObject(
     {
       geometry: object.geometry,
       properties: {
-        hintContent: 'Click to toggle editing',
+        hintContent: 'Click to start editing',
       },
     },
-    _createOptionsForObject(object, false),
+    _createOptionsForObject(type, false),
   );
+  _customizeEditorMenu(geoObject, type);
 
   let isEditing = false;
   myMap.geoObjects.add(geoObject);
   geoObject.events.add('click', (_) => {
     if (isEditing) {
-      console.log('Stop editing');
+      _stopEditing(geoObject, type);
       isEditing = false;
-      geoObject.editor.stopEditing();
     } else {
-      console.log('Start editing');
+      _startEditing(geoObject, type);
       isEditing = true;
-      geoObject.editor.startEditing();
     }
 
-    const newOptions = _createOptionsForObject(object, isEditing);
-    console.log('Setting new options for object', newOptions);
+    const newOptions = _createOptionsForObject(type, isEditing);
     for (const [key, value] of Object.entries(newOptions)) {
       geoObject.options.set(key, value);
       // console.log(`${key}: ${value}`);
@@ -114,10 +113,10 @@ function _addFeatureToMap(object) {
   });
 }
 
-function _createOptionsForObject(object, isEditing) {
-  const foregroundColor = isEditing ? '#E32636' : '#7FFFD4';
-  const backgroundColor = isEditing ? '#E32636AA' : '#7FFFD4AA';
-  switch (object.geometry.type) {
+function _createOptionsForObject(type, isEditing) {
+  const foregroundColor = isEditing ? '#FF4040' : '#6495ED';
+  const backgroundColor = isEditing ? '#FF4040AA' : '#6495EDAA';
+  switch (type) {
     case 'Point':
       return {
         iconColor: foregroundColor,
@@ -126,12 +125,68 @@ function _createOptionsForObject(object, isEditing) {
       return {
         strokeColor: foregroundColor,
         strokeWidth: 6,
+        draggable: isEditing,
       };
     case 'Polygon':
       return {
         fillColor: backgroundColor,
         strokeColor: foregroundColor,
         strokeWidth: 3,
+        draggable: isEditing,
       };
   }
+}
+
+function _customizeEditorMenu(geoObject, type) {
+  let buttonText;
+  switch (type) {
+    case 'Point':
+      buttonText = 'Delete point';
+      break;
+    case 'LineString':
+      buttonText = 'Delete line';
+      break;
+    case 'Polygon':
+      buttonText = 'Delete polygon';
+      break;
+  }
+
+  geoObject.options.set('editorMenuManager', function (items) {
+    items.push({
+      title: buttonText,
+      onClick: function () {
+        myMap.geoObjects.remove(geoObject);
+      },
+    });
+    return items;
+  });
+}
+
+function _startEditing(geoObject, type) {
+  console.log('Start editing');
+  geoObject.editor.startEditing();
+
+  if (type === 'Point') {
+    geoObject.properties.set(
+      'hintContent',
+      'Click to stop editing. Right-click to delete',
+    );
+    geoObject.events.add('contextmenu', _pointContextMenuCallback);
+  } else {
+    geoObject.properties.set('hintContent', 'Click to stop editing');
+  }
+}
+
+function _stopEditing(geoObject, type) {
+  console.log('Stop editing');
+  geoObject.editor.stopEditing();
+  geoObject.properties.set('hintContent', 'Click to start editing');
+
+  if (type === 'Point') {
+    geoObject.events.remove('contextmenu', _pointContextMenuCallback);
+  }
+}
+
+function _pointContextMenuCallback(event) {
+  myMap.geoObjects.remove(event.get('target'));
 }
