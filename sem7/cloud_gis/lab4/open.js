@@ -7,9 +7,9 @@ function openGeoJson() {
   const reader = new FileReader();
   reader.onload = function (e) {
     const contents = e.target.result;
-    const objects = _convertElement(JSON.parse(contents));
-    myObjectManager.add(objects);
-    _addPopups();
+    const geoJson = _convertElement(JSON.parse(contents));
+    _addObjectToMap(geoJson);
+    console.log(myMap.geoObjects.each((e) => console.log('Object', e)));
   };
   reader.readAsText(file);
 }
@@ -68,52 +68,70 @@ function _convertObject(object) {
   return object;
 }
 
-function _addPopups() {
-  const geoObjects = myObjectManager.objects.getAll();
+function _addObjectToMap(object) {
+  switch (object.type) {
+    case 'FeatureCollection':
+      console.log('Add feature collection', object);
+      object.features.forEach(_addObjectToMap);
+      break;
+    case 'Feature':
+      _addFeatureToMap(object);
+      break;
+  }
+}
 
-  geoObjects.forEach((geoObject) => {
-    geoObject.options.balloonContentLayout =
-      _createLayoutForGeoObject(geoObject);
+function _addFeatureToMap(object) {
+  console.log('Add feature', object);
+  const geoObject = new ymaps.GeoObject(
+    {
+      geometry: object.geometry,
+      properties: {
+        hintContent: 'Click to toggle editing',
+      },
+    },
+    _createOptionsForObject(object, false),
+  );
+
+  let isEditing = false;
+  myMap.geoObjects.add(geoObject);
+  geoObject.events.add('click', (_) => {
+    if (isEditing) {
+      console.log('Stop editing');
+      isEditing = false;
+      geoObject.editor.stopEditing();
+    } else {
+      console.log('Start editing');
+      isEditing = true;
+      geoObject.editor.startEditing();
+    }
+
+    const newOptions = _createOptionsForObject(object, isEditing);
+    console.log('Setting new options for object', newOptions);
+    for (const [key, value] of Object.entries(newOptions)) {
+      geoObject.options.set(key, value);
+      // console.log(`${key}: ${value}`);
+    }
   });
 }
 
-function _createLayoutForGeoObject(geoObject) {
-  return ymaps.templateLayoutFactory.createClass(
-    '<h4>Меню объекта</h4>' +
-      'Редактирование: <i id="editing-status">выкл</i>' +
-      '<hr>' +
-      '<button id="edit-geoobject-button">Вкл редактирование</button>' +
-      '<br>' +
-      '<button id="remove-geoobject-button">Удалить оъект</button>',
-    {
-      build: () => {
-        BalloonContentLayout.superclass.build.call(this);
-
-        if (this.isEditing) {
-          $('#editing-status').html('вкл');
-          $('#edit-geoobject-button').html('Выкл редактирование');
-          $('#edit-geoobject-button').bind('click', this.startEdit);
-        } else {
-          $('#editing-status').html('выкл');
-          $('#edit-geoobject-button').bind('click', this.endEdit);
-        }
-      },
-      clear: () => {
-        $('#edit-geoobject-button').unbind('click', this.startEdit);
-        $('#edit-geoobject-button').unbind('click', this.endEdit);
-        BalloonContentLayout.superclass.clear.call(this);
-      },
-      startEdit: () => {
-        this.isEditing = true;
-        geoObject.editor.startEditing();
-        geoObject.balloon.close();
-      },
-      endEdit: () => {
-        this.isEditing = false;
-        geoObject.editor.endEditing();
-        geoObject.balloon.close();
-      },
-      isEditing: false,
-    },
-  );
+function _createOptionsForObject(object, isEditing) {
+  const foregroundColor = isEditing ? '#E32636' : '#7FFFD4';
+  const backgroundColor = isEditing ? '#E32636AA' : '#7FFFD4AA';
+  switch (object.geometry.type) {
+    case 'Point':
+      return {
+        iconColor: foregroundColor,
+      };
+    case 'LineString':
+      return {
+        strokeColor: foregroundColor,
+        strokeWidth: 6,
+      };
+    case 'Polygon':
+      return {
+        fillColor: backgroundColor,
+        strokeColor: foregroundColor,
+        strokeWidth: 3,
+      };
+  }
 }
