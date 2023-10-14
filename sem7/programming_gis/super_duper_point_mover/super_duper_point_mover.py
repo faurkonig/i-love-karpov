@@ -21,14 +21,17 @@
  *                                                                         *
  ***************************************************************************/
 """
-from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication
-from qgis.PyQt.QtGui import QIcon
-from qgis.PyQt.QtWidgets import QAction
 
-# Initialize Qt resources from file resources.py
+from qgis.core import QgsWkbTypes, QgsPointXY, QgsGeometry
+from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication
+from qgis.PyQt.QtGui import QIcon, QBrush, QColor
+from qgis.PyQt.QtWidgets import QAction, QMessageBox, QTableWidgetItem, QPushButton
+
 from .resources import *
-# Import the code for the dialog
 from .super_duper_point_mover_dialog import SuperDuperPointMoverDialog
+from .edit_point_dialog import EditPointDialog
+from .edit_line_dialog import EditLineDialog
+from .point_tool import PointTool
 import os.path
 
 
@@ -172,6 +175,10 @@ class SuperDuperPointMover:
 
 
     def unload(self):
+        self._end_point_picker()
+        if hasattr(self, 'selectedLayer'):
+            self.selectedLayer.selectionChanged.disconnect(self._feature_selection_changed)
+
         """Removes the plugin menu item and icon from QGIS GUI."""
         for action in self.actions:
             self.iface.removePluginMenu(
@@ -189,17 +196,261 @@ class SuperDuperPointMover:
             self.first_start = False
             self.dlg = SuperDuperPointMoverDialog()
 
+            project_layers = self.iface.mapCanvas().layers()
+            self.dlg.layerComboBox.addItem('')
+            for layer in project_layers:
+                self.dlg.layerComboBox.addItem(layer.name())
+            self.dlg.layerComboBox.currentIndexChanged.connect(self._select_layer)
+
         # show the dialog
-        project_layers = self.iface.mapCanvas().layers()
-        for layer in project_layers:
-            self.dlg.layerComboBox.addItem(layer.name())
         self.dlg.show()
 
-        selected_layer = self.dlg.layerComboBox.currentIndex()
-        # Run the dialog event loop
-        result = self.dlg.exec_()
-        # See if OK was pressed
-        if result:
-            # Do something useful here - delete the line containing pass and
-            # substitute with your code.
-            pass
+
+    def _select_layer(self, index: int):
+        def resetWidgets():
+            self.dlg.geometryLabel.setText('Неверный тип геометрии')
+            self.dlg.tableWidget.setRowCount(0)
+            if hasattr(self, 'selectedLayer'):
+                self.selectedLayer.selectionChanged.disconnect(self._feature_selection_changed)
+
+        if (index == 0):
+            resetWidgets()
+            return
+        index -= 1
+
+        if hasattr(self, 'selectedLayer'):
+            self.selectedLayer.selectionChanged.disconnect(self._feature_selection_changed)
+        self.selectedLayer = self.iface.mapCanvas().layer(index)
+        self.selectedLayer.selectionChanged.connect(self._feature_selection_changed)
+
+        try:
+            geometryType = self.selectedLayer.geometryType()
+            if (geometryType == QgsWkbTypes.PointGeometry):
+                self.dlg.geometryLabel.setText('Тип геометрии: <b>Точки</b>')
+            elif (geometryType == QgsWkbTypes.LineGeometry):
+                self.dlg.geometryLabel.setText('Тип геометрии: <b>Линии</b>')
+            elif (geometryType == QgsWkbTypes.PolygonGeometry):
+                self.dlg.geometryLabel.setText('Тип геометрии: <b>Полигоны</b>')
+            else:
+                resetWidgets()
+                return;
+        except:
+            resetWidgets()
+            return;
+
+        self.dlg.tableWidget.setRowCount(self.selectedLayer.featureCount())
+
+        selectedFeatures = self.selectedLayer.selectedFeatureIds()
+        row = 0
+        for feature in self.selectedLayer.getFeatures():
+            featureId = feature.id()
+            editCallback = lambda _, layer=self.selectedLayer, featureId=featureId: self._edit_geometry(layer, featureId)
+
+            idItem = QTableWidgetItem(str(featureId))
+            idItem.setFlags(QtCore.Qt.ItemIsEnabled)
+            if featureId in selectedFeatures:
+                self._set_table_call_as_selected(idItem)
+            self.dlg.tableWidget.setItem(row, 0, idItem)
+
+            editButton = QPushButton('Редактировать')
+            editButton.clicked.connect(editCallback)
+            if not feature.hasGeometry():
+                editButton.setEnabled(False)
+            self.dlg.tableWidget.setCellWidget(row, 1, editButton)
+            row += 1
+
+    def _feature_selection_changed(self, selected: list, deselected: list, clearAndSelect: bool):
+        if clearAndSelect:
+            for i in range(self.dlg.tableWidget.rowCount()):
+                text = self.dlg.tableWidget.item(i, 0).text()
+                idItem = QTableWidgetItem(text)
+                if i in selected:
+                    self._set_table_call_as_selected(idItem)
+                self.dlg.tableWidget.setItem(i, 0, idItem)
+        else:
+            for featureIndex in selected:
+                idItem = self.dlg.tableWidget.item(featureIndex, 0)
+                self._set_table_call_as_selected(idItem)
+                self.dlg.tableWidget.setItem(featureIndex, 0, idItem)
+            for featureIndex in deselected:
+                text = self.dlg.tableWidget.item(featureIndex, 0).text()
+                self.dlg.tableWidget.setItem(featureIndex, 0, QTableWidgetItem(text))
+
+
+    def _edit_geometry(self, layer, featureId: int):
+        geometryType = layer.geometryType()
+
+        if geometryType == QgsWkbTypes.PointGeometry:
+            self._edit_point(layer, featureId)
+        elif geometryType == QgsWkbTypes.LineGeometry:
+            self._edit_line(layer, featureId)
+        elif geometryType == QgsWkbTypes.PolygonGeometry:
+            self._edit_polygon(layer, featureId)
+        else:
+            self._show_warning('Ошибка', 'Неподдерживаемый тип геометрии')
+
+
+    def _edit_point(self, layer, featureId: int):
+        self._close_edit_dialog()
+
+        layer.select(featureId)
+        feature = layer.getFeature(featureId)
+        featureGeometry = feature.geometry().asPoint()
+
+        self.editPointsDlg = editDlg = EditPointDialog()
+        editDlg.layerNameLabel.setText(f'"{layer.name()}" #{featureId} (Точка)')
+        editDlg.xLineEdit.setText(str(featureGeometry.x()))
+        editDlg.yLineEdit.setText(str(featureGeometry.y()))
+        editDlg.pickButton.clicked.connect(self._toggle_edit_point_picker)
+        editDlg.show()
+
+        pointsResult = editDlg.exec_()
+        layer.deselect(featureId)
+        self._end_point_picker()
+        if pointsResult:
+            try:
+                x = float(editDlg.xLineEdit.text())
+                y = float(editDlg.yLineEdit.text())
+
+                layer.startEditing()
+                newGeometry = QgsGeometry.fromPointXY(QgsPointXY(x, y))
+                layer.changeGeometry(featureId, newGeometry)
+                layer.commitChanges()
+            except Exception as error:
+                print('Error on edit geometry', error)
+                self._show_warning('Ошибка', 'Введены неверные координаты')
+
+
+    def _edit_line(self, layer, featureId: int):
+        self._close_edit_dialog()
+
+        layer.select(featureId)
+        feature = layer.getFeature(featureId)
+        featureGeometry = feature.geometry().asMultiPolyline()[0]
+
+        self.editLineDlg = editDlg = EditLineDialog()
+        editDlg.layerNameLabel.setText(f'"{layer.name()}" #{featureId} (Линии)')
+
+        editDlg.coordsTable.setRowCount(len(featureGeometry));
+        i = 0
+        for point in featureGeometry:
+            xItem = QTableWidgetItem(str(point.x()))
+            editDlg.coordsTable.setItem(i, 0, xItem)
+            yItem = QTableWidgetItem(str(point.y()))
+            editDlg.coordsTable.setItem(i, 1, yItem)
+            i += 1
+
+        editDlg.show()
+
+        pointsResult = editDlg.exec_()
+        layer.deselect(featureId)
+        if pointsResult:
+            try:
+                for i in range(len(featureGeometry)):
+                    x = float(editDlg.coordsTable.item(i, 0).text())
+                    y = float(editDlg.coordsTable.item(i, 1).text())
+                    featureGeometry[i] = QgsPointXY(x, y)
+                layer.startEditing()
+                newGeometry = QgsGeometry.fromMultiPolylineXY([featureGeometry])
+                layer.changeGeometry(featureId, newGeometry)
+                layer.commitChanges()
+            except Exception as error:
+                print('Error on edit geometry', error)
+                self._show_warning('Ошибка', 'Введены неверные координаты')
+
+
+    def _edit_polygon(self, layer, featureId: int):
+        self._close_edit_dialog()
+
+        layer.select(featureId)
+        feature = layer.getFeature(featureId)
+        featureGeometry = feature.geometry().asMultiPolygon()[0][0]
+
+        self.editPolygonDlg = editDlg = EditLineDialog()
+        editDlg.layerNameLabel.setText(f'"{layer.name()}" #{featureId} (Полигоны)')
+
+        editDlg.coordsTable.setRowCount(len(featureGeometry));
+        i = 0
+        for point in featureGeometry:
+            xItem = QTableWidgetItem(str(point.x()))
+            editDlg.coordsTable.setItem(i, 0, xItem)
+            yItem = QTableWidgetItem(str(point.y()))
+            editDlg.coordsTable.setItem(i, 1, yItem)
+            i += 1
+
+        editDlg.show()
+
+        pointsResult = editDlg.exec_()
+        layer.deselect(featureId)
+        if pointsResult:
+            try:
+                for i in range(len(featureGeometry)):
+                    x = float(editDlg.coordsTable.item(i, 0).text())
+                    y = float(editDlg.coordsTable.item(i, 1).text())
+                    featureGeometry[i] = QgsPointXY(x, y)
+                layer.startEditing()
+                newGeometry = QgsGeometry.fromMultiPolygonXY([[featureGeometry]])
+                layer.changeGeometry(featureId, newGeometry)
+                layer.commitChanges()
+            except Exception as error:
+                print('Error on edit geometry', error)
+                self._show_warning('Ошибка', 'Введены неверные координаты')
+
+
+    def _toggle_edit_point_picker(self, toggled: bool):
+        if toggled:
+            def _move_callback(point: QgsPointXY):
+                self.editPointsDlg.xLineEdit.setText(str(point.x()))
+                self.editPointsDlg.yLineEdit.setText(str(point.y()))
+
+            def _click_callback(point: QgsPointXY):
+                _move_callback(point)
+                self.editPointsDlg.pickButton.setChecked(False)
+                self._end_point_picker()
+
+            self._start_point_picker(
+                    _move_callback,
+                    _click_callback
+                )
+        else:
+            self._end_point_picker()
+
+
+    def _start_point_picker(self, move_callback, click_callback):
+        self._end_point_picker()
+        print('Started picking point')
+        self.tool = PointTool(self.iface.mapCanvas())
+        self.iface.mapCanvas().setMapTool(self.tool)
+        self.tool.moved.connect(move_callback)
+        self.tool.clicked.connect(click_callback)
+
+    def _end_point_picker(self):
+        if hasattr(self, 'tool'):
+            print('Ending picking point')
+            self.iface.mapCanvas().unsetMapTool(self.tool)
+            del self.tool
+
+
+    def _close_edit_dialog(self):
+        if hasattr(self, 'editPointsDlg'):
+            self.editPointsDlg.reject()
+            del self.editPointsDlg
+        if hasattr(self, 'editLineDlg'):
+            self.editLineDlg.reject()
+            del self.editLineDlg
+        if hasattr(self, 'editPolygonDlg'):
+            self.editPolygonDlg.reject()
+            del self.editPolygonDlg
+
+
+    def _show_warning(self, title: str, content: str):
+        msgBox = QMessageBox()
+        msgBox.setIcon(QMessageBox.Information)
+        msgBox.setText(content)
+        msgBox.setWindowTitle(title)
+        msgBox.exec()
+
+
+    def _set_table_call_as_selected(self, item: QTableWidgetItem):
+        item.setBackground(QBrush(QColor.fromRgb(255, 220, 51)))
+        item.setForeground(QBrush(QColor.fromRgb(28, 28, 28)))
