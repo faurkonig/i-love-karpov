@@ -4,40 +4,22 @@ function saveGeoJson() {
     features: [],
   };
 
-  // TODO: Add geoobject creation
+  myMap.geoObjects.each((geoObject) => {
+    object.features.push(_createGeoJsonFor(geoObject));
+  });
 
-  var blob = new Blob([JSON.stringify(object)], {
+  var blob = new Blob([JSON.stringify(convertGeojsonElement(object))], {
     type: 'application/json;charset=utf-8',
   });
   saveAs(blob, 'download.json');
 }
 
-function _createLineGeoJson() {
-  let originalCoordinates = myPolyline.geometry.getCoordinates();
-  let swappedCoordinates = [];
-
-  originalCoordinates.forEach((coord) => {
-    swappedCoordinates.push([coord[1], coord[0]]);
-  });
-
+function _createGeoJsonFor(geoObject) {
   return {
     type: 'Feature',
     geometry: {
-      coordinates: swappedCoordinates,
-      type: 'LineString',
-    },
-  };
-}
-
-function _createPointGeoJson() {
-  let originalCoordinates = myPoint.geometry.getCoordinates();
-  let swappedCoordinates = [originalCoordinates[1], originalCoordinates[0]];
-
-  return {
-    type: 'Feature',
-    geometry: {
-      coordinates: swappedCoordinates,
-      type: 'Point',
+      type: geoObject.geometry.getType(),
+      coordinates: geoObject.geometry.getCoordinates(),
     },
   };
 }

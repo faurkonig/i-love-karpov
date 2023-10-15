@@ -8,32 +8,3 @@ function init() {
     zoom: 11,
   });
 }
-
-/*
-{
-  "type": "FeatureCollection",
-  "features": [
-    {
-      "type": "Feature",
-      "properties": {},
-      "geometry": {
-        "coordinates": [
-          [
-            25.801110652861382,
-            -0.8717269248489004
-          ],
-          [
-            26.03692400311843,
-            13.84875491400571
-          ],
-          [
-            41.23267529307978,
-            6.777811204550687
-          ]
-        ],
-        "type": "LineString"
-      }
-    }
-  ]
-}
-*/

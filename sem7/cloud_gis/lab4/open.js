@@ -7,65 +7,11 @@ function openGeoJson() {
   const reader = new FileReader();
   reader.onload = function (e) {
     const contents = e.target.result;
-    const geoJson = _convertElement(JSON.parse(contents));
+    const geoJson = convertGeojsonElement(JSON.parse(contents));
     _addObjectToMap(geoJson);
     console.log(myMap.geoObjects.each((e) => console.log('Object', e)));
   };
   reader.readAsText(file);
-}
-
-function _convertElement(element) {
-  if (element instanceof Array) {
-    return _convertArray(element);
-  }
-
-  if (typeof element === 'object') {
-    return _convertObject(element);
-  }
-
-  return element;
-}
-
-function _convertArray(array) {
-  if (
-    array.length === 2 &&
-    typeof array[0] === 'number' &&
-    typeof array[1] === 'number'
-  ) {
-    return [array[1], array[0]];
-  }
-
-  const result = [];
-  array.forEach((element) => result.push(_convertElement(element)));
-  return result;
-}
-
-var id = 0;
-
-function _convertObject(object) {
-  if (object.type === 'FeatureCollection') {
-    return {
-      ...object,
-      features: _convertArray(object.features),
-    };
-  }
-
-  if (object.type === 'Feature') {
-    return {
-      ...object,
-      id: id++,
-      geometry: _convertObject(object.geometry),
-    };
-  }
-
-  if (object.type !== undefined) {
-    return {
-      ...object,
-      coordinates: _convertArray(object.coordinates),
-    };
-  }
-
-  return object;
 }
 
 function _addObjectToMap(object) {
