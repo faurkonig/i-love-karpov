@@ -26,6 +26,8 @@ function _addObjectToMap(object) {
   }
 }
 
+var objectIndex = 1;
+
 function _addFeatureToMap(object) {
   console.log('Add feature', object);
   const type = object.geometry.type;
@@ -33,16 +35,19 @@ function _addFeatureToMap(object) {
     {
       geometry: object.geometry,
       properties: {
-        hintContent: 'Click to start editing',
+        hintContent: `(#${objectIndex}) Click to start editing`,
       },
     },
-    _createOptionsForObject(type, false),
+    {
+      id: objectIndex++,
+      ..._createOptionsForObject(type, false),
+    },
   );
   _customizeEditorMenu(geoObject, type);
 
   let isEditing = false;
   myMap.geoObjects.add(geoObject);
-  geoObject.events.add('click', (_) => {
+  geoObject.events.add('click', (e) => {
     if (isEditing) {
       _stopEditing(geoObject, type);
       isEditing = false;
@@ -54,9 +59,11 @@ function _addFeatureToMap(object) {
     const newOptions = _createOptionsForObject(type, isEditing);
     for (const [key, value] of Object.entries(newOptions)) {
       geoObject.options.set(key, value);
-      // console.log(`${key}: ${value}`);
     }
   });
+  geoObject.events.add('geometrychange', geoObjectGeometryChangedCallback);
+
+  geometryRegistry.set(geoObject, geoObject.geometry.getCoordinates());
 }
 
 function _createOptionsForObject(type, isEditing) {
@@ -112,21 +119,30 @@ function _startEditing(geoObject, type) {
   console.log('Start editing');
   geoObject.editor.startEditing();
 
+  const objectIndex = geoObject.options.get('id');
+
   if (type === 'Point') {
     geoObject.properties.set(
       'hintContent',
-      'Click to stop editing. Right-click to delete',
+      `(#${objectIndex}) Click to stop editing. Right-click to delete`,
     );
     geoObject.events.add('contextmenu', _pointContextMenuCallback);
   } else {
-    geoObject.properties.set('hintContent', 'Click to stop editing');
+    geoObject.properties.set(
+      'hintContent',
+      `(#${objectIndex}) Click to stop editing`,
+    );
   }
 }
 
 function _stopEditing(geoObject, type) {
   console.log('Stop editing');
   geoObject.editor.stopEditing();
-  geoObject.properties.set('hintContent', 'Click to start editing');
+  const objectIndex = geoObject.options.get('id');
+  geoObject.properties.set(
+    'hintContent',
+    `(#${objectIndex}) Click to start editing`,
+  );
 
   if (type === 'Point') {
     geoObject.events.remove('contextmenu', _pointContextMenuCallback);
