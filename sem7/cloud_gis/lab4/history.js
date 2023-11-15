@@ -14,17 +14,21 @@ function geoObjectGeometryChangedCallback(e) {
   }
   const newTimeout = setTimeout(() => {
     console.log('Update tick');
-    history.push({
+    addEditToHistory({
+      type: 'edit',
       geoObject: geoObject,
       oldGeometry: oldGeometry,
       time: new Date(),
     });
     timeoutRegistry.delete(geoObject);
     geometryRegistry.set(geoObject, newGeometry);
-
-    _renderHistoryTable();
   }, 1000 * 1);
   timeoutRegistry.set(geoObject, newTimeout);
+}
+
+function addEditToHistory(historyElement) {
+  history.push(historyElement);
+  _renderHistoryTable();
 }
 
 function _renderHistoryTable() {
@@ -45,7 +49,11 @@ function _renderHistoryTable() {
     const newRow = myTable.insertRow();
 
     const nameCell = newRow.insertCell();
-    nameCell.textContent = `Изменение геометрии ${e.geoObject.geometry.getType()}`;
+    if (e.type === 'edit') {
+      nameCell.textContent = `Изменение геометрии ${e.geoObject.geometry.getType()}`;
+    } else if (e.type === 'delete') {
+      nameCell.textContent = `Удаление ${e.geoObject.geometry.getType()}`;
+    }
     nameCell.style = 'border: 1px solid black;';
 
     const idCell = newRow.insertCell();
@@ -64,8 +72,18 @@ function undoLastEdit() {
     const geoObject = lastItem.geoObject;
     const oldGeometry = lastItem.oldGeometry;
 
-    geometryRegistry.set(geoObject, oldGeometry);
-    geoObject.geometry.setCoordinates(oldGeometry);
+    if (lastItem.type === 'edit') {
+      geometryRegistry.set(geoObject, oldGeometry);
+      geoObject.geometry.setCoordinates(oldGeometry);
+    } else if (lastItem.type === 'delete') {
+      addFeatureToMap({
+        type: 'Feature',
+        geometry: {
+          type: geoObject.geometry.getType(),
+          coordinates: oldGeometry,
+        },
+      });
+    }
 
     _renderHistoryTable();
   }

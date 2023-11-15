@@ -1,5 +1,7 @@
+var file;
+
 function openGeoJson() {
-  const file = document.querySelector('input[type=file]').files[0];
+  file = document.querySelector('input[type=file]').files[0];
   if (!file) {
     return;
   }
@@ -21,14 +23,14 @@ function _addObjectToMap(object) {
       object.features.forEach(_addObjectToMap);
       break;
     case 'Feature':
-      _addFeatureToMap(object);
+      addFeatureToMap(object);
       break;
   }
 }
 
 var objectIndex = 1;
 
-function _addFeatureToMap(object) {
+function addFeatureToMap(object) {
   console.log('Add feature', object);
   const type = object.geometry.type;
   const geoObject = new ymaps.GeoObject(
@@ -108,7 +110,7 @@ function _customizeEditorMenu(geoObject, type) {
     items.push({
       title: buttonText,
       onClick: function () {
-        myMap.geoObjects.remove(geoObject);
+        _deleteGeoObject(geoObject);
       },
     });
     return items;
@@ -150,5 +152,15 @@ function _stopEditing(geoObject, type) {
 }
 
 function _pointContextMenuCallback(event) {
-  myMap.geoObjects.remove(event.get('target'));
+  _deleteGeoObject(event.get('target'));
+}
+
+function _deleteGeoObject(geoObject) {
+  myMap.geoObjects.remove(geoObject);
+  addEditToHistory({
+    type: 'delete',
+    geoObject: geoObject,
+    oldGeometry: geoObject.geometry.getCoordinates(),
+    time: new Date(),
+  });
 }

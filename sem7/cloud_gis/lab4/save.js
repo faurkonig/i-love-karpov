@@ -11,7 +11,7 @@ function saveGeoJson() {
   var blob = new Blob([JSON.stringify(convertGeojsonElement(object))], {
     type: 'application/json;charset=utf-8',
   });
-  saveAs(blob, 'download.json');
+  saveAs(file, 'download.json');
 }
 
 function _createGeoJsonFor(geoObject) {
