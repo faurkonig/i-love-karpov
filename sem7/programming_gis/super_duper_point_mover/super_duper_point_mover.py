@@ -22,7 +22,7 @@
  ***************************************************************************/
 """
 
-from qgis.core import QgsWkbTypes, QgsPointXY, QgsGeometry
+from qgis.core import QgsWkbTypes, QgsPointXY, QgsGeometry, QgsVectorLayer
 from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication
 from qgis.PyQt.QtGui import QIcon, QBrush, QColor
 from qgis.PyQt.QtWidgets import QAction, QMessageBox, QTableWidgetItem, QPushButton
@@ -176,7 +176,7 @@ class SuperDuperPointMover:
 
     def unload(self):
         self._end_point_picker()
-        if hasattr(self, 'selectedLayer'):
+        if hasattr(self, 'selectedLayer') and isinstance(self.selectedLayer, QgsVectorLayer):
             self.selectedLayer.selectionChanged.disconnect(self._feature_selection_changed)
 
         """Removes the plugin menu item and icon from QGIS GUI."""
@@ -197,9 +197,10 @@ class SuperDuperPointMover:
             self.dlg = SuperDuperPointMoverDialog()
 
             project_layers = self.iface.mapCanvas().layers()
-            self.dlg.layerComboBox.addItem('')
+            self.dlg.layerComboBox.addItem('Выберите слой')
             for layer in project_layers:
-                self.dlg.layerComboBox.addItem(layer.name())
+                if isinstance(layer, QgsVectorLayer):
+                    self.dlg.layerComboBox.addItem(layer.name())
             self.dlg.layerComboBox.currentIndexChanged.connect(self._select_layer)
 
         # show the dialog
@@ -210,7 +211,7 @@ class SuperDuperPointMover:
         def resetWidgets():
             self.dlg.geometryLabel.setText('Неверный тип геометрии')
             self.dlg.tableWidget.setRowCount(0)
-            if hasattr(self, 'selectedLayer'):
+            if hasattr(self, 'selectedLayer') and isinstance(self.selectedLayer, QgsVectorLayer):
                 self.selectedLayer.selectionChanged.disconnect(self._feature_selection_changed)
 
         if (index == 0):
@@ -218,7 +219,7 @@ class SuperDuperPointMover:
             return
         index -= 1
 
-        if hasattr(self, 'selectedLayer'):
+        if hasattr(self, 'selectedLayer') and isinstance(self.selectedLayer, QgsVectorLayer):
             self.selectedLayer.selectionChanged.disconnect(self._feature_selection_changed)
         self.selectedLayer = self.iface.mapCanvas().layer(index)
         self.selectedLayer.selectionChanged.connect(self._feature_selection_changed)
