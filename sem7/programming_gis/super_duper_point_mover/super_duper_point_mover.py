@@ -22,7 +22,7 @@
  ***************************************************************************/
 """
 
-from qgis.core import QgsWkbTypes, QgsPointXY, QgsGeometry, QgsVectorLayer
+from qgis.core import QgsWkbTypes, QgsPointXY, QgsGeometry, QgsVectorLayer, QgsSingleSymbolRenderer, QgsMarkerSymbol, QgsLineSymbol, QgsFillSymbol
 from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication
 from qgis.PyQt.QtGui import QIcon, QBrush, QColor
 from qgis.PyQt.QtWidgets import QAction, QMessageBox, QTableWidgetItem, QPushButton
@@ -32,6 +32,7 @@ from .super_duper_point_mover_dialog import SuperDuperPointMoverDialog
 from .edit_point_dialog import EditPointDialog
 from .edit_line_dialog import EditLineDialog
 from .point_tool import PointTool
+from .edit_style_dialog import EditStyleDialog
 import os.path
 
 
@@ -202,6 +203,7 @@ class SuperDuperPointMover:
                 if isinstance(layer, QgsVectorLayer):
                     self.dlg.layerComboBox.addItem(layer.name())
             self.dlg.layerComboBox.currentIndexChanged.connect(self._select_layer)
+            self.dlg.editStyleButton.clicked.connect(self._open_style_editor)
 
         # show the dialog
         self.dlg.show()
@@ -213,6 +215,7 @@ class SuperDuperPointMover:
             self.dlg.tableWidget.setRowCount(0)
             if hasattr(self, 'selectedLayer') and isinstance(self.selectedLayer, QgsVectorLayer):
                 self.selectedLayer.selectionChanged.disconnect(self._feature_selection_changed)
+            self.dlg.editStyleButton.setEnabled(False)
 
         if (index == 0):
             resetWidgets()
@@ -223,6 +226,7 @@ class SuperDuperPointMover:
             self.selectedLayer.selectionChanged.disconnect(self._feature_selection_changed)
         self.selectedLayer = self.iface.mapCanvas().layer(index)
         self.selectedLayer.selectionChanged.connect(self._feature_selection_changed)
+        self.dlg.editStyleButton.setEnabled(True)
 
         try:
             geometryType = self.selectedLayer.geometryType()
@@ -253,11 +257,12 @@ class SuperDuperPointMover:
                 self._set_table_call_as_selected(idItem)
             self.dlg.tableWidget.setItem(row, 0, idItem)
 
-            editButton = QPushButton('Редактировать')
-            editButton.clicked.connect(editCallback)
+            editGeometryButton = QPushButton('Редактировать')
+            editGeometryButton.clicked.connect(editCallback)
             if not feature.hasGeometry():
-                editButton.setEnabled(False)
-            self.dlg.tableWidget.setCellWidget(row, 1, editButton)
+                editGeometryButton.setEnabled(False)
+            self.dlg.tableWidget.setCellWidget(row, 1, editGeometryButton)
+
             row += 1
 
     def _feature_selection_changed(self, selected: list, deselected: list, clearAndSelect: bool):
@@ -265,6 +270,7 @@ class SuperDuperPointMover:
             for i in range(self.dlg.tableWidget.rowCount()):
                 text = self.dlg.tableWidget.item(i, 0).text()
                 idItem = QTableWidgetItem(text)
+                idItem.setFlags(QtCore.Qt.ItemIsEnabled)
                 if i in selected:
                     self._set_table_call_as_selected(idItem)
                 self.dlg.tableWidget.setItem(i, 0, idItem)
@@ -275,7 +281,9 @@ class SuperDuperPointMover:
                 self.dlg.tableWidget.setItem(featureIndex, 0, idItem)
             for featureIndex in deselected:
                 text = self.dlg.tableWidget.item(featureIndex, 0).text()
-                self.dlg.tableWidget.setItem(featureIndex, 0, QTableWidgetItem(text))
+                idItem = QTableWidgetItem(text)
+                idItem.setFlags(QtCore.Qt.ItemIsEnabled)
+                self.dlg.tableWidget.setItem(featureIndex, 0, idItem)
 
 
     def _edit_geometry(self, layer, featureId: int):
@@ -442,6 +450,25 @@ class SuperDuperPointMover:
         if hasattr(self, 'editPolygonDlg'):
             self.editPolygonDlg.reject()
             del self.editPolygonDlg
+
+    def _open_style_editor(self):
+        styleDlg = EditStyleDialog()
+        styleDlg.show()
+        styleDlg.get_style_data_from_layer(self.selectedLayer)
+        if styleDlg.exec_():
+            strokeColor = styleDlg.strokeColor
+            fillColor = styleDlg.fillColor
+            symbolSize = styleDlg.widthSpinBox.value()
+
+            geometryType = self.selectedLayer.geometryType()
+            if geometryType == QgsWkbTypes.PointGeometry:
+                renderer = QgsSingleSymbolRenderer(QgsMarkerSymbol.createSimple({'name': 'square', 'color': strokeColor, 'size': symbolSize}))
+            elif geometryType == QgsWkbTypes.LineGeometry:
+                renderer = QgsSingleSymbolRenderer(QgsLineSymbol.createSimple({'color': strokeColor, 'width': symbolSize}))
+            elif geometryType == QgsWkbTypes.PolygonGeometry:
+                renderer = QgsSingleSymbolRenderer(QgsFillSymbol.createSimple({'outline_color': strokeColor, 'color': fillColor, 'stroke_width': symbolSize}))
+            self.selectedLayer.setRenderer(renderer)
+            self.selectedLayer.triggerRepaint()
 
 
     def _show_warning(self, title: str, content: str):
