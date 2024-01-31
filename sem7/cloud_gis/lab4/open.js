@@ -10,10 +10,20 @@ function openGeoJson() {
   reader.onload = function (e) {
     const contents = e.target.result;
     const geoJson = convertGeojsonElement(JSON.parse(contents));
+
+    _resetState();
     _addObjectToMap(geoJson);
     console.log(myMap.geoObjects.each((e) => console.log('Object', e)));
   };
   reader.readAsText(file);
+}
+
+function _resetState() {
+  objectIndex = 1;
+  const objects = [];
+  myMap.geoObjects.each((e) => objects.push(e));
+  objects.forEach((e) => myMap.geoObjects.remove(e));
+  clearHistory();
 }
 
 function _addObjectToMap(object) {
@@ -66,6 +76,8 @@ function addFeatureToMap(object) {
   geoObject.events.add('geometrychange', geoObjectGeometryChangedCallback);
 
   geometryRegistry.set(geoObject, geoObject.geometry.getCoordinates());
+
+  return geoObject;
 }
 
 function _createOptionsForObject(type, isEditing) {
@@ -163,4 +175,99 @@ function _deleteGeoObject(geoObject) {
     oldGeometry: geoObject.geometry.getCoordinates(),
     time: new Date(),
   });
+}
+
+function addPoint() {
+  disableButtons();
+
+  myMap.events.add('click', _addPointCb);
+}
+
+function _addPointCb(e) {
+  myMap.events.remove('click', _addPointCb);
+  const coords = e.get('coords');
+
+  const object = addFeatureToMap({
+    type: 'Feature',
+    geometry: { type: 'Point', coordinates: coords },
+  });
+
+  addEditToHistory({
+    type: 'add',
+    geoObject: object,
+    time: new Date(),
+  });
+
+  enableButtons();
+}
+
+function addLine() {
+  disableButtons();
+
+  myMap.events.add('click', _addLineCb);
+}
+
+function _addLineCb(e) {
+  myMap.events.remove('click', _addLineCb);
+  const coords = e.get('coords');
+
+  const object = addFeatureToMap({
+    type: 'Feature',
+    geometry: { type: 'LineString', coordinates: [coords] },
+  });
+  object.editor.startDrawing();
+
+  addEditToHistory({
+    type: 'add',
+    geoObject: object,
+    time: new Date(),
+  });
+
+  const contextFunc = (e) => {
+    myMap.events.remove('contextmenu', contextFunc);
+    object.editor.stopDrawing();
+    enableButtons();
+  };
+  myMap.events.add('contextmenu', contextFunc);
+}
+
+function addPolygon() {
+  disableButtons();
+
+  myMap.events.add('click', _addPolygonCb);
+}
+
+function _addPolygonCb(e) {
+  myMap.events.remove('click', _addPolygonCb);
+  const coords = e.get('coords');
+
+  const object = addFeatureToMap({
+    type: 'Feature',
+    geometry: { type: 'Polygon', coordinates: [[coords]] },
+  });
+  object.editor.startDrawing();
+
+  addEditToHistory({
+    type: 'add',
+    geoObject: object,
+    time: new Date(),
+  });
+
+  const contextFunc = (e) => {
+    object.editor.stopDrawing();
+    enableButtons();
+  };
+  myMap.events.add('contextmenu', contextFunc);
+}
+
+function disableButtons() {
+  document.getElementById('point-add').disabled = true;
+  document.getElementById('line-add').disabled = true;
+  document.getElementById('polygon-add').disabled = true;
+}
+
+function enableButtons() {
+  document.getElementById('point-add').disabled = false;
+  document.getElementById('line-add').disabled = false;
+  document.getElementById('polygon-add').disabled = false;
 }

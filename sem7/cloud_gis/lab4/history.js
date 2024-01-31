@@ -1,5 +1,5 @@
-const geometryRegistry = new Map();
-const timeoutRegistry = new Map();
+var geometryRegistry = new Map();
+var timeoutRegistry = new Map();
 const history = [];
 
 function geoObjectGeometryChangedCallback(e) {
@@ -53,6 +53,8 @@ function _renderHistoryTable() {
       nameCell.textContent = `Изменение геометрии ${e.geoObject.geometry.getType()}`;
     } else if (e.type === 'delete') {
       nameCell.textContent = `Удаление ${e.geoObject.geometry.getType()}`;
+    } else if (e.type === 'add') {
+      nameCell.textContent = `Добавление ${e.geoObject.geometry.getType()}`;
     }
     nameCell.style = 'border: 1px solid black;';
 
@@ -70,12 +72,13 @@ function undoLastEdit() {
   if (history.length > 0) {
     const lastItem = history.pop();
     const geoObject = lastItem.geoObject;
-    const oldGeometry = lastItem.oldGeometry;
 
     if (lastItem.type === 'edit') {
+      const oldGeometry = lastItem.oldGeometry;
       geometryRegistry.set(geoObject, oldGeometry);
       geoObject.geometry.setCoordinates(oldGeometry);
     } else if (lastItem.type === 'delete') {
+      const oldGeometry = lastItem.oldGeometry;
       addFeatureToMap({
         type: 'Feature',
         geometry: {
@@ -83,8 +86,20 @@ function undoLastEdit() {
           coordinates: oldGeometry,
         },
       });
+    } else if (lastItem.type === 'add') {
+      myMap.geoObjects.remove(geoObject);
     }
 
     _renderHistoryTable();
   }
+}
+
+function clearHistory() {
+  geometryRegistry.clear();
+  timeoutRegistry.clear();
+
+  while (history.length > 0) {
+    history.pop();
+  }
+  _renderHistoryTable();
 }

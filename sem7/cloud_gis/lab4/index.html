@@ -21,6 +21,11 @@
   <body>
     <div id="map"></div>
 
+    <h4>Добавить:</h4>
+    <button onclick="addPoint()" id="point-add">Точку</button>
+    <button onclick="addLine()" id="line-add">Линию</button>
+    <button onclick="addPolygon()" id="polygon-add">Полигон</button>
+
     <h4>Загрузка:</h4>
     <input type="file" id="file" onchange="openGeoJson()" />
     <br />
@@ -29,8 +34,8 @@
 
     <hr />
     <button onclick="undoLastEdit()" id="undo-button" disabled="true">
-      Отмена последнего изменения
-    </button><br>
+      Отмена последнего изменения</button
+    ><br />
     <b>История изменений</b>:
     <table id="history-table" style="border: 1px solid black">
       <thead>

@@ -11,7 +11,7 @@ function saveGeoJson() {
   var blob = new Blob([JSON.stringify(convertGeojsonElement(object))], {
     type: 'application/json;charset=utf-8',
   });
-  saveAs(file, 'download.json');
+  saveAs(blob, 'download.json');
 }
 
 function _createGeoJsonFor(geoObject) {
@@ -20,6 +20,6 @@ function _createGeoJsonFor(geoObject) {
     geometry: {
       type: geoObject.geometry.getType(),
       coordinates: geoObject.geometry.getCoordinates(),
-    },
+    }
   };
 }
